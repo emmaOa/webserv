@@ -15,6 +15,7 @@
 
 int main()
 {
-    MainFileCnf();
+    if (MainFileCnf() != 0)
+        exit (1);
     return 0;
 }
