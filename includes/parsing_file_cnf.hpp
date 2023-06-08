@@ -3,7 +3,19 @@
 
 # include "webserv.hpp"
 
-int MainFileCnf(void);
+void initial_key_srv(void);
+int MainFileCnf(std::ifstream &  CnfFile);
+int vld_srv_key(std::string word);
+int store_location(std::string line);
+int store(std::string line);
+int is_location(std::string line);
+int all_key_srv(void);
+int ParcLine(std::string line);
+int all_key_location(void);
+void initial_key_loc(void);
+int all_key_location_cgi(void);
+void initial_key_loc_cgi(void);
+int vld_location_key(std::string word);
 
 typedef std::deque<std::string> dq;
 typedef std::map<std::string, dq > mp_dq;
@@ -18,6 +30,11 @@ struct cnf
     dq dq_2;
     std::string key_map1;
     int if_map_2;
+    bool is_cgi;
+    std::pair<int, int> location;
+    std::map<std::string, int> m_s_key;
+    std::map<std::string, int> m_l_key;
+    std::map<std::string, int> m_l_c_key;
 };
 
 

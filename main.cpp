@@ -13,9 +13,21 @@
 # include "./includes/webserv.hpp"
 # include "./includes/parsing_file_cnf.hpp"
 
-int main()
+int main(int arc, char *arg[])
 {
-    if (MainFileCnf() != 0)
+    std::ifstream CnfFile;
+    if (arc != 2){
+        std::cout << "invalid number arguments\n";
         exit (1);
+    }
+    CnfFile.open(arg[1]);
+    if (CnfFile.is_open()){
+        if (MainFileCnf(CnfFile) != 0)
+            exit (1);
+    }
+    else{
+        std::cout << "open field\n";
+        exit (1);
+    }
     return 0;
 }
