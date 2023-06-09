@@ -18,6 +18,9 @@ int all_key_location_cgi(void);
 void initial_key_loc_cgi(void);
 int vld_location_key(std::string word);
 int check_srv_value(std::string key);
+int key_location(std::string line);
+int check_lct_value(std::string key);
+int close_brackets(void);
 
 typedef std::deque<std::string> dq;
 typedef std::map<std::string, dq > mp_dq;
@@ -37,6 +40,6 @@ struct cnf
     std::map<std::string, int> m_l_key;
     std::map<std::string, int> m_l_c_key;
 };
-
+extern cnf *data_cnf;
 
 #endif
