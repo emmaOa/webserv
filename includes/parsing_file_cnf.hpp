@@ -10,17 +10,18 @@ int store_location(std::string line);
 int store(std::string line);
 int is_location(std::string line);
 int all_key_srv(void);
+void init(void);
 int ParcLine(std::string line);
 int all_key_location(void);
 void initial_key_loc(void);
 int all_key_location_cgi(void);
 void initial_key_loc_cgi(void);
 int vld_location_key(std::string word);
+int check_srv_value(std::string key);
 
 typedef std::deque<std::string> dq;
 typedef std::map<std::string, dq > mp_dq;
 typedef std::map<std::string, mp_dq > m_mp_dq;
-
 struct cnf
 {
     std::pair<int, int> br;

@@ -1,4 +1,4 @@
-MANDATORY=  main.cpp parsing_file_configuration/MainParsing.cpp
+MANDATORY=  main.cpp parsing_file_configuration/MainParsing.cpp parsing_file_configuration/init.cpp
 
 CC=cc
 FLAGS= -Wall -Werror -Wextra -std=c++98
