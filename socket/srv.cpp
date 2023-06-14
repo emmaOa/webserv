@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 18:52:27 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/14 16:36:03 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/06/14 17:52:16 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 srv_socket::srv_socket(/* args */)
 {
-    // *serv_addr = new struct sockaddr_in;
+    // serv_addr = new  sockaddr_in;
     this->id_srv = 0;
     this->serv_addr.sin_family = AF_INET;
     try {
