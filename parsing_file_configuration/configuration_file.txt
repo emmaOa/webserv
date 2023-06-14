@@ -1,5 +1,5 @@
 server {
-  port 80
+  port 8000
   host 127.0.0.1
   server_name test
   error_page_404 /error/404.html
@@ -20,7 +20,7 @@ server {
     }
 }
 server {
-  port 80
+  port 8001
   host 127.0.0.1
   server_name test
   error_page_404 /error/404.html
@@ -41,7 +41,7 @@ server {
     }
 }
 server {
-  port 80
+  port 8000
   host 127.0.0.1
   server_name test
   error_page_404 /error/404.html

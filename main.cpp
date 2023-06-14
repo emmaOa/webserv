@@ -6,12 +6,13 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/09 17:22:16 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/06/13 16:26:19 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "./includes/webserv.hpp"
 # include "./includes/parsing_file_cnf.hpp"
+# include "./includes/socket.hpp"
 
 int main(int arc, char *arg[])
 {
@@ -27,6 +28,10 @@ int main(int arc, char *arg[])
     }
     else{
         std::cout << "open field\n";
+        exit (1);
+    }
+    if (socket() < 0) {
+        std::cout << "open socket field\n";
         exit (1);
     }
     return 0;
