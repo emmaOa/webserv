@@ -6,13 +6,13 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/14 21:19:48 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/06/15 15:31:25 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/socket.hpp"
 
-int socket(void)
+int srvs(void)
 {
     srv_socket *srv = new srv_socket;
     struct sockaddr_in cli_add;

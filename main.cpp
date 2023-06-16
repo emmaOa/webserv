@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/13 16:26:19 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/06/15 15:31:05 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int main(int arc, char *arg[])
         std::cout << "open field\n";
         exit (1);
     }
-    if (socket() < 0) {
+    if (srvs() < 0) {
         std::cout << "open socket field\n";
         exit (1);
     }

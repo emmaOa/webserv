@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 
 
-int socket(void);
+int srvs(void);
 
 class srv_socket
 {
