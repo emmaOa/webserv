@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 18:52:27 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/14 17:52:16 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/06/19 12:12:59 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,19 @@ srv_socket::srv_socket(/* args */)
         // std::cout << this->serv_addr.sin_addr.s_addr << "  : heereeee \n";
 }
 
-srv_socket::srv_socket(int id)
+std::deque<int> creat_socket(void)
 {
-    id_srv = id;
+    int i = 0;
+    std::deque<int> sockets;
+    while (i < data_cnf->servers.size())
+    {
+        
+        i++;
+    }
+    return sockets;
+}
+srv_socket::srv_socket(int id_srv)
+{
     this->serv_addr.sin_family = AF_INET;
     try{
         std::string portString = data_cnf->servers.at(id_srv).at("port").at("null").at(0);
