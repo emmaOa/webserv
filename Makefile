@@ -6,6 +6,8 @@ MANDATORY=  main.cpp parsing_file_configuration/MainParsing.cpp \
 			parsing_file_configuration/store.cpp \
 			socket/sockets.cpp \
 			socket/clients.cpp \
+			request/request.cpp \
+			request/requestPart.cpp \
 
 CC=cc
 FLAGS= -Wall -Werror -Wextra -std=c++98

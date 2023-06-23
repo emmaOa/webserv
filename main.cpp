@@ -6,24 +6,25 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/23 19:31:18 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/06/23 20:09:45 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "./includes/webserv.hpp"
 # include "./includes/parsing_file_cnf.hpp"
 # include "./includes/socket.hpp"
+#include "./includes/headerRequest.hpp"
 std::map<int, srvs_set> servs;
 
 
-int request_part(char *buffer, int sock_clt, int sock_srv)
-{
-    (void)buffer;
-    (void)sock_clt;
-    (void)sock_srv;
-    std::cout << buffer<< std::endl;
-    return 1;
-}
+// int request_part(char *buffer, int sock_clt, int sock_srv)
+// {
+//     (void)buffer;
+//     (void)sock_clt;
+//     (void)sock_srv;
+//     std::cout << buffer<< std::endl;
+//     return 1;
+// }
 
 int response_part(int sock_clt, int sock_srv)
 {
