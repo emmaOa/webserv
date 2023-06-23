@@ -2,6 +2,7 @@
 # define SOCKET_HPP
 
 # include "webserv.hpp"
+#include "../includes/headerRequest.hpp"
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -20,6 +21,7 @@ struct client_info {
     int socket_srv;
     char request[2048];
     int received;
+    // std::map<int, Request> Events; ====> Request
 };
 
 typedef struct s_srvs_set {
@@ -28,6 +30,7 @@ typedef struct s_srvs_set {
     std::string host;
     std::map<int, struct client_info> clts;
     struct sockaddr_in serv_addr;
+    
 }               srvs_set;
 
 extern std::map<int, srvs_set> servs;
