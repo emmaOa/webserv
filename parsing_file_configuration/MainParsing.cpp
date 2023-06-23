@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:57:24 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/09 18:12:18 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/06/23 14:14:12 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int MainFileCnf(std::ifstream & CnfFile)
     init();
     while ( getline (CnfFile,line) )
     {
-        if (ParcLine(line) != 0)
+        if (ParseLine(line) != 0)
             return 1;
     }
     CnfFile.close();
@@ -32,7 +32,7 @@ int MainFileCnf(std::ifstream & CnfFile)
     return 0;
 }
 
-int ParcLine(std::string line)
+int ParseLine(std::string line)
 {
     std::cout <<  line << std::endl;
     if (line.compare("server {") == 0 && data_cnf->br.second == 0){

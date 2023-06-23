@@ -6,66 +6,38 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/select.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
 #include <arpa/inet.h>
 
-
-int srvs(void);
-int clients(void);
-std::deque<int> creat_socket(void);
-std::map<int, srvs_set> servs;
-
-struct srvs_set {
-    int socket;
-    std::string first_lct;
-    int port;
-    std::string host;
-    std::deque<int> clients_sock;
-    struct sockaddr_in serv_addr;
-};
-
-class srv_socket
-{
-    private:
-        struct sockaddr_in serv_addr;
-        int id_srv;
-    public:
-        srv_socket();
-        srv_socket(int id);
-        sockaddr_in get_srv_add();
-        srv_socket(const srv_socket &obj);
-        ~srv_socket();
-};
-
 struct client_info {
     socklen_t address_length;
     struct sockaddr_storage address;
     int socket;
+    int socket_srv;
     char request[2048];
     int received;
 };
 
-class clients
-{
-    private:
-        std::map<int, client_info> clts;
-        client_info info;
-    public:
-        clients(/* args */);
-        client_info *get_client(int sock);
-        void drop_client(client_info *client);
-        std::string get_client_address(client_info *ci);
-        fd_set wait_on_clients(int server);
-        void send_400(struct client_info *client);
-        void clients::send_404(struct client_info *client);
-        ~clients();
-};
+typedef struct s_srvs_set {
+    int socket;
+    int port;
+    std::string host;
+    std::map<int, struct client_info> clts;
+    struct sockaddr_in serv_addr;
+}               srvs_set;
 
+extern std::map<int, srvs_set> servs;
 
-
-
-
+int creat_socket(int id);
+std::deque<int> int_socket_srvs(void);
+int wait_on_clients(int server);
+std::deque<int> int_socket_srvs(void);
+int creat_client(int sock);
+int check_request(fd_set reads, int server);
+int check_response(int sock);
 
 #endif

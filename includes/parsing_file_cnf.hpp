@@ -11,7 +11,7 @@ int store(std::string line);
 int is_location(std::string line);
 int all_key_srv(void);
 void init(void);
-int ParcLine(std::string line);
+int ParseLine(std::string line);
 int all_key_location(void);
 void initial_key_loc(void);
 int all_key_location_cgi(void);

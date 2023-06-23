@@ -6,95 +6,107 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/19 09:47:28 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/06/23 19:29:37 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+# include "../includes/webserv.hpp"
+# include "../includes/parsing_file_cnf.hpp"
 # include "../includes/socket.hpp"
 
-struct client_info *clients::get_client(int sock)
+int creat_client(int sock)
 {
-    if (this->clts.find(sock) != this->clts.end()){
-        return &this->clts.at(sock);
-    }
-    else {
-        struct client_info *tmp;
-        tmp = (struct client_info*) calloc(1, sizeof(struct client_info));
-        if (!tmp) {
-            std::cout << "error 01\n";
-            exit (1);
-        }
-        tmp->address_length = sizeof(tmp->address);
-        this->clts.insert (std::pair<int, client_info> (sock, *tmp));
-        return tmp;
-    }
-}
-
-void clients::drop_client(struct client_info *client)
-{
-    if (this->clts.find(client->socket) != this->clts.end()){
-        this->clts.erase(client->socket);
-        close(client->socket);
-    }
-    else {
-        std::cout << "error 02\n";
+    struct client_info *tmp;
+    tmp = (struct client_info*) calloc(1, sizeof(struct client_info));
+    if (!tmp) {
+        std::cout << "error 01\n";
         exit (1);
     }
+    tmp->address_length = sizeof(tmp->address);
+    tmp->socket = accept(sock, (struct sockaddr*) &(tmp->address), &(tmp->address_length));
+    if (tmp->socket < 0){
+        std::cout << "accept field\n";
+       return -1; 
+    }
+    tmp->socket_srv = sock;
+    servs[sock].clts.insert(std::pair<int, client_info> (tmp->socket, *tmp));
+    std::cout << servs[0].clts[0].socket << std::endl;
+    return tmp->socket;
 }
 
-fd_set clients::wait_on_clients(int server)
+int check_request(fd_set reads, int server)
 {
-    fd_set reads;
-    FD_ZERO (&reads);
-    FD_SET(server, &reads);
+    unsigned long i = 0;
+
+    while (i < servs.at(server).clts.size())
+    {
+        if (FD_ISSET(servs.at(server).clts[i].socket, &reads)){
+            return servs.at(server).clts[i].socket;
+        }
+        i++;
+    }
+    return -1;
+}
+
+int check_response(int sock)
+{
+    fd_set wr;
+    FD_ZERO (&wr);
+
+    int max = sock;
+
+    timeval tm;
+    tm.tv_sec = 10;
+    tm.tv_usec = 0;
+    
+    FD_SET (sock, &wr);
+    if (select(max+1, 0, &wr, 0, &tm) < 0){
+        std::cout << "error 04\n";
+        exit (1);
+    }
+    if (FD_ISSET(sock, &wr)){
+        return sock;
+    }
+    return -1;
+}
+
+int wait_on_clients(int server)
+{
+    unsigned long i = 0;
+    fd_set re;
+
+    timeval tm;
+    tm.tv_sec = 0;
+    tm.tv_usec = 1000;
+
+    FD_ZERO (&re);
+    FD_SET(server, &re);
     int max_socket = server;
 
-    std::map<int, client_info>::iterator it = this->clts.begin();
-    while (it != this->clts.end())
+    while (i < servs.at(server).clts.size())
     {
-        FD_SET (it->second.socket, &reads);
-        if (it->second.socket > max_socket)
-            max_socket = it->second.socket;
-        ++it;
+        FD_SET (servs.at(server).clts[i].socket, &re);
+        if (servs.at(server).clts[i].socket > max_socket)
+            max_socket = servs.at(server).clts[i].socket;
+        i++;
     }
-    if (select(max_socket+1, &reads, 0, 0, 0) < 0){
+
+    if (select(max_socket+1, &re, 0, 0, &tm) < 0){
         std::cout << "error 03\n";
         exit (1);
     }
-    return reads;
+
+    if (FD_ISSET(server, &re)) {
+        try {
+            creat_client(servs.at(server).socket);
+        }
+        catch (const std::out_of_range& e) {
+            std::cerr << "Exception srv_socket default: " << e.what() << std::endl;
+        }
+        return -1;
+    }
+    int val = check_request(re, server);
+    return val;  
 }
 
-void clients::send_404(struct client_info *client) {
-    const char *c404 = "HTTP/1.1 400 Bad Request\r\n"
-    "Connection: close\r\n"
-    "Content-Length: 11\r\n\r\nBad Request";
-    send(client->socket, c404, strlen(c404), 0);
-    this->drop_client(client);
-}
-
-void clients::send_400(struct client_info *client) {
-    const char *c400 = "HTTP/1.1 400 Bad Request\r\n"
-    "Connection: close\r\n"
-    "Content-Length: 11\r\n\r\nBad Request";
-    send(client->socket, c400, strlen(c400), 0);
-    this->drop_client(client);
-}
-
-std::string clients::get_client_address(client_info *ci)
-{
-    static char address_buffer[100];
-    getnameinfo((struct sockaddr*)&ci->address,
-    ci->address_length, \
-    address_buffer, sizeof(address_buffer), 0, 0, NI_NUMERICHOST);
-    std::string resl(address_buffer);
-    return resl;
-}
-
-clients::clients(/* args */)
-{
-}
-
-clients::~clients()
-{
-}
 

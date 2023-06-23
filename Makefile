@@ -5,7 +5,6 @@ MANDATORY=  main.cpp parsing_file_configuration/MainParsing.cpp \
 			parsing_file_configuration/check_values.cpp \
 			parsing_file_configuration/store.cpp \
 			socket/sockets.cpp \
-			socket/srv.cpp \
 			socket/clients.cpp \
 
 CC=cc
