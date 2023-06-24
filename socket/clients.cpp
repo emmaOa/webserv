@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/23 19:29:37 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/06/24 02:36:22 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ int wait_on_clients(int server)
     FD_ZERO (&re);
     FD_SET(server, &re);
     int max_socket = server;
-
+    // std::cout << server << " <<------\n";
     while (i < servs.at(server).clts.size())
     {
         FD_SET (servs.at(server).clts[i].socket, &re);

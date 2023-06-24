@@ -21,7 +21,7 @@ struct client_info {
     int socket_srv;
     char request[2048];
     int received;
-    // std::map<int, Request> Events; ====> Request
+    class Request *clientReq;
 };
 
 typedef struct s_srvs_set {
