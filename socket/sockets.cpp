@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   sockets.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/23 19:32:43 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 19:29:10 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
-# include "../includes/socket.hpp"
-# include "../includes/parsing_file_cnf.hpp"
 
 std::deque<int> int_socket_srvs(void)
 {

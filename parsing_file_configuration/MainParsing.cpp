@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   MainParsing.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:57:24 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/23 14:14:12 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 19:34:32 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/parsing_file_cnf.hpp"
+# include "../includes/webserv.hpp"
 
 cnf *data_cnf = new cnf;
 

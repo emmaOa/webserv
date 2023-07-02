@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   init.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:05:06 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/09 17:50:39 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 19:28:45 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/parsing_file_cnf.hpp"
+# include "../includes/webserv.hpp"
 
 void initial_key_srv(void)
 {

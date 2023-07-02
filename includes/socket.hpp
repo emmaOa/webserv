@@ -1,18 +1,6 @@
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
 
-# include "webserv.hpp"
-
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <sys/select.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <errno.h>
-#include <arpa/inet.h>
-
 struct client_info {
     socklen_t address_length;
     struct sockaddr_storage address;

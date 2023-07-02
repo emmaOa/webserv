@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   vld_key.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:53:48 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/09 17:57:43 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 19:28:55 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/parsing_file_cnf.hpp"
+# include "../includes/webserv.hpp"
 
 int vld_srv_key(std::string word)
 {

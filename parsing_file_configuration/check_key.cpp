@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   check_key.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:51:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/09 17:51:57 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 19:28:33 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/parsing_file_cnf.hpp"
+# include "../includes/webserv.hpp"
 
 int all_key_srv(void)
 {

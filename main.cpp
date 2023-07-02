@@ -3,22 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/26 21:16:07 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 19:35:02 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "./includes/webserv.hpp"
-# include "./includes/parsing_file_cnf.hpp"
-# include "./includes/socket.hpp"
-#include "./includes/request.hpp"
+
 std::map<int, srvs_set> servs;
 
 int response_part(int sock_clt, int sock_srv)
 {
-    // std::cout << servs[sock_srv].clts[sock_clt].clientReq->getMethod() << "----<<";
     (void)sock_srv;
     char hello[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
     write(sock_clt , hello , sizeof(hello));

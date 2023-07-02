@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   clients.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/24 02:36:22 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 19:29:39 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
-# include "../includes/parsing_file_cnf.hpp"
-# include "../includes/socket.hpp"
 
 int creat_client(int sock)
 {
