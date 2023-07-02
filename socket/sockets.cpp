@@ -6,7 +6,7 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/02 19:29:10 by nidor            ###   ########.fr       */
+/*   Updated: 2023/07/02 22:08:47 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,13 @@ std::deque<int> int_socket_srvs(void)
     unsigned long i = 0;
     while (i < data_cnf->servers.size())
     {
-        srvs[i] = creat_socket(i);
+        srvs[i] = create_socket(i);
         i++;
     }
     return srvs;
 }
 
-int creat_socket(int id)
+int create_socket(int id)
 {
     struct addrinfo hints, *bind_address;
     const char *host, *port;

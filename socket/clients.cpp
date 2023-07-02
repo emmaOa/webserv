@@ -6,13 +6,13 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/02 19:29:39 by nidor            ###   ########.fr       */
+/*   Updated: 2023/07/02 22:09:40 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
 
-int creat_client(int sock)
+int create_client(int sock)
 {
     struct client_info *tmp;
     tmp = (struct client_info*) calloc(1, sizeof(struct client_info));
@@ -96,7 +96,7 @@ int wait_on_clients(int server)
 
     if (FD_ISSET(server, &re)) {
         try {
-            creat_client(servs.at(server).socket);
+            create_client(servs.at(server).socket);
         }
         catch (const std::out_of_range& e) {
             std::cerr << "Exception srv_socket default: " << e.what() << std::endl;
