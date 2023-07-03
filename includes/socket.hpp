@@ -19,7 +19,7 @@ struct client_info {
     int socket;
     int socket_srv;
     char request[2048];
-    int received;
+    std::string fd_name;
     class Request *clientReq;
 };
 

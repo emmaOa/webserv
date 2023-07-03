@@ -10,16 +10,48 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "./includes/webserv.hpp"
-# include "./includes/parsing_file_cnf.hpp"
-# include "./includes/socket.hpp"
-#include "./includes/request.hpp"
+# include "../includes/webserv.hpp"
+# include "../includes/parsing_file_cnf.hpp"
+# include "../includes/socket.hpp"
+#include "../includes/request.hpp"
+
+bool is_empty(std::fstream& pFile)
+{
+    return pFile.peek() == std::ifstream::traits_type::eof();
+}
 
 int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
     (void)lent;
-    (void)sock_clt;
-    (void)sock_srv;
-    std::cout << buffer << std::endl;
+    if (servs.at(sock_srv).clts.at(sock_clt).fd_name.compare("null") == 0) {
+        std::fstream fd;
+        std::string name;
+        std::string line;
+        std::string buf(buffer);
+        std::stringstream ss;
+        ss << sock_clt;
+        name = "file_" + ss.str();
+        fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
+        servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
+        // std::cout << name << std::endl;
+        if (!fd) {
+            std::cout << "Open failed" << std::endl;
+            return -2;
+        }
+        fd << buffer << std::endl;
+        fd.seekp(0, std::ios::beg);
+        if (is_empty(fd)){
+            std::cout << "empty\n";
+        }
+        // std::cout << buffer << std::endl;
+        while (std::getline(fd, line))
+        {
+            std::cout << line << std::endl;
+        }
+        fd.close();
+        
+    }
+
+    // std::cout << buffer << std::endl;
     return 1;
 }

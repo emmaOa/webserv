@@ -29,8 +29,9 @@ int creat_client(int sock)
        return -1; 
     }
     tmp->socket_srv = sock;
+    tmp->fd_name = "null";
     servs[sock].clts.insert(std::pair<int, client_info> (tmp->socket, *tmp));
-    std::cout << servs[0].clts[0].socket << std::endl;
+    // std::cout << servs[0].clts[0].socket << std::endl;
     return tmp->socket;
 }
 

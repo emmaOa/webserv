@@ -14,6 +14,9 @@
 #include <fstream>
 #include <sstream>
 #include <unistd.h>
+#include <cstring>
+#include <iostream>
+
 
 
 #endif
