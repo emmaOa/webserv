@@ -6,7 +6,7 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/02 22:09:40 by nidor            ###   ########.fr       */
+/*   Updated: 2023/07/03 19:27:07 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int create_client(int sock)
     tmp->address_length = sizeof(tmp->address);
     tmp->socket = accept(sock, (struct sockaddr*) &(tmp->address), &(tmp->address_length));
     if (tmp->socket < 0){
-        std::cout << "accept field\n";
+        std::cout << "accept failed\n";
        return -1; 
     }
     tmp->socket_srv = sock;
