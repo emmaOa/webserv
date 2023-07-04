@@ -15,6 +15,24 @@
 # include "../includes/socket.hpp"
 #include "../includes/request.hpp"
 
+std::string random_String()
+{
+    std::string randomString;
+    const int length = 6;
+
+    // Seed the random number generator
+    std::srand(std::time(0));
+
+    for (int i = 0; i < length; ++i)
+    {
+        // Generate a random ASCII character within the range of [a-z]
+        char randomChar = 'a' + (std::rand() % 26);
+        randomString.push_back(randomChar);
+    }
+
+    return randomString;
+}
+
 bool is_empty(std::fstream& pFile)
 {
     return pFile.peek() == std::ifstream::traits_type::eof();
@@ -22,7 +40,6 @@ bool is_empty(std::fstream& pFile)
 
 int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
-    (void)lent;
     if (servs.at(sock_srv).clts.at(sock_clt).fd_name.compare("null") == 0) {
         std::fstream fd;
         std::string name;
@@ -30,7 +47,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::string buf(buffer);
         std::stringstream ss;
         ss << sock_clt;
-        name = "file_" + ss.str();
+        name = "file_" + ss.str() + random_String();
         fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
         servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
         // std::cout << name << std::endl;
@@ -53,5 +70,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
     }
 
     // std::cout << buffer << std::endl;
-    return 1;
+    if (lent == 0)
+        return 1;
+    return 0;
 }
