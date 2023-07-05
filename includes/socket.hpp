@@ -20,7 +20,7 @@ struct client_info {
     int socket_srv;
     char request[2048];
     std::string fd_name;
-    class Request *clientReq;
+    std::map<std::string, std::string> request_map;
 };
 
 typedef struct s_srvs_set {

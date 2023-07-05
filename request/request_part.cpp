@@ -42,6 +42,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
     if (servs.at(sock_srv).clts.at(sock_clt).fd_name.compare("null") == 0) {
         std::fstream fd;
+        int i = 0;
         std::string name;
         std::string line;
         std::string buf(buffer);
@@ -63,8 +64,16 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         // std::cout << buffer << std::endl;
         while (std::getline(fd, line))
         {
-            std::cout << line << std::endl;
+            // std::cout << line << std::endl;
+            if (i == 0)
+                first_line(line, sock_clt, sock_srv);
+            else {
+                if ((line.find(':') != std::string::npos))
+                    pars_head(line, sock_clt, sock_srv);
+            }
+            i++;
         }
+        // std::cout << "====>" << servs.at(sock_srv).clts.at(sock_clt).request_map["Connection"] << "\n";
         fd.close();
         
     }
