@@ -29,7 +29,6 @@ bool check_allowed_chars(std::string str)
     return 1;
 }
 
-
 int check_method(int id, std::string location, std::string method)
 {
     std::deque<std::string>::iterator it;
