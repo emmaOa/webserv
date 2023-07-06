@@ -42,7 +42,7 @@ int first_line(std::string line, int sock_clt, int sock_srv)
     std::pair<std::string, std::string>pr;
  
     servs.at(sock_srv).clts.at(sock_clt).request_map["method"] = out[0];
-    servs.at(sock_srv).clts.at(sock_clt).request_map["path_old"] = out[1];
+    servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"] = out[1];
     servs.at(sock_srv).clts.at(sock_clt).request_map["http_vr"] = out[2];
 
     // std::vector<std::string>::iterator it;

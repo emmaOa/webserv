@@ -13,7 +13,66 @@
 # include "../includes/webserv.hpp"
 # include "../includes/parsing_file_cnf.hpp"
 # include "../includes/socket.hpp"
-#include "../includes/request.hpp"
+# include "../includes/request.hpp"
+
+bool check_allowed_chars(std::string str)
+{
+    const std::string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    for (std::string::size_type i = 0; i < str.length(); ++i)
+    {
+        if (allowedChars.find(str[i]) == std::string::npos)
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+int check_method(int id, std::string location, std::string method)
+{
+    std::deque<std::string>::iterator it;
+
+    std::cout << "id : " << id << " - location : " << location << " - method : " << method << "\n";
+    for (unsigned int i = 0; i < data_cnf->servers.at(id).at(location).at("allow_methods").size(); i++){
+        if (data_cnf->servers.at(id).at(location).at("allow_methods").at(i).compare(method) == 0)
+            return 1;  
+    }
+    return 0;
+}
+
+int port_srv(int port, std::string host)
+{
+    std::cout << "port : " << port << "host :"<< host << "\n";
+    int i = 0;
+    int id = -1;
+    std::deque <m_mp_dq >::iterator it;
+    for (it = data_cnf->servers.begin(); it != data_cnf->servers.end(); it++){
+        if (strtod(data_cnf->servers.at(i).at("port").at("null").at(0).c_str(), NULL) == port && \
+                data_cnf->servers.at(i).at("host").at("null").at(0).compare(host) == 0) 
+            id = i;
+        i++;
+    }
+    return id;
+}
+
+void check_err_head(int sock_srv, int sock_clt)
+{
+    int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
+    if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) {
+        if (servs.at(sock_srv).clts.at(sock_clt).request_map["Transfer-Encoding"] != "chunked")
+            servs.at(sock_srv).clts.at(sock_clt).err = 501;
+    }
+    if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") == servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Length") == servs.at(sock_srv).clts.at(sock_clt).request_map.end())
+        servs.at(sock_srv).clts.at(sock_clt).err = 400;
+    if (servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"].length() > 2048)
+        servs.at(sock_srv).clts.at(sock_clt).err = 414;
+    if (check_allowed_chars(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]) < 1)
+        servs.at(sock_srv).clts.at(sock_clt).err = 400;
+    if (check_method(id_srv, servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"], servs.at(sock_srv).clts.at(sock_clt).request_map["method"]) < 1)
+        servs.at(sock_srv).clts.at(sock_clt).err = 405; 
+}
 
 std::string random_String()
 {
@@ -73,6 +132,9 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             }
             i++;
         }
+        check_err_head(sock_srv, sock_clt);
+        // std::cout << check_method(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host), servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"], servs.at(sock_srv).clts.at(sock_clt).request_map["method"])<< "\n";
+        // std::cout << port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host) << "<======\n";
         // std::cout << "====>" << servs.at(sock_srv).clts.at(sock_clt).request_map["Connection"] << "\n";
         fd.close();
         

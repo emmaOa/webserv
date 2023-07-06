@@ -21,6 +21,7 @@ struct client_info {
     char request[2048];
     std::string fd_name;
     std::map<std::string, std::string> request_map;
+    int err;
 };
 
 typedef struct s_srvs_set {
