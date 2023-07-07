@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/24 02:36:22 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/07 18:10:41 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,7 @@
 
 int creat_client(int sock)
 {
-    struct client_info *tmp;
-    tmp = (struct client_info*) calloc(1, sizeof(struct client_info));
+    struct client_info *tmp = new client_info;
     if (!tmp) {
         std::cout << "error 01\n";
         exit (1);
