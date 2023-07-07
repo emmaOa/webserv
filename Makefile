@@ -8,6 +8,8 @@ MANDATORY=  main.cpp parsing_file_configuration/MainParsing.cpp \
 			socket/clients.cpp \
 			request/request_part.cpp \
 			response/get_method.cpp \
+			request/header_request.cpp \
+			request/pars_location.cpp \
 
 CC=cc
 FLAGS= -Wall -Werror -Wextra -std=c++98

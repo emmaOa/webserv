@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   clients.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/03 19:27:07 by nidor            ###   ########.fr       */
+/*   Updated: 2023/07/07 18:24:28 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,7 @@
 
 int create_client(int sock)
 {
-    struct client_info *tmp;
-    tmp = (struct client_info*) calloc(1, sizeof(struct client_info));
+    struct client_info *tmp = new client_info;
     if (!tmp) {
         std::cout << "error 01\n";
         exit (1);
@@ -23,12 +22,14 @@ int create_client(int sock)
     tmp->address_length = sizeof(tmp->address);
     tmp->socket = accept(sock, (struct sockaddr*) &(tmp->address), &(tmp->address_length));
     if (tmp->socket < 0){
-        std::cout << "accept failed\n";
+        std::cout << "accept field\n";
        return -1; 
     }
     tmp->socket_srv = sock;
+    tmp->fd_name = "null";
+    tmp->err = -1;
+    tmp->err_msg = "null";
     servs[sock].clts.insert(std::pair<int, client_info> (tmp->socket, *tmp));
-    std::cout << servs[0].clts[0].socket << std::endl;
     return tmp->socket;
 }
 

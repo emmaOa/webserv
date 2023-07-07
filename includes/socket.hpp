@@ -7,8 +7,10 @@ struct client_info {
     int socket;
     int socket_srv;
     char request[2048];
-    int received;
-    class Request *clientReq;
+    std::string fd_name;
+    std::map<std::string, std::string> request_map;
+    int err;
+    std::string err_msg;
 };
 
 typedef struct s_srvs_set {
