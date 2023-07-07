@@ -60,17 +60,27 @@ void check_err_head(int sock_srv, int sock_clt)
 {
     int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
     if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) {
-        if (servs.at(sock_srv).clts.at(sock_clt).request_map["Transfer-Encoding"] != "chunked")
+        if (servs.at(sock_srv).clts.at(sock_clt).request_map["Transfer-Encoding"] != "chunked") {
             servs.at(sock_srv).clts.at(sock_clt).err = 501;
+            servs.at(sock_srv).clts.at(sock_clt).err_msg = "Not Implemented";
+        }
     }
-    if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") == servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Length") == servs.at(sock_srv).clts.at(sock_clt).request_map.end())
+    if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") == servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Length") == servs.at(sock_srv).clts.at(sock_clt).request_map.end()) {
         servs.at(sock_srv).clts.at(sock_clt).err = 400;
-    if (servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"].length() > 2048)
+        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
+    }
+    if (servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"].length() > 2048) {
         servs.at(sock_srv).clts.at(sock_clt).err = 414;
-    if (check_allowed_chars(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]) < 1)
+        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Request-URI Too Long";
+    }
+    if (check_allowed_chars(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]) < 1) {
         servs.at(sock_srv).clts.at(sock_clt).err = 400;
-    if (check_method(id_srv, servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"], servs.at(sock_srv).clts.at(sock_clt).request_map["method"]) < 1)
+        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
+    }
+    if (check_method(id_srv, servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"], servs.at(sock_srv).clts.at(sock_clt).request_map["method"]) < 1) {
         servs.at(sock_srv).clts.at(sock_clt).err = 405; 
+        servs.at(sock_srv).clts.at(sock_clt).err_msg = " Method Not Allowed";
+    }
 }
 
 std::string random_String()
