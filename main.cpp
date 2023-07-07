@@ -3,27 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/26 21:16:07 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/03 19:42:33 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "./includes/webserv.hpp"
-# include "./includes/parsing_file_cnf.hpp"
-# include "./includes/socket.hpp"
-#include "./includes/request.hpp"
 std::map<int, srvs_set> servs;
-
-int response_part(int sock_clt, int sock_srv)
-{
-    // std::cout << servs[sock_srv].clts[sock_clt].clientReq->getMethod() << "----<<";
-    (void)sock_srv;
-    char hello[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-    write(sock_clt , hello , sizeof(hello));
-    return 1;
-}
 
 int main(int arc, char *arg[])
 {
@@ -41,7 +29,7 @@ int main(int arc, char *arg[])
             exit (1);
     }
     else{
-        std::cout << "open field\n";
+        std::cout << "open failed\n";
         exit (1);
     }
     std::deque<int> socket_srv = int_socket_srvs();
@@ -51,12 +39,11 @@ int main(int arc, char *arg[])
         it = servs.begin();
         while (it != servs.end())
         {
-            // std::cout << it->first << " <<------\n";
             r = wait_on_clients(it->first);
             if (r >= 0) {
                 read_ret = read(r, buffer, 1024);
                 if (read_ret < 0){
-                    std::cout << "read field\n";
+                    std::cout << "read failed\n";
                     exit (1);
                 }
                 else {
@@ -73,6 +60,5 @@ int main(int arc, char *arg[])
             ++it;
         }
     }
-    
     return 0;
 }

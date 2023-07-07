@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   sockets.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/23 19:32:43 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 22:08:47 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
-# include "../includes/socket.hpp"
-# include "../includes/parsing_file_cnf.hpp"
 
 std::deque<int> int_socket_srvs(void)
 {
@@ -20,13 +18,13 @@ std::deque<int> int_socket_srvs(void)
     unsigned long i = 0;
     while (i < data_cnf->servers.size())
     {
-        srvs[i] = creat_socket(i);
+        srvs[i] = create_socket(i);
         i++;
     }
     return srvs;
 }
 
-int creat_socket(int id)
+int create_socket(int id)
 {
     struct addrinfo hints, *bind_address;
     const char *host, *port;
@@ -35,7 +33,7 @@ int creat_socket(int id)
 
     std::cout << "Configuring local address...\n";
 
-    std::memset(&hints, 0, sizeof(hints));
+    memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;

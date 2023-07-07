@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   check_values.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:07:34 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/09 18:09:22 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 19:28:40 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/parsing_file_cnf.hpp"
+# include "../includes/webserv.hpp"
 
 int check_lct_value(std::string key)
 {

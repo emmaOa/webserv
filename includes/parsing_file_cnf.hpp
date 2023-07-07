@@ -1,8 +1,6 @@
 #ifndef PARSING_FILE_CNF_HPP
 # define PARSING_FILE_CNF_HPP
 
-# include "webserv.hpp"
-
 void initial_key_srv(void);
 int MainFileCnf(std::ifstream &  CnfFile);
 int vld_srv_key(std::string word);

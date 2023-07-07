@@ -7,6 +7,7 @@ MANDATORY=  main.cpp parsing_file_configuration/MainParsing.cpp \
 			socket/sockets.cpp \
 			socket/clients.cpp \
 			request/request_part.cpp \
+			response/get_method.cpp \
 			request/header_request.cpp \
 			request/pars_location.cpp \
 

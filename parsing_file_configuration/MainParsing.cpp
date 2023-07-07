@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   MainParsing.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:57:24 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/23 14:14:12 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 22:07:54 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/parsing_file_cnf.hpp"
+# include "../includes/webserv.hpp"
 
 cnf *data_cnf = new cnf;
 
@@ -34,7 +34,7 @@ int MainFileCnf(std::ifstream & CnfFile)
 
 int ParseLine(std::string line)
 {
-    std::cout <<  line << std::endl;
+    // std::cout <<  line << std::endl;
     if (line.compare("server {") == 0 && data_cnf->br.second == 0){
         data_cnf->br.first++;
         return 0;

@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   store.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:10:45 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/09 18:11:46 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/02 19:28:50 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../includes/parsing_file_cnf.hpp"
+# include "../includes/webserv.hpp"
 
 int store(std::string line)
 {

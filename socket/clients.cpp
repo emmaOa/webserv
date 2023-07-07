@@ -6,15 +6,13 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/07 18:10:41 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/07 18:24:28 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
-# include "../includes/parsing_file_cnf.hpp"
-# include "../includes/socket.hpp"
 
-int creat_client(int sock)
+int create_client(int sock)
 {
     struct client_info *tmp = new client_info;
     if (!tmp) {
@@ -32,7 +30,6 @@ int creat_client(int sock)
     tmp->err = -1;
     tmp->err_msg = "null";
     servs[sock].clts.insert(std::pair<int, client_info> (tmp->socket, *tmp));
-    // std::cout << servs[0].clts[0].socket << std::endl;
     return tmp->socket;
 }
 
@@ -100,7 +97,7 @@ int wait_on_clients(int server)
 
     if (FD_ISSET(server, &re)) {
         try {
-            creat_client(servs.at(server).socket);
+            create_client(servs.at(server).socket);
         }
         catch (const std::out_of_range& e) {
             std::cerr << "Exception srv_socket default: " << e.what() << std::endl;

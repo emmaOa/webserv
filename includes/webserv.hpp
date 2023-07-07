@@ -1,22 +1,33 @@
 #ifndef WEBSERV_HPP
 # define WEBSERV_HPP
 
-# include <iostream>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
 # include <algorithm>
-#include <vector>
-#include <map>
-#include <deque>
-#include <string>
-#include <cmath>
-#include <ctime>
+#include <sys/time.h>
+# include <iostream>
+#include <unistd.h>
 #include <cstdlib>
 #include <iomanip>
+#include <cstring>
 #include <fstream>
 #include <sstream>
-#include <unistd.h>
-#include <cstring>
-#include <iostream>
+#include <stdio.h>
+#include <errno.h>
+#include <netdb.h>
+#include <string>
+#include <vector>
+#include <deque>
+#include <cmath>
+#include <ctime>
+#include <map>
 
-
+# include "./parsing_file_cnf.hpp"
+# include "./socket.hpp"
+#include "./request.hpp"
+#include "./response.hpp"
 
 #endif

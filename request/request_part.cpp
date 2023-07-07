@@ -6,14 +6,11 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/06/26 21:17:13 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/07 19:27:15 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
-# include "../includes/parsing_file_cnf.hpp"
-# include "../includes/socket.hpp"
-# include "../includes/request.hpp"
 
 bool check_allowed_chars(std::string str)
 {
@@ -33,7 +30,7 @@ int check_method(int id, std::string location, std::string method)
 {
     std::deque<std::string>::iterator it;
 
-    std::cout << "id : " << id << " - location : " << location << " - method : " << method << "\n";
+    // std::cout << "id : " << id << " - location : " << location << " - method : " << method << "\n";
     for (unsigned int i = 0; i < data_cnf->servers.at(id).at(location).at("allow_methods").size(); i++){
         if (data_cnf->servers.at(id).at(location).at("allow_methods").at(i).compare(method) == 0)
             return 1;  
@@ -43,7 +40,7 @@ int check_method(int id, std::string location, std::string method)
 
 int port_srv(int port, std::string host)
 {
-    std::cout << "port : " << port << "host :"<< host << "\n";
+    // std::cout << "port : " << port << "host :"<< host << "\n";
     int i = 0;
     int id = -1;
     std::deque <m_mp_dq >::iterator it;
@@ -88,12 +85,10 @@ std::string random_String()
     std::string randomString;
     const int length = 6;
 
-    // Seed the random number generator
     std::srand(std::time(0));
 
     for (int i = 0; i < length; ++i)
     {
-        // Generate a random ASCII character within the range of [a-z]
         char randomChar = 'a' + (std::rand() % 26);
         randomString.push_back(randomChar);
     }
@@ -108,6 +103,9 @@ bool is_empty(std::fstream& pFile)
 
 int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
+    (void)lent;
+
+    std::cout << "request starte\n";
     if (servs.at(sock_srv).clts.at(sock_clt).fd_name.compare("null") == 0) {
         std::fstream fd;
         int i = 0;
@@ -118,8 +116,6 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         ss << sock_clt;
         name = "file_" + ss.str() + random_String();
         fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
-        servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
-        // std::cout << name << std::endl;
         if (!fd) {
             std::cout << "Open failed" << std::endl;
             return -2;
@@ -129,10 +125,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         if (is_empty(fd)){
             std::cout << "empty\n";
         }
-        // std::cout << buffer << std::endl;
         while (std::getline(fd, line))
         {
-            // std::cout << line << std::endl;
             if (i == 0)
                 first_line(line, sock_clt, sock_srv);
             else {
@@ -142,15 +136,18 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             i++;
         }
         check_err_head(sock_srv, sock_clt);
-        // std::cout << check_method(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host), servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"], servs.at(sock_srv).clts.at(sock_clt).request_map["method"])<< "\n";
-        // std::cout << port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host) << "<======\n";
-        // std::cout << "====>" << servs.at(sock_srv).clts.at(sock_clt).request_map["Connection"] << "\n";
+        if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("GET") == 0 || \
+            servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("DELETE") == 0){
+                servs.at(sock_srv).clts.at(sock_clt).fd_name = "done";
+                
+            }
+        else
+            servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
         fd.close();
-        
-    }
-
-    // std::cout << buffer << std::endl;
-    if (lent == 0)
         return 1;
-    return 0;
+    }
+    else if (servs.at(sock_srv).clts.at(sock_clt).fd_name.compare("done") == 0)
+        return 1;
+    else
+        return 0;
 }
