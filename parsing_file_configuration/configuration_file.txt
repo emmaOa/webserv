@@ -1,12 +1,12 @@
 server {
-  port 8001
+  port 8002
   host 127.0.0.1
   server_name test
   error_page_404 /error/404.html
   error_page_400 /error/400.html
   client_max_body_size 1024
 
-  location / {
+  location /hi {
       root includes/webserv.hpp
       autoindex on
       allow_methods POST GET

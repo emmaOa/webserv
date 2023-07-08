@@ -11,5 +11,7 @@ void check_err_head(int sock_srv, int sock_clt);
 int port_srv(int port, std::string host);
 int check_method(int id, std::string location, std::string method);
 bool check_allowed_chars(std::string str);
+int match_location(int sock_srv, int sock_clt);
+int check_return(int sock_srv, int sock_clt, std::string location);
 
 #endif

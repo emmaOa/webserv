@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_values.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:07:34 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/02 19:28:40 by nidor            ###   ########.fr       */
+/*   Updated: 2023/07/08 17:26:44 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int check_lct_value(std::string key)
             }   
         }
         else {
-            if (data_cnf->dq_2.size() != 1 || (access(data_cnf->dq_2[0].c_str(), F_OK) == -1) || (access(data_cnf->dq_2[0].c_str(), R_OK) == -1)){
+            if ((data_cnf->dq_2.size() == 1 && ((access(data_cnf->dq_2[0].c_str(), F_OK) == -1) || (access(data_cnf->dq_2[0].c_str(), R_OK) == -1))) || data_cnf->dq_2.size() > 1){
                 std::cout  << "invalid form 19\n";
                 return 1;
             } 

@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/07 19:27:15 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/08 16:55:26 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 bool check_allowed_chars(std::string str)
 {
-    const std::string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const std::string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:/";
 
     for (std::string::size_type i = 0; i < str.length(); ++i)
     {
@@ -74,6 +74,7 @@ void check_err_head(int sock_srv, int sock_clt)
         servs.at(sock_srv).clts.at(sock_clt).err = 400;
         servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
     }
+    match_location(sock_srv, sock_clt);
     if (check_method(id_srv, servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"], servs.at(sock_srv).clts.at(sock_clt).request_map["method"]) < 1) {
         servs.at(sock_srv).clts.at(sock_clt).err = 405; 
         servs.at(sock_srv).clts.at(sock_clt).err_msg = " Method Not Allowed";

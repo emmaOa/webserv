@@ -11,6 +11,7 @@ struct client_info {
     std::map<std::string, std::string> request_map;
     int err;
     std::string err_msg;
+    std::string location;
 };
 
 typedef struct s_srvs_set {
@@ -19,8 +20,7 @@ typedef struct s_srvs_set {
     std::string host;
     std::map<int, struct client_info> clts;
     struct sockaddr_in serv_addr;
-    
-}               srvs_set;
+}      srvs_set;
 
 extern std::map<int, srvs_set> servs;
 
