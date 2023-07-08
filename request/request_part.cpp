@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request_part.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/07 19:27:15 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/08 01:43:58 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,6 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
     (void)lent;
 
-    std::cout << "request starte\n";
     if (servs.at(sock_srv).clts.at(sock_clt).fd_name.compare("null") == 0) {
         std::fstream fd;
         int i = 0;
