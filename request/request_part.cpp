@@ -26,18 +26,6 @@ bool check_allowed_chars(std::string str)
     return 1;
 }
 
-int check_method(int id, std::string location, std::string method)
-{
-    std::deque<std::string>::iterator it;
-
-    // std::cout << "id : " << id << " - location : " << location << " - method : " << method << "\n";
-    for (unsigned int i = 0; i < data_cnf->servers.at(id).at(location).at("allow_methods").size(); i++){
-        if (data_cnf->servers.at(id).at(location).at("allow_methods").at(i).compare(method) == 0)
-            return 1;  
-    }
-    return 0;
-}
-
 int port_srv(int port, std::string host)
 {
     // std::cout << "port : " << port << "host :"<< host << "\n";
@@ -55,7 +43,7 @@ int port_srv(int port, std::string host)
 
 void check_err_head(int sock_srv, int sock_clt)
 {
-    int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
+    // int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
     if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) {
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["Transfer-Encoding"] != "chunked") {
             servs.at(sock_srv).clts.at(sock_clt).err = 501;
@@ -75,10 +63,10 @@ void check_err_head(int sock_srv, int sock_clt)
         servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
     }
     match_location(sock_srv, sock_clt);
-    if (check_method(id_srv, servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"], servs.at(sock_srv).clts.at(sock_clt).request_map["method"]) < 1) {
-        servs.at(sock_srv).clts.at(sock_clt).err = 405; 
-        servs.at(sock_srv).clts.at(sock_clt).err_msg = " Method Not Allowed";
-    }
+    // if (check_method(id_srv, servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"], servs.at(sock_srv).clts.at(sock_clt).request_map["method"]) < 1) {
+    //     servs.at(sock_srv).clts.at(sock_clt).err = 405; 
+    //     servs.at(sock_srv).clts.at(sock_clt).err_msg = " Method Not Allowed";
+    // }
 }
 
 std::string random_String()

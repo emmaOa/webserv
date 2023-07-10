@@ -38,11 +38,19 @@ int check_lct_value(std::string key)
                 return 1;
             }   
         }
-        else {
-            if ((data_cnf->dq_2.size() == 1 && ((access(data_cnf->dq_2[0].c_str(), F_OK) == -1) || (access(data_cnf->dq_2[0].c_str(), R_OK) == -1))) || data_cnf->dq_2.size() > 1){
-                std::cout  << "invalid form 19\n";
+        else if(key.compare("root") == 0){
+            if (data_cnf->dq_2.size() != 1 || (access(data_cnf->dq_2[0].c_str(), F_OK) == -1) || (access(data_cnf->dq_2[0].c_str(), R_OK) == -1)){
+                std::cout  << data_cnf->dq_2[0] << "<----\n";
+                std::cout  << "invalid form 200\n";
                 return 1;
             } 
+        }
+        else {
+            if ((data_cnf->dq_2.size() == 1 && !data_cnf->dq_2[0].empty() && ((access(data_cnf->dq_2[0].c_str(), F_OK) == -1) || (access(data_cnf->dq_2[0].c_str(), R_OK) == -1))) || data_cnf->dq_2.size() > 1){
+                std::cout  << data_cnf->dq_2[0] << "<----\n";
+                std::cout  << "invalid form 19\n";
+                return 1;
+            }
         }
     }
     else {

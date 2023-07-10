@@ -12,14 +12,15 @@
 
 # include "../includes/webserv.hpp"
 
-int nwe_path(std::string path, int sock_clt, int sock_srv)
+int new_path(std::string path, int sock_clt, int sock_srv)
 {
     if ((path.find('?') != std::string::npos)) {
         std::vector<std::string> out; 
         const char delim = '?';
         split_one(path, delim, out);
-        path = out[0];
+        servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"] = out[0];
         servs.at(sock_srv).clts.at(sock_clt).request_map["query"] = out[1];
+        return 1;
     }
     return 0;
 }
@@ -48,7 +49,8 @@ int first_line(std::string line, int sock_clt, int sock_srv)
     std::pair<std::string, std::string>pr;
  
     servs.at(sock_srv).clts.at(sock_clt).request_map["method"] = out[0];
-    servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"] = out[1];
+    if (new_path(out[1], sock_clt, sock_srv) < 1)
+        servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"] = out[1];
     servs.at(sock_srv).clts.at(sock_clt).request_map["http_vr"] = out[2];
 
     return 0;

@@ -6,12 +6,12 @@ server {
   error_page_400 /error/400.html
   client_max_body_size 1024
 
-  location /hi {
+  location / {
       root includes/webserv.hpp
       autoindex on
       allow_methods POST GET
       index index.html
-      return includes/webserv.hpp
+      return includes/socket.hpp
     }
   location cgi-bin  {
       root ./
