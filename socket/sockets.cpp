@@ -60,7 +60,7 @@ int create_socket(int id)
     freeaddrinfo(bind_address);
 
     std::cout << "Listening...\n";
-    if (listen(socket_sv, 10) < 0){
+    if (listen(socket_sv, 128) < 0){
         std::cout << "listen failed\n";
         exit (1);
     }

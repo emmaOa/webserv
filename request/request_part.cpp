@@ -100,7 +100,6 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         int i = 0;
         std::string name;
         std::string line;
-        std::string buf(buffer);
         std::stringstream ss;
         ss << sock_clt;
         name = "file_" + ss.str() + random_String();
@@ -109,13 +108,15 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             std::cout << "Open failed" << std::endl;
             return -2;
         }
-        fd << buffer << std::endl;
+        // std::cout << lent << " " << strlen(buffer) << "\n";
+        fd << std::string(buffer, lent) << std::endl;
         fd.seekp(0, std::ios::beg);
         if (is_empty(fd)){
             std::cout << "empty\n";
         }
         while (std::getline(fd, line))
         {
+            // std::cout << i << std::endl;
             if (i == 0)
                 first_line(line, sock_clt, sock_srv);
             else {
@@ -133,6 +134,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         else
             servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
         fd.close();
+        // std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "<<------\n";
         return 1;
     }
     else if (servs.at(sock_srv).clts.at(sock_clt).fd_name.compare("done") == 0)
