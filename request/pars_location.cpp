@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/08 21:28:00 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/13 11:26:36 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,10 @@ int match_location(int sock_srv, int sock_clt)
     std::vector<std::string> out; 
     const char delim = '/';
     split_one(uri, delim, out);
-    unsigned int i = 0;
 
     if (out.size() > 1)
         out.erase(out.begin());
+    unsigned int i = out.size();
     
     // while (i < out.size())
     // {
@@ -54,6 +54,7 @@ int match_location(int sock_srv, int sock_clt)
             else
                 uri = uri + "/" + out[l];
         }
+        // std::cout << uri << "<----\n";
         it = data_cnf->servers.at(id_srv).find(uri);
         if (it != data_cnf->servers.at(id_srv).end()) {
             // std::cout << it->first << "<===\n";
