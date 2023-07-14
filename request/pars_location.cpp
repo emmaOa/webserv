@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/13 11:26:36 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/13 12:40:42 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int check_return(int sock_srv, int sock_clt, std::string location)
 
     if (data_cnf->servers.at(id_srv).at(location).at("return").size() == 1) {
         servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] = data_cnf->servers.at(id_srv).at(location).at("return").at(0);
-        std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "<===\n";
+        // std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "<===\n";
         return 1;
     }
     return 0;

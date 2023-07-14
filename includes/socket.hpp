@@ -8,6 +8,7 @@ struct client_info {
     int socket_srv;
     char request[2048];
     std::string fd_name;
+    int is_done;
     std::map<std::string, std::string> request_map;
     int err;
     std::string err_msg;
