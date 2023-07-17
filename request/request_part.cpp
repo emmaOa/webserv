@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/14 16:45:10 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/17 20:13:52 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,8 +100,6 @@ int he_to_in(std::string hex)
 
 int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
-    (void)lent;
-
     std::cout << "request starte\n";
     if (servs.at(sock_srv).clts.at(sock_clt).is_done < 0) {
         std::fstream fd;
@@ -112,6 +110,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::string line;
         std::stringstream ss;
         int is_body = 0;
+        int size = 0;
         ss << sock_clt;
         name = "file_" + ss.str() + random_String();
         fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
@@ -125,13 +124,16 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             return -2;
         }
         // std::cout << lent << " " << strlen(buffer) << "\n";
-        fd2 << std::string(buffer, lent);
+        // char * bf = buffer.c_str();
+        fd2.write(buffer , lent);
+        // fd2 << std::string(buffer, lent);
         fd2.seekp(0, std::ios::beg);
         // if (is_empty(fd2)){
         //     std::cout << "empty\n";
         // }
-        while (std::getline(fd2, line))
+        while (std::getline(fd2, line) && is_body == 0)
         {
+            size += line.length() + 1;
             // std::cout << i << std::endl;
             if (i == 0)
                 first_line(line, sock_clt, sock_srv);
@@ -139,16 +141,45 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                     pars_head(line, sock_clt, sock_srv);
             }
             if (!(line.find(':') != std::string::npos) && !(i == 0)) {
-                if (is_body == 0)
-                    is_body = 1;
+                    break ;
             }
-            if (is_body == 2)
-                fd << line << std::endl;
-            if (is_body == 1)
-                is_body++;
-            // line.replace(line.find(line),line.length(),"");
             i++;
         }
+        std::string s = buffer ;
+        size_t l = s.find("\r\n\r\n");
+        std::string s2 = s.substr(l + 4);
+        // s.substr(s.find("\r\n\r\n"));
+        
+        fd.write(s2.c_str() , lent - (l + 4));
+        std::cout << "lent : "<< s2.length() <<" : " << s2;
+        // size += line.length() + 1;
+        // char *bf = new char[lent - size];
+       
+        std::cout << "\n lent : " << lent << "size : " << l << "re : " << (lent - (l + 4)) << std::endl;
+        // // fd2.seekg(0, std::ios::beg);
+        
+        // fd2.read(bf, lent - size);
+        // // std::getline(fd2, line);
+        // fd.write(bf, lent - size);
+        
+        // if (std::getline(fd2, line)) {
+        //     fd.write(line.c_str() , line.length());
+        //     while (!line.empty())
+        //     {
+        //         fd.write(line.c_str() , line.length());
+        //         std::getline(fd2, line);
+        //     }
+        // }
+
+        
+            // if (is_body == 2){
+                
+            //     // fd.write("\n" , 1);
+            // }
+            // if (is_body == 1)
+            //     is_body++;
+            // line.replace(line.find(line),line.length(),"");
+            // i++;
         check_err_head(sock_srv, sock_clt);
         // fallocate(fd, FALLOC_FL_COLLAPSE_RANGE, 0, 900);
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
@@ -157,7 +188,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         }
         else {
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-            fd.close();
+            // fd.close();
         }
         fd2.close();
         // std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "<<------\n";
@@ -169,10 +200,18 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             std::cout << "Open failed" << std::endl;
             return -2;
         }
+        // file_contents.erase(found, word.length());
         if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end())
         {
-            fd << std::string(buffer, lent);
+            fd.write(buffer , lent);
             std::cout << lent << "\n";
+            // if (lent < 1024){
+            //     servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+            //     fd.seekg(0, std::ios::beg);
+            //     std::string line;
+            //     std::getline(fd, line);
+                
+            // }
             if (lent < 1024) {
                 int len;
                 int size = 0;
@@ -217,12 +256,12 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                         // break;
                     }
                     else
-                        fd2 << line << std::endl;
+                        fd2.write(line.c_str() , line.length());
                 }
             }
         }
         else {
-            fd << std::string(buffer, lent);
+            fd.write(buffer , lent);
             if (lent < 1024) 
                 servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
         }
