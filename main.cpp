@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/03 19:42:33 by nidor            ###   ########.fr       */
+/*   Updated: 2023/07/17 23:18:43 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ int main(int arc, char *arg[])
     std::ifstream CnfFile;
     char buffer[1024] = {0};
     int r = 0;
+    int w = 0;
     int read_ret;
     if (arc != 2){
         std::cout << "invalid number arguments\n";
@@ -46,15 +47,14 @@ int main(int arc, char *arg[])
                     std::cout << "read failed\n";
                     exit (1);
                 }
-                else {
-                    if (request_part(buffer, read_ret, r, it->first) > 0) {    
-                        if (check_response(r) > 0){
-                            if (response_part(r, it->first) > 0) {
-                                close(r);
-                                it->second.clts.erase(r);
-                            }
-                        }
-                    }
+                else
+                    request_part(buffer, read_ret, r, it->first);
+            }
+            w = check_response(it->first);
+            if (w >= 0) {
+                if (response_part(w, it->first) > 0) {
+                    close(r);
+                    it->second.clts.erase(r);
                 }
             }
             ++it;

@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/13 12:10:23 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/17 23:21:46 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,26 +47,60 @@ int check_request(fd_set reads, int server)
     return -1;
 }
 
-int check_response(int sock)
+int check_response(int server)
 {
+    unsigned long i = 0;
     fd_set wr;
-    FD_ZERO (&wr);
-
-    int max = sock;
 
     timeval tm;
-    tm.tv_sec = 10;
-    tm.tv_usec = 0;
-    
-    FD_SET (sock, &wr);
-    if (select(max+1, 0, &wr, 0, &tm) < 0){
-        std::cout << "error 04\n";
+    tm.tv_sec = 0;
+    tm.tv_usec = 1000;
+
+    FD_ZERO (&wr);
+    FD_SET(server, &wr);
+    int max_socket = server;
+    // std::cout << server << " <<------\n";
+    while (i < servs.at(server).clts.size())
+    {
+        if (servs.at(server).clts[i].is_done == 1){
+            FD_SET (servs.at(server).clts[i].socket, &wr);
+            if (servs.at(server).clts[i].socket > max_socket)
+                max_socket = servs.at(server).clts[i].socket;
+        }
+        i++;
+    }
+
+    if (select(max_socket+1, 0, &wr, 0, &tm) < 0){
+        std::cout << "error 03\n";
         exit (1);
     }
-    if (FD_ISSET(sock, &wr)){
-        return sock;
+    i = 0;
+    while (i < servs.at(server).clts.size())
+    {
+        if (FD_ISSET(servs.at(server).clts[i].socket, &wr)){
+            return servs.at(server).clts[i].socket;
+        }
+        i++;
     }
     return -1;
+    // fd_set wr;
+    // FD_ZERO (&wr);
+
+    // int max = sock;
+
+    // timeval tm;
+    // tm.tv_sec = 10;
+    // tm.tv_usec = 0;
+    
+    // FD_SET (sock, &wr);
+    // if (select(max+1, 0, &wr, 0, &tm) < 0){
+    //     std::cout << "error 04\n";
+    //     exit (1);
+    // }
+    // if (FD_ISSET(sock, &wr)){
+    //     return sock;
+    // }
+    // return -1;
 }
 
 int wait_on_clients(int server)

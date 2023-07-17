@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/17 20:13:52 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/17 23:23:00 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,36 @@ int he_to_in(std::string hex)
     return decimal;
 }
 
+std::string first_word(std::fstream &fd)
+{
+    std::string word;
+    char c;
+    fd >> std::noskipws >> c;
+    word = c;
+    while (c != '\n') 
+    {
+        fd >> std::noskipws >> c;
+        word += c;
+        // std::cout << c << "\n";
+    }
+    // std::cout << "first : "<< word;
+    return word;
+}
+
+std::string word_from_file(std::fstream &fd, int big, int end)
+{
+    std::string word;
+
+    int len = end - big;
+    char *c =  new char ;
+    fd.seekg(big, std::ios::beg);
+    fd.read(c, len);
+    // std::cout << "word : " << c ;
+    word = c;
+    delete(c);
+    return word;
+}
+
 int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
     std::cout << "request starte\n";
@@ -151,11 +181,11 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         // s.substr(s.find("\r\n\r\n"));
         
         fd.write(s2.c_str() , lent - (l + 4));
-        std::cout << "lent : "<< s2.length() <<" : " << s2;
+        // std::cout << "lent : "<< s2.length() <<" : " << s2;
         // size += line.length() + 1;
         // char *bf = new char[lent - size];
        
-        std::cout << "\n lent : " << lent << "size : " << l << "re : " << (lent - (l + 4)) << std::endl;
+        // std::cout << "\n lent : " << lent << "size : " << l << "re : " << (lent - (l + 4)) << std::endl;
         // // fd2.seekg(0, std::ios::beg);
         
         // fd2.read(bf, lent - size);
@@ -204,60 +234,107 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end())
         {
             fd.write(buffer , lent);
-            std::cout << lent << "\n";
+            // std::cout << lent << "\n";
             // if (lent < 1024){
             //     servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-            //     fd.seekg(0, std::ios::beg);
             //     std::string line;
             //     std::getline(fd, line);
                 
             // }
             if (lent < 1024) {
-                int len;
-                int size = 0;
-                std::string line;
                 servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-                fd.seekp(0, std::ios::beg);
-                std::fstream fd2;
-                fd2.open("ttt", std::ios::in | std::ios::out);
-                if (!fd2) {
-                    std::cout << "Open failed3" << std::endl;
-                    return -2;
-                }
-                std::getline(fd, line);
-                len = he_to_in(line);
-                std::cout << "hexa : "<< line  << "\n";
-                std::cout << "decimal : " << len  << "\n";
-                while (std::getline(fd, line))
-                { 
-                    // while (size < len)
-                    // {
-                    // }
+                // int dec;
+                // fd.seekg(0, std::ios::beg);
+                // std::string f_word = first_word(fd);
+                // std::cout << f_word <<  "___word \n";
+                // dec = he_to_in(f_word);
+                // // first_word(fd);
+                // // fd.erase()
+
+                // std::fstream fd2;
+                // fd2.open("ttt", std::ios::in | std::ios::out);
+                // if (!fd2) {
+                //     std::cout << "Open failed3" << std::endl;
+                //     return -2;
+                // }
+                // fd.seekg(f_word.length(), std::ios::beg);
+                
+                // std::cout << "dec : "<< dec << " len : " << f_word.length() << "\n";
+                
+
+
+
+
+
+
+                // std::string word;
+                // char c;
+                // fd >> std::noskipws >> c;
+                // word = c;
+                // while (c != '\n') 
+                // {
+                //     fd >> std::noskipws >> c;
+                //     word += c;
+                //     std::cout << c << "\n";
+                // }
+                // std::cout << "\n first : "<< word;
+                // size_t big = 0;
+                // size_t len = 0;
+                // len = 
+                // len = fd.find("\r\n");
+
+
+
+
+
+
+
+                
+                // int len;
+                // int size = 0;
+                // std::string line;
+                // servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+                // fd.seekp(0, std::ios::beg);
+                // std::fstream fd2;
+                // fd2.open("ttt", std::ios::in | std::ios::out);
+                // if (!fd2) {
+                //     std::cout << "Open failed3" << std::endl;
+                //     return -2;
+                // }
+                // std::getline(fd, line);
+                // len = he_to_in(line);
+                // std::cout << "hexa : "<< line  << "\n";
+                // std::cout << "decimal : " << len  << "\n";
+                // while (std::getline(fd, line))
+                // { 
+                //     // while (size < len)
+                //     // {
+                //     // }
                     
-                    size += line.length();
-                    if (size > len){
+                //     size += line.length();
+                //     if (size > len){
                         
-                        // size -= line.length();
-                        // std::cout << "size : "<< size << "len : " << len << "\n";
-                        // std::getline(fd, line);
-                        // std::cout << line.length() << "\n";
-                        // std::cout << line << "\n";
+                //         // size -= line.length();
+                //         // std::cout << "size : "<< size << "len : " << len << "\n";
+                //         // std::getline(fd, line);
+                //         // std::cout << line.length() << "\n";
+                //         // std::cout << line << "\n";
                         
-                        len = he_to_in(line);
-                        if (len == 0) {
-                            std::cout << "hexa : "<< line  << "\n";
-                            std::cout << "decimal : " << len  << "\n";
-                            break;
-                        }
-                        std::cout << "hexa : "<< line  << "\n";
-                        std::cout << "decimal : " << len  << "\n";
-                        size = 0;
-                        line.replace(line.begin(),line.end(), "");
-                        // break;
-                    }
-                    else
-                        fd2.write(line.c_str() , line.length());
-                }
+                //         len = he_to_in(line);
+                //         if (len == 0) {
+                //             std::cout << "hexa : "<< line  << "\n";
+                //             std::cout << "decimal : " << len  << "\n";
+                //             break;
+                //         }
+                //         std::cout << "hexa : "<< line  << "\n";
+                //         std::cout << "decimal : " << len  << "\n";
+                //         size = 0;
+                //         line.replace(line.begin(),line.end(), "");
+                //         // break;
+                //     }
+                //     else
+                //         fd2.write(line.c_str() , line.length());
+                // }
             }
         }
         else {
