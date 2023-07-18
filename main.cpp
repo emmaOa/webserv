@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/17 23:18:43 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/18 17:52:21 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ int main(int arc, char *arg[])
             if (r >= 0) {
                 read_ret = read(r, buffer, 1024);
                 if (read_ret < 0){
+                    std::cout << " \n return : " << read_ret << "buffer : " << buffer << "r : " << r  <<  "\n";
                     std::cout << "read failed\n";
                     exit (1);
                 }
@@ -53,8 +54,8 @@ int main(int arc, char *arg[])
             w = check_response(it->first);
             if (w >= 0) {
                 if (response_part(w, it->first) > 0) {
-                    close(r);
-                    it->second.clts.erase(r);
+                    close(w);
+                    it->second.clts.erase(w);
                 }
             }
             ++it;
