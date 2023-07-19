@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/18 17:48:45 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/18 21:51:10 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,14 +33,14 @@ int create_client(int sock)
     return tmp->socket;
 }
 
-int check_request(fd_set reads, int server)
+int check_request(fd_set reads, std::vector<int> v)
 {
     unsigned long i = 0;
 
-    while (i < servs.at(server).clts.size())
+    while (i < v.size())
     {
-        if (FD_ISSET(servs.at(server).clts[i].socket, &reads)){
-            return servs.at(server).clts[i].socket;
+        if (FD_ISSET(v[i], &reads)){
+            return v[i];
         }
         i++;
     }
@@ -60,10 +60,12 @@ int check_response(int server)
     FD_SET(server, &wr);
     int max_socket = server;
     // std::cout << server << " <<------\n";
+    std::vector<int> v;
     while (i < servs.at(server).clts.size())
     {
         if (servs.at(server).clts[i].is_done == 1){
             FD_SET (servs.at(server).clts[i].socket, &wr);
+            v.push_back(servs.at(server).clts[i].socket);
             if (servs.at(server).clts[i].socket > max_socket)
                 max_socket = servs.at(server).clts[i].socket;
         }
@@ -75,10 +77,10 @@ int check_response(int server)
         exit (1);
     }
     i = 0;
-    while (i < servs.at(server).clts.size())
+    while (i < v.size())
     {
-        if (FD_ISSET(servs.at(server).clts[i].socket, &wr)){
-            return servs.at(server).clts[i].socket;
+        if (v[i], &wr){
+            return v[i];
         }
         i++;
     }
@@ -115,11 +117,13 @@ int wait_on_clients(int server)
     FD_ZERO (&re);
     FD_SET(server, &re);
     int max_socket = server;
+    std::vector<int> v;
     // std::cout << server << " <<------\n";
     while (i < servs.at(server).clts.size())
     {
         if (servs.at(server).clts[i].is_done != 1){
             FD_SET (servs.at(server).clts[i].socket, &re);
+            v.push_back(servs.at(server).clts[i].socket);
             if (servs.at(server).clts[i].socket > max_socket)
                 max_socket = servs.at(server).clts[i].socket;
         }
@@ -140,7 +144,7 @@ int wait_on_clients(int server)
         }
         return -1;
     }
-    int val = check_request(re, server);
+    int val = check_request(re, v);
     return val;  
 }
 

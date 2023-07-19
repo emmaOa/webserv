@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/18 17:52:21 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/19 00:04:41 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,29 +37,45 @@ int main(int arc, char *arg[])
     std::map<int, srvs_set>::iterator it = servs.begin();
     while (42)
     {
+        // std::cout << "b inf while\n";
         it = servs.begin();
         while (it != servs.end())
         {
+            // std::cout << "b srv while\n";
             r = wait_on_clients(it->first);
+            // std::cout << "wait on cliennts\n";
             if (r >= 0) {
+                // std::cout << "b read request\n";
                 read_ret = read(r, buffer, 1024);
+                // std::cout << "read request\n";
                 if (read_ret < 0){
-                    std::cout << " \n return : " << read_ret << "buffer : " << buffer << "r : " << r  <<  "\n";
-                    std::cout << "read failed\n";
+                    // std::cout << "\nread_ret\n";
+                    // std::cout << "\nread_ret\n";
                     exit (1);
                 }
                 else
                     request_part(buffer, read_ret, r, it->first);
             }
-            w = check_response(it->first);
-            if (w >= 0) {
-                if (response_part(w, it->first) > 0) {
-                    close(w);
-                    it->second.clts.erase(w);
+            // else {
+                // std::cout << "b check response\n";
+                w = check_response(it->first);
+                // std::cout << " check response\n";
+                if (w >= 0) {
+                    // std::cout << "b response\n";
+                    if (response_part(w, it->first) > 0) {
+                        // std::cout << "response\n";
+                        // std::cout << "close\n";
+                        close(w);
+                        it->second.clts.erase(w);
+                    }
+                    // std::cout << "2 response\n";
                 }
-            }
+            // }
+            // std::cout << "srv while\n";
             ++it;
         }
+        // std::cout << "inf while\n";
     }
+    // std::cout << "end\n";
     return 0;
 }

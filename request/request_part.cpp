@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/17 23:23:00 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/19 01:38:04 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,17 +114,28 @@ std::string first_word(std::fstream &fd)
     return word;
 }
 
-std::string word_from_file(std::fstream &fd, int big, int end)
+std::string word_from_file(std::fstream &fd, int beg)
 {
     std::string word;
-
-    int len = end - big;
-    char *c =  new char ;
-    fd.seekg(big, std::ios::beg);
-    fd.read(c, len);
-    // std::cout << "word : " << c ;
+    fd.seekg(beg, std::ios::beg);
+    char c;
+    fd >> std::noskipws >> c;
     word = c;
-    delete(c);
+    while (c != '\n') 
+    {
+        fd >> std::noskipws >> c;
+        word += c;
+        // std::cout << c << "\n";
+    }
+    
+
+    // int len = end - big;
+    // char *c =  new char ;
+    // fd.seekg(big, std::ios::beg);
+    // fd.read(c, len);
+    // // std::cout << "word : " << c ;
+    // word = c;
+    // delete(c);
     return word;
 }
 
@@ -179,7 +190,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         size_t l = s.find("\r\n\r\n");
         std::string s2 = s.substr(l + 4);
         // s.substr(s.find("\r\n\r\n"));
-        
+
         fd.write(s2.c_str() , lent - (l + 4));
         // std::cout << "lent : "<< s2.length() <<" : " << s2;
         // size += line.length() + 1;
@@ -187,11 +198,11 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
        
         // std::cout << "\n lent : " << lent << "size : " << l << "re : " << (lent - (l + 4)) << std::endl;
         // // fd2.seekg(0, std::ios::beg);
-        
+
         // fd2.read(bf, lent - size);
         // // std::getline(fd2, line);
         // fd.write(bf, lent - size);
-        
+
         // if (std::getline(fd2, line)) {
         //     fd.write(line.c_str() , line.length());
         //     while (!line.empty())
@@ -233,8 +244,9 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         // file_contents.erase(found, word.length());
         if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end())
         {
+            std::cout << lent << "   hiiiiiii\n";
             fd.write(buffer , lent);
-            // std::cout << lent << "\n";
+            
             // if (lent < 1024){
             //     servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             //     std::string line;
@@ -242,12 +254,47 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 
             // }
             if (lent < 1024) {
+                std::fstream fd2;
+                fd2.open("ttt", std::ios::in | std::ios::out | std::ios::app);
+                if (!fd2) {
+                    std::cout << "Open failed3" << std::endl;
+                    return -2;
+                }
+
+
+
+                
                 servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-                // int dec;
-                // fd.seekg(0, std::ios::beg);
-                // std::string f_word = first_word(fd);
-                // std::cout << f_word <<  "___word \n";
-                // dec = he_to_in(f_word);
+                int dec;
+                // char *buff =  new char;
+                fd.seekg(0, std::ios::beg);
+                std::string f_word = word_from_file(fd, 0);
+                int beg = f_word.length();
+                std::cout << f_word ;
+                dec = he_to_in(f_word);
+                while (dec != 0)
+                {
+                    beg += dec + 2;
+                    char buff[dec];
+                    // fd.seekg(beg, std::ios::beg);
+                    fd.read(buff, dec);
+                    fd2.write(buff, dec);
+                    // buff = NULL;
+                    // char *c =  new char ;
+                    // fd.read(c, 20);
+                    // std::cout << "- "<< c << "\n" ;
+                    f_word = word_from_file(fd, beg);
+                    beg += f_word.length();
+                    std::cout << f_word ;
+                    dec = he_to_in(f_word);
+                }
+                // fd.close();
+                // int result = std::rename("ttt", servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str());
+                // if (result != 0)
+                //     std::cout << "Error renaming file." << std::endl;
+
+                // delete(buff);
+                
                 // // first_word(fd);
                 // // fd.erase()
 
