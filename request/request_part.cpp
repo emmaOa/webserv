@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/19 01:38:04 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/20 17:56:07 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,6 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::string name2 = "test";
         std::string line;
         std::stringstream ss;
-        int is_body = 0;
         int size = 0;
         ss << sock_clt;
         name = "file_" + ss.str() + random_String();
@@ -172,7 +171,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         // if (is_empty(fd2)){
         //     std::cout << "empty\n";
         // }
-        while (std::getline(fd2, line) && is_body == 0)
+        while (std::getline(fd2, line))
         {
             size += line.length() + 1;
             // std::cout << i << std::endl;
@@ -187,11 +186,24 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             i++;
         }
         std::string s = buffer ;
-        size_t l = s.find("\r\n\r\n");
-        std::string s2 = s.substr(l + 4);
+        size_t l = s.find("\r\n\r\n") + 4;
+        std::string s2 = s.substr(l);
         // s.substr(s.find("\r\n\r\n"));
 
-        fd.write(s2.c_str() , lent - (l + 4));
+        if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Type") != servs.at(sock_srv).clts.at(sock_clt).request_map.end() && \
+            servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"].find("form-data") != std:: string :: npos){
+                // std::cout << "ho\n";
+            size_t l2 = s2.find("\r\n\r\n") + 4;
+            // std::cout << l2 << "\n";
+            s2 = s2.substr(l2);
+            if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end())
+                fd.write(s2.c_str() , lent - (l2 + l + 2));
+            else
+                fd.write(s2.c_str() , lent - (l2 + l));
+        }
+        else
+            fd.write(s2.c_str() , lent - l);
+
         // std::cout << "lent : "<< s2.length() <<" : " << s2;
         // size += line.length() + 1;
         // char *bf = new char[lent - size];
@@ -222,6 +234,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             // line.replace(line.find(line),line.length(),"");
             // i++;
         check_err_head(sock_srv, sock_clt);
+        // std::cout << servs.at(sock_srv).clts.at(sock_clt).err << "<----\n";
+        // std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map["Transfer-Encoding"] << "<<----\n";
         // fallocate(fd, FALLOC_FL_COLLAPSE_RANGE, 0, 900);
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
             servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
@@ -241,32 +255,20 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             std::cout << "Open failed" << std::endl;
             return -2;
         }
-        // file_contents.erase(found, word.length());
-        if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end())
-        {
-            std::cout << lent << "   hiiiiiii\n";
-            fd.write(buffer , lent);
-            
-            // if (lent < 1024){
-            //     servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-            //     std::string line;
-            //     std::getline(fd, line);
-                
-            // }
-            if (lent < 1024) {
+        fd.write(buffer , lent);
+        if (lent < 1024) {
+            servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+            if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) {
                 std::fstream fd2;
+                int dec;
+
                 fd2.open("ttt", std::ios::in | std::ios::out | std::ios::app);
                 if (!fd2) {
                     std::cout << "Open failed3" << std::endl;
                     return -2;
                 }
 
-
-
-                
                 servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-                int dec;
-                // char *buff =  new char;
                 fd.seekg(0, std::ios::beg);
                 std::string f_word = word_from_file(fd, 0);
                 int beg = f_word.length();
@@ -276,119 +278,168 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 {
                     beg += dec + 2;
                     char buff[dec];
-                    // fd.seekg(beg, std::ios::beg);
                     fd.read(buff, dec);
                     fd2.write(buff, dec);
-                    // buff = NULL;
-                    // char *c =  new char ;
-                    // fd.read(c, 20);
-                    // std::cout << "- "<< c << "\n" ;
                     f_word = word_from_file(fd, beg);
                     beg += f_word.length();
-                    std::cout << f_word ;
+                    // std::cout << f_word ;
                     dec = he_to_in(f_word);
                 }
-                // fd.close();
-                // int result = std::rename("ttt", servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str());
-                // if (result != 0)
-                //     std::cout << "Error renaming file." << std::endl;
-
-                // delete(buff);
-                
-                // // first_word(fd);
-                // // fd.erase()
-
-                // std::fstream fd2;
-                // fd2.open("ttt", std::ios::in | std::ios::out);
-                // if (!fd2) {
-                //     std::cout << "Open failed3" << std::endl;
-                //     return -2;
-                // }
-                // fd.seekg(f_word.length(), std::ios::beg);
-                
-                // std::cout << "dec : "<< dec << " len : " << f_word.length() << "\n";
-                
-
-
-
-
-
-
-                // std::string word;
-                // char c;
-                // fd >> std::noskipws >> c;
-                // word = c;
-                // while (c != '\n') 
-                // {
-                //     fd >> std::noskipws >> c;
-                //     word += c;
-                //     std::cout << c << "\n";
-                // }
-                // std::cout << "\n first : "<< word;
-                // size_t big = 0;
-                // size_t len = 0;
-                // len = 
-                // len = fd.find("\r\n");
-
-
-
-
-
-
-
-                
-                // int len;
-                // int size = 0;
-                // std::string line;
-                // servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-                // fd.seekp(0, std::ios::beg);
-                // std::fstream fd2;
-                // fd2.open("ttt", std::ios::in | std::ios::out);
-                // if (!fd2) {
-                //     std::cout << "Open failed3" << std::endl;
-                //     return -2;
-                // }
-                // std::getline(fd, line);
-                // len = he_to_in(line);
-                // std::cout << "hexa : "<< line  << "\n";
-                // std::cout << "decimal : " << len  << "\n";
-                // while (std::getline(fd, line))
-                // { 
-                //     // while (size < len)
-                //     // {
-                //     // }
-                    
-                //     size += line.length();
-                //     if (size > len){
-                        
-                //         // size -= line.length();
-                //         // std::cout << "size : "<< size << "len : " << len << "\n";
-                //         // std::getline(fd, line);
-                //         // std::cout << line.length() << "\n";
-                //         // std::cout << line << "\n";
-                        
-                //         len = he_to_in(line);
-                //         if (len == 0) {
-                //             std::cout << "hexa : "<< line  << "\n";
-                //             std::cout << "decimal : " << len  << "\n";
-                //             break;
-                //         }
-                //         std::cout << "hexa : "<< line  << "\n";
-                //         std::cout << "decimal : " << len  << "\n";
-                //         size = 0;
-                //         line.replace(line.begin(),line.end(), "");
-                //         // break;
-                //     }
-                //     else
-                //         fd2.write(line.c_str() , line.length());
-                // }
+                fd.close();
+                fd2.close();
+                int result = std::rename("ttt", servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str());
+                if (result != 0)
+                    std::cout << "Error renaming file." << std::endl;
             }
         }
-        else {
-            fd.write(buffer , lent);
-            if (lent < 1024) 
-                servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-        }
+        // // file_contents.erase(found, word.length());
+        // if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end())
+        // {
+        //     // std::cout << lent << "   hiiiiiii\n";
+            
+            
+        //     // if (lent < 1024){
+        //     //     servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+        //     //     std::string line;
+        //     //     std::getline(fd, line);
+                
+        //     // }
+        //     if (lent < 1024) {
+        //         std::fstream fd2;
+        //         fd2.open("ttt", std::ios::in | std::ios::out | std::ios::app);
+        //         if (!fd2) {
+        //             std::cout << "Open failed3" << std::endl;
+        //             return -2;
+        //         }
+
+
+
+                
+        //         servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+        //         int dec;
+        //         // char *buff =  new char;
+        //         fd.seekg(0, std::ios::beg);
+        //         std::string f_word = word_from_file(fd, 0);
+        //         int beg = f_word.length();
+        //         std::cout << f_word ;
+        //         dec = he_to_in(f_word);
+        //         while (dec != 0)
+        //         {
+        //             beg += dec + 2;
+        //             char buff[dec];
+        //             // fd.seekg(beg, std::ios::beg);
+        //             fd.read(buff, dec);
+        //             fd2.write(buff, dec);
+        //             // buff = NULL;
+        //             // char *c =  new char ;
+        //             // fd.read(c, 20);
+        //             // std::cout << "- "<< c << "\n" ;
+        //             f_word = word_from_file(fd, beg);
+        //             beg += f_word.length();
+        //             std::cout << f_word ;
+        //             dec = he_to_in(f_word);
+        //         }
+        //         fd.close();
+        //         int result = std::rename("ttt", servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str());
+        //         if (result != 0)
+        //             std::cout << "Error renaming file." << std::endl;
+
+        //         // delete(buff);
+                
+        //         // // first_word(fd);
+        //         // // fd.erase()
+
+        //         // std::fstream fd2;
+        //         // fd2.open("ttt", std::ios::in | std::ios::out);
+        //         // if (!fd2) {
+        //         //     std::cout << "Open failed3" << std::endl;
+        //         //     return -2;
+        //         // }
+        //         // fd.seekg(f_word.length(), std::ios::beg);
+                
+        //         // std::cout << "dec : "<< dec << " len : " << f_word.length() << "\n";
+                
+
+
+
+
+
+
+        //         // std::string word;
+        //         // char c;
+        //         // fd >> std::noskipws >> c;
+        //         // word = c;
+        //         // while (c != '\n') 
+        //         // {
+        //         //     fd >> std::noskipws >> c;
+        //         //     word += c;
+        //         //     std::cout << c << "\n";
+        //         // }
+        //         // std::cout << "\n first : "<< word;
+        //         // size_t big = 0;
+        //         // size_t len = 0;
+        //         // len = 
+        //         // len = fd.find("\r\n");
+
+
+
+
+
+
+
+                
+        //         // int len;
+        //         // int size = 0;
+        //         // std::string line;
+        //         // servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+        //         // fd.seekp(0, std::ios::beg);
+        //         // std::fstream fd2;
+        //         // fd2.open("ttt", std::ios::in | std::ios::out);
+        //         // if (!fd2) {
+        //         //     std::cout << "Open failed3" << std::endl;
+        //         //     return -2;
+        //         // }
+        //         // std::getline(fd, line);
+        //         // len = he_to_in(line);
+        //         // std::cout << "hexa : "<< line  << "\n";
+        //         // std::cout << "decimal : " << len  << "\n";
+        //         // while (std::getline(fd, line))
+        //         // { 
+        //         //     // while (size < len)
+        //         //     // {
+        //         //     // }
+                    
+        //         //     size += line.length();
+        //         //     if (size > len){
+                        
+        //         //         // size -= line.length();
+        //         //         // std::cout << "size : "<< size << "len : " << len << "\n";
+        //         //         // std::getline(fd, line);
+        //         //         // std::cout << line.length() << "\n";
+        //         //         // std::cout << line << "\n";
+                        
+        //         //         len = he_to_in(line);
+        //         //         if (len == 0) {
+        //         //             std::cout << "hexa : "<< line  << "\n";
+        //         //             std::cout << "decimal : " << len  << "\n";
+        //         //             break;
+        //         //         }
+        //         //         std::cout << "hexa : "<< line  << "\n";
+        //         //         std::cout << "decimal : " << len  << "\n";
+        //         //         size = 0;
+        //         //         line.replace(line.begin(),line.end(), "");
+        //         //         // break;
+        //         //     }
+        //         //     else
+        //         //         fd2.write(line.c_str() , line.length());
+        //         // }
+        //     }
+        // }
+        // else {
+        //     fd.write(buffer , lent);
+        //     if (lent < 1024) 
+        //         servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+        // }
 
     }
     return servs.at(sock_srv).clts.at(sock_clt).is_done;
