@@ -11,6 +11,7 @@ struct client_info {
     int is_done;
     std::map<std::string, std::string> request_map;
     int err;
+    int is_boundary;
     std::string err_msg;
     std::string location;
 };

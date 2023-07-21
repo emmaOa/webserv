@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/18 21:51:10 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/20 22:35:43 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ int create_client(int sock)
     tmp->socket_srv = sock;
     tmp->is_done = -1;
     tmp->err = -1;
+    tmp->is_boundary = 0;
     tmp->err_msg = "null";
     servs[sock].clts.insert(std::pair<int, client_info> (tmp->socket, *tmp));
     return tmp->socket;

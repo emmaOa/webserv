@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:07:34 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/08 17:26:44 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/21 17:18:50 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,10 @@ int check_lct_value(std::string key)
             } 
         }
         else {
-            if ((data_cnf->dq_2.size() == 1 && !data_cnf->dq_2[0].empty() && ((access(data_cnf->dq_2[0].c_str(), F_OK) == -1) || (access(data_cnf->dq_2[0].c_str(), R_OK) == -1))) || data_cnf->dq_2.size() > 1){
+            if ((data_cnf->dq_2.size() == 1 && !data_cnf->dq_2[0].empty() && ((access(data_cnf->dq_2[0].c_str(), F_OK) == -1) || (access(data_cnf->dq_2[0].c_str(), R_OK) == -1))) || data_cnf->dq_2.size() > 2 || \
+                (data_cnf->dq_2.size() == 2 && data_cnf->dq_2[1].compare("301") != 0 && data_cnf->dq_2[1].compare("302"))){
                 std::cout  << data_cnf->dq_2[0] << "<----\n";
+                std::cout  << data_cnf->dq_2[1] << "<----\n";
                 std::cout  << "invalid form 19\n";
                 return 1;
             }

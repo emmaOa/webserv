@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/13 12:40:42 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/21 17:11:10 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,13 @@ int check_return(int sock_srv, int sock_clt, std::string location)
 {
     int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
 
-    if (data_cnf->servers.at(id_srv).at(location).at("return").size() == 1) {
+    if (data_cnf->servers.at(id_srv).at(location).at("return").size() > 0) {
         servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] = data_cnf->servers.at(id_srv).at(location).at("return").at(0);
         // std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "<===\n";
+        if (data_cnf->servers.at(id_srv).at(location).at("return").size() == 2)
+            servs.at(sock_srv).clts.at(sock_clt).err = strtod(data_cnf->servers.at(id_srv).at(location).at("return").at(1).c_str(), NULL);
+        else
+            servs.at(sock_srv).clts.at(sock_clt).err = 302;
         return 1;
     }
     return 0;
