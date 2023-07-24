@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:17 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/07 18:27:07 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/24 22:05:05 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,6 @@ int pars_head(std::string line, int sock_clt, int sock_srv)
     const char delim = ':';
 
     split_one(line, delim, out);
-    servs.at(sock_srv).clts.at(sock_clt).request_map[out[0]] = out[1];
+    servs.at(sock_srv).clts.at(sock_clt).request_map[out[0]] = out[1].erase(0, 1);
     return 0;
 }
