@@ -1,4 +1,9 @@
-MANDATORY=  main.cpp parsing_file_configuration/MainParsing.cpp \
+DIR_OBJ = ./obj
+NAME	=	webserv
+CXX		=	c++
+CXXFLAGS=
+RM		=	rm -rf	
+SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			parsing_file_configuration/init.cpp \
 			parsing_file_configuration/vld_key.cpp \
 			parsing_file_configuration/check_key.cpp \
@@ -11,23 +16,23 @@ MANDATORY=  main.cpp parsing_file_configuration/MainParsing.cpp \
 			request/header_request.cpp \
 			request/pars_location.cpp \
 
-CC=cc
-FLAGS= -Wall -Werror -Wextra -std=c++98
-DEBUG=-fsanitize=address -g
-NAME= webserv
+OBJS = $(addprefix $(DIR_OBJ)/, $(SRCS:.cpp=.o))
 
-all: $(NAME)
+all:		$(NAME) $(INCS)
 
-$(NAME):$(MANDATORY)
-	c++ $(FLAGS) $(MANDATORY) -o $(NAME)
-
-debug:$(VRLIBFT)
-	c++ $(FLAGS) $(DEBUG) $(MANDATORY) -o $(NAME) 
+$(NAME):	$(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
+		
+$(DIR_OBJ)/%.o:		%.cpp
+	mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(NAME)
+	@$(RM) $(OBJS) file*
 
-fclean:
-	rm -rf $(NAME)
+fclean:		clean
+	@$(RM) $(NAME) file* obj
 
-re: fclean all
+re:			fclean all
+
+.PHONY:		clean fclean re all
