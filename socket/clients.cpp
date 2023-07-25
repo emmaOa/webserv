@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 18:29:29 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/25 20:07:22 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int create_client(int sock)
     }
     tmp->socket_srv = sock;
     tmp->is_done = -1;
-    tmp->err = -1;
+    tmp->err = "null";
     tmp->is_boundary = 0;
     tmp->err_msg = "null";
     tmp->new_client = 0;

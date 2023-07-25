@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 18:28:40 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/25 20:04:35 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,20 +46,20 @@ void check_err_head(int sock_srv, int sock_clt)
     // int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
     if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) {
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["Transfer-Encoding"].compare("chunked\r") != 0) {
-            servs.at(sock_srv).clts.at(sock_clt).err = 501;
+            servs.at(sock_srv).clts.at(sock_clt).err = "501";
             servs.at(sock_srv).clts.at(sock_clt).err_msg = "Not Implemented";
         }
     }
     if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") == servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Length") == servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
-        servs.at(sock_srv).clts.at(sock_clt).err = 400;
+        servs.at(sock_srv).clts.at(sock_clt).err = "400";
         servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request1";
     }
     if (servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"].length() > 2048) {
-        servs.at(sock_srv).clts.at(sock_clt).err = 414;
+        servs.at(sock_srv).clts.at(sock_clt).err = "414";
         servs.at(sock_srv).clts.at(sock_clt).err_msg = "Request-URI Too Long";
     }
     if (check_allowed_chars(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]) < 1) {
-        servs.at(sock_srv).clts.at(sock_clt).err = 400;
+        servs.at(sock_srv).clts.at(sock_clt).err = "400";
         servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request2";
     } 
     match_location(sock_srv, sock_clt);

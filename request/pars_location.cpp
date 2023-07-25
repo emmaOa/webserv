@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 18:27:15 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/25 20:04:13 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@ int check_return(int sock_srv, int sock_clt, std::string location)
         servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] = data_cnf->servers.at(id_srv).at(location).at("return").at(0);
         // std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "<===\n";
         if (data_cnf->servers.at(id_srv).at(location).at("return").size() == 2)
-            servs.at(sock_srv).clts.at(sock_clt).err = strtod(data_cnf->servers.at(id_srv).at(location).at("return").at(1).c_str(), NULL);
+            servs.at(sock_srv).clts.at(sock_clt).err = data_cnf->servers.at(id_srv).at(location).at("return").at(1);
         else
-            servs.at(sock_srv).clts.at(sock_clt).err = 301;
+            servs.at(sock_srv).clts.at(sock_clt).err = "301";
         return 1;
     }
     return 0;
@@ -69,12 +69,12 @@ int match_location(int sock_srv, int sock_clt)
         i--;
     }
     if (is_find == 0){
-        servs.at(sock_srv).clts.at(sock_clt).err = 404;
+        servs.at(sock_srv).clts.at(sock_clt).err = "404";
         servs.at(sock_srv).clts.at(sock_clt).err_msg = "Not found";
     }
     else {
         if (find_method(data_cnf->servers.at(id_srv).at(servs.at(sock_srv).clts.at(sock_clt).location).at("allow_methods"), servs.at(sock_srv).clts.at(sock_clt).request_map["method"]) < 1) {
-            servs.at(sock_srv).clts.at(sock_clt).err = 405; 
+            servs.at(sock_srv).clts.at(sock_clt).err = "405"; 
             servs.at(sock_srv).clts.at(sock_clt).err_msg = "Method Not Allowed";
         }
     }

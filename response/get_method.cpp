@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/24 19:12:26 by namine            #+#    #+#             */
-/*   Updated: 2023/07/25 18:27:50 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/25 20:08:36 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,9 +111,9 @@ void deleteMethod(int sock_clt, int sock_srv)
 
 int proceedResponse(int sock_clt, int sock_srv, std::map <std::string, std::string>& response)
 {
-    if (servs.at(sock_srv).clts.at(sock_clt).err != -1)
+    if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") != 0)
     {
-        if (servs.at(sock_srv).clts.at(sock_clt).err == 301) // 302 !!
+        if (servs.at(sock_srv).clts.at(sock_clt).err.compare("301") == 0) // 302 !!
         {
             response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path;
         }
