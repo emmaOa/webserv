@@ -12,9 +12,9 @@ SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			socket/sockets.cpp \
 			socket/clients.cpp \
 			request/request_part.cpp \
-			response/get_method.cpp \
 			request/header_request.cpp \
 			request/pars_location.cpp \
+			response/get_method.cpp \
 
 OBJS = $(addprefix $(DIR_OBJ)/, $(SRCS:.cpp=.o))
 

@@ -8,8 +8,11 @@
 #include <arpa/inet.h>
 # include <algorithm>
 #include <sys/time.h>
+#include <sys/stat.h>
 # include <iostream>
 #include <unistd.h>
+#include <signal.h>
+#include <dirent.h>
 #include <cstdlib>
 #include <iomanip>
 #include <cstring>

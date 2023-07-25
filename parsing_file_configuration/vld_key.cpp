@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   vld_key.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:53:48 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/02 19:28:55 by nidor            ###   ########.fr       */
+/*   Updated: 2023/07/25 02:13:55 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,21 +29,11 @@ int vld_location_key(std::string word)
 {
     if (word.compare("}") == 0)
         return 0;
-    if (data_cnf->is_cgi == false){
-        if (data_cnf->m_l_key.count(word) > 0 && data_cnf->m_l_key[word] == 0)
-            data_cnf->m_l_key[word] = 1;
-        else {
-            std::cout << word << "    invalid form : 10";
-            return 1;
-        }
-    }
+    if (data_cnf->m_l_key.count(word) > 0 && data_cnf->m_l_key[word] == 0)
+        data_cnf->m_l_key[word] = 1;
     else {
-        if (data_cnf->m_l_c_key.count(word) > 0 && data_cnf->m_l_c_key[word] == 0)
-            data_cnf->m_l_c_key[word] = 1;
-        else {
-            std::cout << "invalid form : 11";
-            return 1;
-        }
+        std::cout << word << "    invalid form : 10";
+        return 1;
     }
     return 0;
 }
@@ -62,12 +52,8 @@ int key_location(std::string line)
             i++;
         else if (i == 1){
             data_cnf->key_map1 = word;
-            if (word.compare("cgi-bin") == 0){
-                data_cnf->location.second++;
-                data_cnf->is_cgi = true;
-            }
-            else
-                data_cnf->location.first++;
+            data_cnf->location.second++;
+            data_cnf->location.first++;
             i++;
         }
         else if (i == 2 && word.compare("{") == 0)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_values.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:07:34 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/02 19:28:40 by nidor            ###   ########.fr       */
+/*   Updated: 2023/07/25 05:08:22 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,58 +15,49 @@
 int check_lct_value(std::string key)
 {
     unsigned long i = 0;
-    if (data_cnf->is_cgi == false){
-        if (key.compare("autoindex") == 0){
-            if (data_cnf->dq_2.size() != 1 || (data_cnf->dq_2[0] != "on" && data_cnf->dq_2[0] != "of")){
-                std::cout << "invalid form 16\n";
-                return 1;
-            }   
-        }
-        else if (key.compare("allow_methods") == 0){
-            while (i < data_cnf->dq_2.size())
-            {
-                if (data_cnf->dq_2[i] != "DELETE" && data_cnf->dq_2[i] != "POST" && data_cnf->dq_2[i] != "GET"){
-                    std::cout << "invalid form 17\n";
-                    return 1;  
-                }
-                i++;
+
+    if (key.compare("autoindex") == 0){
+        if (data_cnf->dq_2.size() != 1 || (data_cnf->dq_2[0] != "on" && data_cnf->dq_2[0] != "off")){
+            std::cout << "invalid form 16\n";
+            return 1;
+        }   
+    }
+    else if (key.compare("allow_methods") == 0){
+        while (i < data_cnf->dq_2.size())
+        {
+            if (data_cnf->dq_2[i] != "DELETE" && data_cnf->dq_2[i] != "POST" && data_cnf->dq_2[i] != "GET"){
+                std::cout << "invalid form 17\n";
+                return 1;  
             }
+            i++;
         }
-        else if (key.compare("index") == 0){
-            if (data_cnf->dq_2.size() != 1 || data_cnf->dq_2[0] != "index.html"){
-                std::cout << "invalid form 18\n";
-                return 1;
-            }   
-        }
-        else {
-            if (data_cnf->dq_2.size() != 1 || (access(data_cnf->dq_2[0].c_str(), F_OK) == -1) || (access(data_cnf->dq_2[0].c_str(), R_OK) == -1)){
-                std::cout  << "invalid form 19\n";
-                return 1;
-            } 
+    }
+    else if (key.compare("index") == 0){
+        if (data_cnf->dq_2.size() != 1 || data_cnf->dq_2[0] != "index.html"){
+            std::cout << "invalid form 18\n";
+            return 1;
+        }   
+    }
+    else if(key.compare("root") == 0){
+        if (data_cnf->dq_2.size() != 1){
+            std::cout  << data_cnf->dq_2[0] << "<----\n";
+            std::cout  << "invalid form 200\n";
+            return 1;
+        } 
+    }
+    else  if(key.compare("return") == 0) {
+        if ( data_cnf->dq_2.size() > 2 || \
+            (data_cnf->dq_2.size() == 2 && data_cnf->dq_2[1].compare("301") != 0 && data_cnf->dq_2[1].compare("302"))){
+            std::cout  << data_cnf->dq_2[0] << "<----\n";
+            std::cout  << data_cnf->dq_2[1] << "<----\n";
+            std::cout  << "invalid form 19\n";
+            return 1;
         }
     }
     else {
-        if (key.compare("root") == 0){
-            if (data_cnf->dq_2.size() != 1 || (access(data_cnf->dq_2[0].c_str(), F_OK) == -1) || (access(data_cnf->dq_2[0].c_str(), R_OK) == -1)){
-                std::cout  << "invalid form 20\n";
-                return 1;
-            }
-        }
-        else if (key.compare("cgi_path") == 0){
-            while (i < data_cnf->dq_2.size())
-            {
-                if (access(data_cnf->dq_2[i].c_str(), F_OK) == -1 || access(data_cnf->dq_2[i].c_str(), R_OK) == -1){
-                    std::cout  << "invalid form 21\n";
-                    return 1;
-                }
-                i++;
-            }
-        }
-        else {
-            if (data_cnf->dq_2.size() < 1 ){
-                std::cout  << "invalid form 22\n";
-                return 1;
-            }
+        if (data_cnf->dq_2.size() != 1 || (data_cnf->dq_2[0] != "on" && data_cnf->dq_2[0] != "off")){
+            std::cout << "invalid form 25\n";
+            return 1;
         }
     }
     return 0;

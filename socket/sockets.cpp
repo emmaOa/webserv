@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sockets.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/02 22:08:47 by nidor            ###   ########.fr       */
+/*   Updated: 2023/07/16 16:47:21 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int create_socket(int id)
     freeaddrinfo(bind_address);
 
     std::cout << "Listening...\n";
-    if (listen(socket_sv, 10) < 0){
+    if (listen(socket_sv, 128) < 0){
         std::cout << "listen failed\n";
         exit (1);
     }
