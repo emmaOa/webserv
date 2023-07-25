@@ -12,7 +12,7 @@ MANDATORY=  main.cpp parsing_file_configuration/MainParsing.cpp \
 			request/pars_location.cpp \
 
 CC=cc
-FLAGS= -Wall -Werror -Wextra -std=c++98
+FLAGS=
 DEBUG=-fsanitize=address -g
 NAME= webserv
 

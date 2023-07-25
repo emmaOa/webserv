@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/19 00:04:41 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/24 22:09:04 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@ std::map<int, srvs_set> servs;
 
 int main(int arc, char *arg[])
 {
+    signal(SIGPIPE, SIG_IGN);
     std::ifstream CnfFile;
     char buffer[1024] = {0};
     int r = 0;

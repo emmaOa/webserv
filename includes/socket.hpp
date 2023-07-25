@@ -1,5 +1,11 @@
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
+# define ROOT /
+# define CGI_PATH_PY /usr/bin/python3
+# define CGI_PATH_SH /bin/bash
+# define CGI_EXT_1 .py
+# define CGI_EXT_2 .sh
+
 
 struct client_info {
     socklen_t address_length;
@@ -14,6 +20,9 @@ struct client_info {
     int is_boundary;
     std::string err_msg;
     std::string location;
+    int new_client;
+    int current_position;
+    std::string path;
 };
 
 typedef struct s_srvs_set {

@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/21 17:11:10 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/25 01:58:07 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ int match_location(int sock_srv, int sock_clt)
         // // std::cout << id_srv
         if (find_method(data_cnf->servers.at(id_srv).at(servs.at(sock_srv).clts.at(sock_clt).location).at("allow_methods"), servs.at(sock_srv).clts.at(sock_clt).request_map["method"]) < 1) {
             servs.at(sock_srv).clts.at(sock_clt).err = 405; 
-            servs.at(sock_srv).clts.at(sock_clt).err_msg = " Method Not Allowed";
+            servs.at(sock_srv).clts.at(sock_clt).err_msg = "Method Not Allowed";
             // std::cout << "not allowed \n";
         }
     }

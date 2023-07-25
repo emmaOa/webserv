@@ -1,5 +1,5 @@
 server {
-  port 8002
+  port 8001
   host 127.0.0.1
   server_name test
   error_page_404 /error/404.html
@@ -7,15 +7,19 @@ server {
   client_max_body_size 1024
 
   location / {
-      root includes/webserv.hpp
+      root /public
       autoindex on
       allow_methods POST GET
       index index.html
-      return includes/socket.hpp
+      cgi_is off
+      return includes/webserv.hpp 301
     }
-  location cgi-bin  {
-      root ./
-      cgi_path /usr/bin/python3 /bin/bash
-      cgi_ext .py .sh
+  location /image2.jpeg {
+      root /public
+      autoindex on
+      allow_methods POST GET
+      index index.html
+      cgi_is off
+      return 
     }
 }
