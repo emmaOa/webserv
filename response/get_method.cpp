@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/24 19:12:26 by namine            #+#    #+#             */
-/*   Updated: 2023/07/24 22:08:47 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/25 20:08:36 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,23 +36,27 @@ std::string	getContentType(const char* path)
 
 void	print_request_header(int sock_clt, int sock_srv)
 {
+    (void)sock_clt;
+    (void)sock_srv;
     std::cout << "\n-------------------------------- REQUEST HEADER : --------------------------------\n";
     std::cout << "sock_clt" << sock_clt << "\n";
     std::cout << "sock_srv" << sock_srv << "\n";
-    std::map<std::string, std::string>::iterator it = servs.at(sock_srv).clts.at(sock_clt).request_map.begin();
-    while (it != servs.at(sock_srv).clts.at(sock_clt).request_map.end())
-    {
-        std::cout << "Key=|" << it->first << "|=>|" << it->second << "|" << std::endl;
-        ++it;
-    }
-    std::cout << "err = |" << servs.at(sock_srv).clts.at(sock_clt).err << "|" << "\n";
-    std::cout << "err_msg = |" << servs.at(sock_srv).clts.at(sock_clt).err_msg << "|" << "\n";
-    std::cout << "location = |" << servs.at(sock_srv).clts.at(sock_clt).location << "|" << "\n";
+    // std::map<std::string, std::string>::iterator it = servs.at(sock_srv).clts.at(sock_clt).request_map.begin();
+    // while (it != servs.at(sock_srv).clts.at(sock_clt).request_map.end())
+    // {
+    //     std::cout << "Key=|" << it->first << "|=>|" << it->second << "|" << std::endl;
+    //     ++it;
+    // }
+    std::cout << "err = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["old_new"] << "|" << "\n";
+    // std::cout << "err = |" << servs.at(sock_srv).clts.at(sock_clt).err << "|" << "\n";
+    // std::cout << "err_msg = |" << servs.at(sock_srv).clts.at(sock_clt).err_msg << "|" << "\n";
+    // std::cout << "location = |" << servs.at(sock_srv).clts.at(sock_clt).location << "|" << "\n";
     std::cout << "-----------------------------------------------------------------------------------\n";
 }
 
 void	send_header(int sock_clt, int sock_srv, int size, const char *path, std::map <std::string, std::string>& response)
 {
+    (void)sock_srv;
     std::string header;
     std::map<std::string,std::string>::iterator it; 
 
@@ -65,7 +69,7 @@ void	send_header(int sock_clt, int sock_srv, int size, const char *path, std::ma
     it = response.find("Location: ");
     if (it != response.end())
     {
-        std::cout << "Gonna add location to the response header ...\n";
+        // std::cout << "Gonna add location to the response header ...\n";
         header.append("Location: ");
         header.append(response["Location: "]).append("\n");
     }
@@ -79,51 +83,38 @@ void	send_header(int sock_clt, int sock_srv, int size, const char *path, std::ma
     response["Content-Length: "] = std::to_string(size);
     header.append(response["Content-Length: "]).append("\n\n");
     send(sock_clt, header.c_str(), header.length(), 0);
-    std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
-    std::cout << "Header : " << header << "\n";
-    std::cout << "-------------------------------------------------------------------------------------\n";
-}
-
-void set_the_path(int sock_clt, int sock_srv)
-{
-    if (servs.at(sock_srv).clts.at(sock_clt).path.size() == 0) {
-        
-        std::map<std::string, std::string>::iterator it = servs.at(sock_srv).clts.at(sock_clt).request_map.begin();
-        it = servs.at(sock_srv).clts.at(sock_clt).request_map.find("uri_new");
-        if (it == servs.at(sock_srv).clts.at(sock_clt).request_map.end())
-        {
-            servs.at(sock_srv).clts.at(sock_clt).path.append(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]);
-        }
-        else
-        {
-            servs.at(sock_srv).clts.at(sock_clt).path.append(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
-        }
-    }
+    // std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
+    // std::cout << "Header : " << header << "\n";
+    // std::cout << "-------------------------------------------------------------------------------------\n";
 }
 
 void seve_error_file(int sock_clt, int sock_srv)
 {
+    (void)sock_clt;
+    (void)sock_srv;
     std::cout << "serve error file ...!";
 }
 
 void postMethod(int sock_clt, int sock_srv)
 {
+    (void)sock_clt;
+    (void)sock_srv;
     std::cout << "POST\n";
 }
 
 void deleteMethod(int sock_clt, int sock_srv)
 {
+    (void)sock_clt;
+    (void)sock_srv;
     std::cout << "DELETE\n";
 }
 
 int proceedResponse(int sock_clt, int sock_srv, std::map <std::string, std::string>& response)
 {
-    servs.at(sock_srv).clts.at(sock_clt).err = -1;
-    if (servs.at(sock_srv).clts.at(sock_clt).err != -1)
+    if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") != 0)
     {
-        if (servs.at(sock_srv).clts.at(sock_clt).err == 301)
+        if (servs.at(sock_srv).clts.at(sock_clt).err.compare("301") == 0) // 302 !!
         {
-            set_the_path(sock_clt, sock_srv);
             response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path;
         }
         else
@@ -137,45 +128,47 @@ int proceedResponse(int sock_clt, int sock_srv, std::map <std::string, std::stri
 
 int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& response)
 {
-    struct dirent *read_dir;
+
+    // struct dirent *read_dir;
     long long int size;
     std::ifstream file;
     int chunk = 1024;
-    struct stat buf;
+    // struct stat buf;
     static int i;
     char *buffer; 
     int rest;
     
     if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0)
     {
-        set_the_path(sock_clt, sock_srv);
-        DIR *dir = opendir("./public");
-        if (dir == NULL)
-        {
-            seve_error_file(sock_clt, sock_srv);
-            close(sock_clt);
-            return (1);
-        }
-        while ((read_dir = readdir(dir)) != NULL)
-        {
-            servs.at(sock_srv).clts.at(sock_clt).path.erase(remove(servs.at(sock_srv).clts.at(sock_clt).path.begin(), \
-                servs.at(sock_srv).clts.at(sock_clt).path.end(), '/'), servs.at(sock_srv).clts.at(sock_clt).path.end());
-            std::string fileName = read_dir->d_name;
-            if (fileName.compare(servs.at(sock_srv).clts.at(sock_clt).path) == 0)
-            {
-                servs.at(sock_srv).clts.at(sock_clt).path.insert(0, "./public/");
-                lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf);
-                if(S_ISREG(buf.st_mode)) // file
-                {
+        servs.at(sock_srv).clts.at(sock_clt).path.append(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
+        // std::cout << "path = " << servs.at(sock_srv).clts.at(sock_clt).path << "\n";
+        // DIR *dir = opendir("./public");
+        // if (dir == NULL)
+        // {
+        //     seve_error_file(sock_clt, sock_srv);
+        //     close(sock_clt);
+        //     return (1);
+        // }
+        // while ((read_dir = readdir(dir)) != NULL)
+        // {
+        //     servs.at(sock_srv).clts.at(sock_clt).path.erase(remove(servs.at(sock_srv).clts.at(sock_clt).path.begin(), \
+        //         servs.at(sock_srv).clts.at(sock_clt).path.end(), '/'), servs.at(sock_srv).clts.at(sock_clt).path.end());
+        //     std::string fileName = read_dir->d_name;
+        //     if (fileName.compare(servs.at(sock_srv).clts.at(sock_clt).path) == 0)
+        //     {
+        //         servs.at(sock_srv).clts.at(sock_clt).path.insert(0, "./public/");
+        //         lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf);
+        //         if(S_ISREG(buf.st_mode)) // file
+        //         {
                     file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-                    if (file.is_open())
+                    if (!file.is_open())
                     {
-                        break ;
+                        // exit(0);
                     }
-                }
-            }
-        }
-        closedir(dir);
+        //         }
+        //     }
+        // }
+        // closedir(dir);
         size = file.tellg();
         file.seekg (0, file.beg);
         rest = size % chunk;
@@ -193,9 +186,9 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
             close(sock_clt);
             return (1);
         }
-        std::cout << "current_position = " << servs.at(sock_srv).clts.at(sock_clt).current_position << "\n";
+        // std::cout << "current_position = " << servs.at(sock_srv).clts.at(sock_clt).current_position << "\n";
         size = file.tellg();
-        std::cout << "size == " << size << "\n";
+        // std::cout << "size == " << size << "\n";
         rest = size % chunk;
         buffer = new char[1024];
         if (servs.at(sock_srv).clts.at(sock_clt).current_position > size)
@@ -225,7 +218,7 @@ int		response_part(int sock_clt, int sock_srv)
 {
     std::map <std::string, std::string> response;
     
-    print_request_header(sock_clt, sock_srv);
+    // print_request_header(sock_clt, sock_srv);
     if (!proceedResponse(sock_clt, sock_srv, response))
     {
         close(sock_clt);
@@ -242,24 +235,3 @@ int		response_part(int sock_clt, int sock_srv)
         deleteMethod(sock_clt, sock_srv);
     return (0);
 }
-
-/*
-int response_part(int sock_clt, int sock_srv)
-{
-    print_request_headers(sock_clt, sock_srv);
-    
-    static int i;
-    if (i == 2)
-    {
-        i-=2;
-        return 1;
-    }
-    std::cout << i << "\n";
-    (void)sock_srv;
-    char hello[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-    write(sock_clt , hello , sizeof(hello));
-    i++;
-    sleep(10);
-    return (0);
-}
-*/

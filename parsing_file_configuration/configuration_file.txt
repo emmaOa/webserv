@@ -6,15 +6,15 @@ server {
   error_page_400 /error/400.html
   client_max_body_size 1024
 
-  location / {
-      root /public
+  location /toto {
+      root ./public
       autoindex on
       allow_methods POST GET
       index index.html
       cgi_is off
-      return includes/webserv.hpp 301
+      return
     }
-  location /image2.jpeg {
+  location /imagejpeg {
       root /public
       autoindex on
       allow_methods POST GET

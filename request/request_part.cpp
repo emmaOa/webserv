@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/24 22:04:30 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/25 20:04:35 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 bool check_allowed_chars(std::string str)
 {
-    const std::string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:/";
+    const std::string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:/.";
 
     for (std::string::size_type i = 0; i < str.length(); ++i)
     {
@@ -46,21 +46,21 @@ void check_err_head(int sock_srv, int sock_clt)
     // int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
     if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) {
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["Transfer-Encoding"].compare("chunked\r") != 0) {
-            servs.at(sock_srv).clts.at(sock_clt).err = 501;
+            servs.at(sock_srv).clts.at(sock_clt).err = "501";
             servs.at(sock_srv).clts.at(sock_clt).err_msg = "Not Implemented";
         }
     }
-    if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") == servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Length") == servs.at(sock_srv).clts.at(sock_clt).request_map.end()) {
-        servs.at(sock_srv).clts.at(sock_clt).err = 400;
-        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
+    if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") == servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Length") == servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
+        servs.at(sock_srv).clts.at(sock_clt).err = "400";
+        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request1";
     }
     if (servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"].length() > 2048) {
-        servs.at(sock_srv).clts.at(sock_clt).err = 414;
+        servs.at(sock_srv).clts.at(sock_clt).err = "414";
         servs.at(sock_srv).clts.at(sock_clt).err_msg = "Request-URI Too Long";
     }
     if (check_allowed_chars(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]) < 1) {
-        servs.at(sock_srv).clts.at(sock_clt).err = 400;
-        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
+        servs.at(sock_srv).clts.at(sock_clt).err = "400";
+        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request2";
     } 
     match_location(sock_srv, sock_clt);
 }
@@ -168,7 +168,11 @@ int pars_bound( int sock_clt, int sock_srv, std::string line)
 
 int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
-    std::cout << "request starte\n";
+    // std::cout << "\n-------------------------------- REQUEST PART : --------------------------------\n";
+    // std::cout << "sock_clt" << sock_clt << "\n";
+    // std::cout << "sock_srv" << sock_srv << "\n";
+    // std::cout << "request starte\n";
+    // // std::cout << "-----------------------------------------------------------------------------------\n";
     if (servs.at(sock_srv).clts.at(sock_clt).is_done < 0) {
         std::fstream fd;
         std::fstream fd2;
@@ -238,13 +242,16 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             
         }
         check_err_head(sock_srv, sock_clt);
-        std::cout << servs.at(sock_srv).clts.at(sock_clt).err << "\n";
+        // std::cout << servs.at(sock_srv).clts.at(sock_clt).err << "\n";
         // fallocate(fd, FALLOC_FL_COLLAPSE_RANGE, 0, 900);
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
             servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
             servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
         }
         else {
+            // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
+            // std::cout << "request end\n";
+            // std::cout << "-----------------------------------------------------------------------------------\n";
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             // fd.close();
         }
@@ -297,6 +304,9 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 int result = std::rename("ttt", servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str());
                 if (result != 0)
                     std::cout << "Error renaming file." << std::endl;
+                // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
+                // std::cout << "request end\n";
+                // std::cout << "-----------------------------------------------------------------------------------\n";
             }
             fd.close();
         }

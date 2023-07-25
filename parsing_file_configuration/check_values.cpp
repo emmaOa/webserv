@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_values.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:07:34 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 02:35:59 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/25 05:08:22 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int check_lct_value(std::string key)
         } 
     }
     else  if(key.compare("return") == 0) {
-        if ((data_cnf->dq_2.size() == 1 && !data_cnf->dq_2[0].empty()) || data_cnf->dq_2.size() > 2 || \
+        if ( data_cnf->dq_2.size() > 2 || \
             (data_cnf->dq_2.size() == 2 && data_cnf->dq_2[1].compare("301") != 0 && data_cnf->dq_2[1].compare("302"))){
             std::cout  << data_cnf->dq_2[0] << "<----\n";
             std::cout  << data_cnf->dq_2[1] << "<----\n";
