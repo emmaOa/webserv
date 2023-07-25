@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/24 22:15:41 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/25 18:29:29 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ int check_response(int server)
     i = 0;
     while (i < v.size())
     {
-        if (v[i], &wr){
+        if (FD_ISSET(v[i], &wr)){
             return v[i];
         }
         i++;

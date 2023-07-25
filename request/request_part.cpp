@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request_part.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
+/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 04:07:20 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/25 18:28:40 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,11 @@ int pars_bound( int sock_clt, int sock_srv, std::string line)
 
 int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
-    std::cout << "request starte\n";
+    // std::cout << "\n-------------------------------- REQUEST PART : --------------------------------\n";
+    // std::cout << "sock_clt" << sock_clt << "\n";
+    // std::cout << "sock_srv" << sock_srv << "\n";
+    // std::cout << "request starte\n";
+    // // std::cout << "-----------------------------------------------------------------------------------\n";
     if (servs.at(sock_srv).clts.at(sock_clt).is_done < 0) {
         std::fstream fd;
         std::fstream fd2;
@@ -238,13 +242,16 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             
         }
         check_err_head(sock_srv, sock_clt);
-        std::cout << servs.at(sock_srv).clts.at(sock_clt).err << "\n";
+        // std::cout << servs.at(sock_srv).clts.at(sock_clt).err << "\n";
         // fallocate(fd, FALLOC_FL_COLLAPSE_RANGE, 0, 900);
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
             servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
             servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
         }
         else {
+            // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
+            // std::cout << "request end\n";
+            // std::cout << "-----------------------------------------------------------------------------------\n";
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             // fd.close();
         }
@@ -297,6 +304,9 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 int result = std::rename("ttt", servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str());
                 if (result != 0)
                     std::cout << "Error renaming file." << std::endl;
+                // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
+                // std::cout << "request end\n";
+                // std::cout << "-----------------------------------------------------------------------------------\n";
             }
             fd.close();
         }
