@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 18:31:55 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/26 12:05:50 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int main(int arc, char *arg[])
                 w = check_response(it->first);
                 if (w >= 0) {
                     if (response_part(w, it->first) > 0) {
-                        close(w);
+                        // close(w);
                         it->second.clts.erase(w);
                     }
                 }
