@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 20:07:22 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/26 17:55:31 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,9 @@ int create_client(int sock)
     tmp->new_client = 0;
     tmp->current_position = 0;
     servs[sock].clts.insert(std::pair<int, client_info> (tmp->socket, *tmp));
-    return tmp->socket;
+    int socke = tmp->socket;
+    delete tmp;
+    return socke;
 }
 
 int check_request(fd_set reads, std::vector<int> v)
@@ -115,7 +117,7 @@ int wait_on_clients(int server)
 
     timeval tm;
     tm.tv_sec = 0;
-    tm.tv_usec = 1000;
+    tm.tv_usec = 100;
 
     FD_ZERO (&re);
     FD_SET(server, &re);
@@ -144,11 +146,14 @@ int wait_on_clients(int server)
         }
         catch (const std::out_of_range& e) {
             std::cerr << "Exception srv_socket default: " << e.what() << std::endl;
+            return -1;
         }
-        return -1;
     }
-    int val = check_request(re, v);
-    return val;  
+    else{
+        int val = check_request(re, v);
+        return val;
+    }
+    return -1;
 }
 
 
