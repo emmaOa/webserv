@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 20:04:13 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/26 20:15:52 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int check_return(int sock_srv, int sock_clt, std::string location)
         if (data_cnf->servers.at(id_srv).at(location).at("return").size() == 2)
             servs.at(sock_srv).clts.at(sock_clt).err = data_cnf->servers.at(id_srv).at(location).at("return").at(1);
         else
-            servs.at(sock_srv).clts.at(sock_clt).err = "301";
+            servs.at(sock_srv).clts.at(sock_clt).err = "302";
         return 1;
     }
     return 0;

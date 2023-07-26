@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 20:04:35 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/26 02:53:45 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,6 +215,10 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             }
             if (!(line.find(':') != std::string::npos) && !(i == 0)) {
                 j++;
+                if (j == 2){
+                    std::cout << line.length() << std::endl;
+                    servs.at(sock_srv).clts.at(sock_clt).len_bound = line.length() + 5;
+                }
                 if (j > 2)
                     break ;
 
@@ -265,8 +269,11 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             return -2;
         }
         if (lent < 1024 && servs.at(sock_srv).clts.at(sock_clt).is_boundary == 1) {
-
-            fd.write(buffer , lent);
+            std::string str;
+            str = buffer;
+            str.erase(lent - servs.at(sock_srv).clts.at(sock_clt).len_bound, lent);
+            fd.write(str.c_str() , lent - servs.at(sock_srv).clts.at(sock_clt).len_bound);
+            //  fd.write(buffer , lent);
         }
         else
             fd.write(buffer , lent);
