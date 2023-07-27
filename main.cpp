@@ -6,7 +6,7 @@
 /*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/26 20:21:36 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/27 16:45:46 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ int main(int arc, char *arg[])
         std::cout << "invalid number arguments\n";
         exit (1);
     }
+    // std::cout << "abort: 1\n";
     CnfFile.open(arg[1]);
     if (CnfFile.is_open()){
         if (MainFileCnf(CnfFile) != 0)
@@ -34,31 +35,13 @@ int main(int arc, char *arg[])
         std::cout << "open failed\n";
         exit (1);
     }
+    // std::cout << "abort: 2\n";
     std::deque<int> socket_srv = int_socket_srvs();
-    std::map<int, srvs_set>::iterator it = servs.begin();
     while (42)
     {
-        it = servs.begin();
-        while (it != servs.end())
-        {
-            r = wait_on_clients(it->first);
-            if (r >= 0) {
-                read_ret = read(r, buffer, 1024);
-                if (read_ret < 0){
-                    exit (1);
-                }
-                else
-                    request_part(buffer, read_ret, r, it->first);
-            }
-                w = check_response(it->first);
-                if (w >= 0) {
-                    if (response_part(w, it->first) > 0) {
-                        // close(w);
-                        it->second.clts.erase(w);
-                    }
-                }
-            ++it;
-        }
+        // std::cout << "abort: 3\n";
+        wait_on_clients();
+        // std::cout << "abort: 4\n";
     }
-    return 0;
+    return (0);
 }

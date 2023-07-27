@@ -22,3 +22,13 @@ rm test3.pdf
 curl -s --output test4.txt localhost:8001/toto/txt.txt
 diff test4.txt ./public/txt.txt
 rm test4.txt
+
+# serve mp4 file
+curl -s --output test0.mp5 localhost:8001/toto/video_1_hour.mp4
+diff test0.mp5 ./public/video_1_hour.mp4
+rm test0.mp5
+
+# serve mp4 html
+curl -s --output test0.html localhost:8001/toto/form.html
+diff test0.html ./public/form.html
+rm test0.html

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request_part.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/26 02:53:45 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/27 18:11:06 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 bool check_allowed_chars(std::string str)
 {
-    const std::string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:/.";
+    const std::string allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:/._";
 
     for (std::string::size_type i = 0; i < str.length(); ++i)
     {
@@ -171,8 +171,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
     // std::cout << "\n-------------------------------- REQUEST PART : --------------------------------\n";
     // std::cout << "sock_clt" << sock_clt << "\n";
     // std::cout << "sock_srv" << sock_srv << "\n";
-    // std::cout << "request starte\n";
-    // // std::cout << "-----------------------------------------------------------------------------------\n";
+    // std::cout << "request start\n";
+    // std::cout << "-----------------------------------------------------------------------------------\n";
     if (servs.at(sock_srv).clts.at(sock_clt).is_done < 0) {
         std::fstream fd;
         std::fstream fd2;

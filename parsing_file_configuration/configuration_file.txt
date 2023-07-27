@@ -12,14 +12,6 @@ server {
       allow_methods POST GET
       index index.html
       cgi_is off
-      return   
-    }
-  location /imagejpeg {
-      root /public
-      autoindex on
-      allow_methods POST GET
-      index index.html
-      cgi_is off
-      return 
+      return
     }
 }

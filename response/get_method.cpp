@@ -6,13 +6,13 @@
 /*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/24 19:12:26 by namine            #+#    #+#             */
-/*   Updated: 2023/07/26 21:11:07 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/27 18:28:37 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
 
-void seve_error_file(int sock_clt, int sock_srv)
+void serve_error_file(int sock_clt, int sock_srv)
 {
     std::cout << "serve error file...\n";
     char hello[] = "HTTP/1.1 404 Not Found\nContent-Type: text/plain\nContent-Length: 107\n\nResource Not Found :( gonna add some html and css later with appropriate error message and status code ...!";
@@ -61,6 +61,7 @@ int	send_header(int sock_clt, int sock_srv, int size, const char *path, std::map
     {
         std::cout << "SEND POSED IN HEADER !!!!\n";
         close(sock_clt);
+        servs.at(sock_srv).clts.erase(sock_clt);
         return (0);
     }
     std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
@@ -85,7 +86,7 @@ int proceedResponse(int sock_clt, int sock_srv, std::map <std::string, std::stri
         }
         else
         {
-            seve_error_file(sock_clt, sock_srv);
+            serve_error_file(sock_clt, sock_srv);
             return (0);
         }
     }
@@ -99,9 +100,16 @@ int proceedResponse(int sock_clt, int sock_srv, std::map <std::string, std::stri
 
 void interruptResponse(int sock_clt, int sock_srv)
 {
-    seve_error_file(sock_clt, sock_srv);
+    serve_error_file(sock_clt, sock_srv);
     close(sock_clt);
+    servs.at(sock_srv).clts.erase(sock_clt);
 }
+
+// int pathSecure(std::string path)
+// {
+//     std::cout << "path not secure\n";
+//     return (path.find("..") == -1);
+// }
 
 int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& response)
 {
@@ -110,17 +118,15 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
     std::ifstream file;
     int chunk = 1024;
     struct stat buf;
-    static int i;
-    char *buffer; 
+    int i = 0;
+    char *buffer;
     int rest;
     
     if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0)
     {
         servs.at(sock_srv).clts.at(sock_clt).path.append(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
-        if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1) {
-            std::cout << "er = " << strerror(errno) << "\n";
-            interruptResponse(sock_clt, sock_srv);
-		    return (1); }
+        if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1)
+            { interruptResponse(sock_clt, sock_srv); return (1); }
         else if(S_ISREG(buf.st_mode)) // file
         {
             std::cout << "lstat success.\n";
@@ -132,18 +138,36 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
         }
         else // dir
         {
-			// if (servs.at(sock_srv).clts.at(sock_clt).path.find("/", servs.at(sock_srv).clts.at(sock_clt).path.size()) == -1)
-			// {
-			// 	servs.at(sock_srv).clts.at(sock_clt).err = "301";
-			// 	servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
-            //     // add location
-			// }
-            // DIR *dir = opendir(servs.at(sock_srv).clts.at(sock_clt).path.c_str());
-            // while ((read_dir = readdir(dir)) != NULL)
-            // {
-            //     std::cout << read_dir->d_name << "\n";
-            //     closedir(dir);
-            // }
+			if (servs.at(sock_srv).clts.at(sock_clt).path.at(servs.at(sock_srv).clts.at(sock_clt).path.size() - 1) != '/')
+			{
+                std::cout << "gonna add slash\n";
+                std::cout << "+++++++++++++++++++++++\n";
+                servs.at(sock_srv).clts.at(sock_clt).path.append("/");
+				servs.at(sock_srv).clts.at(sock_clt).err = "301";
+				servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
+                response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path.append(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
+                send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str(), response);
+                std::cout << "+++++++++++++++++++++++\n";
+                return (1);
+			}
+            else
+            {
+                // check if i have index in config file
+                // if yes:
+                    //  if cgi on -> Return Code Depend on cgi
+                    // if cgi off ->return requested file
+                    // if file has .py or .php extension and cgi off (mgs d'erreur)
+                // if no 
+                    // get autoindex file placed in root (should be "index.html")
+                    // if (autoindex off) -> 403 Forbidden
+                    // if (autoindex on) -> (list files)200 OK
+            }
+            DIR *dir = opendir(servs.at(sock_srv).clts.at(sock_clt).path.c_str());
+            while ((read_dir = readdir(dir)) != NULL)
+            {
+                std::cout << read_dir->d_name << "\n";
+                closedir(dir);
+            }
         }
         size = file.tellg();
         file.seekg (0, file.beg);
@@ -159,11 +183,9 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
         file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
         if (!file.is_open()) { interruptResponse(sock_clt, sock_srv);
             return (1); }
-        // std::cout << "current_position = " << servs.at(sock_srv).clts.at(sock_clt).current_position << "\n";
-        size = file.tellg();
-        // std::cout << "size == " << size << "\n";
-        rest = size % chunk;
         buffer = new char[1024];
+        size = file.tellg();
+        rest = size % chunk;
         if (servs.at(sock_srv).clts.at(sock_clt).current_position > size)
         {
             i = 1;
@@ -176,7 +198,7 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
         {
             std::cout << "SEND POSED\n";
             close(sock_clt);
-            i -= 1;
+            servs.at(sock_srv).clts.erase(sock_clt);
             delete[] buffer;
             return (1);
         }
@@ -184,8 +206,8 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
         servs.at(sock_srv).clts.at(sock_clt).current_position += chunk;
         if (i)
         {
-            i -= 1;
             close(sock_clt);
+            servs.at(sock_srv).clts.erase(sock_clt);
             delete[] buffer;
             return (1);
         }
@@ -204,6 +226,7 @@ int		response_part(int sock_clt, int sock_srv)
         {
             std::cout << "quit response.\n";
             close(sock_clt);
+            servs.at(sock_srv).clts.erase(sock_clt);
             return (1);
         }
     }
@@ -212,7 +235,7 @@ int		response_part(int sock_clt, int sock_srv)
         if (getMethod(sock_clt, sock_srv, response))
             return (1);
     }
-    else if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "POST")
+    if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "POST")
         postMethod(sock_clt, sock_srv);
     else
         deleteMethod(sock_clt, sock_srv);
@@ -230,3 +253,4 @@ int		response_part(int sock_clt, int sock_srv)
 //     write(sock_clt , hello , sizeof(hello));
 //     return 1;
 // }
+
