@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/24 19:12:26 by namine            #+#    #+#             */
-/*   Updated: 2023/07/26 21:23:20 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/27 02:25:03 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,10 +61,12 @@ int	send_header(int sock_clt, int sock_srv, int size, const char *path, std::map
     {
         std::cout << "SEND POSED IN HEADER !!!!\n";
         close(sock_clt);
+        servs.at(sock_srv).clts.erase(sock_clt);
         return (0);
     }
     std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
     std::cout << header << "\n";
+    std::cout << std::rand() << std::endl;
     std::cout << "-------------------------------------------------------------------------------------\n";
     return (1);
 }
@@ -101,6 +103,7 @@ void interruptResponse(int sock_clt, int sock_srv)
 {
     seve_error_file(sock_clt, sock_srv);
     close(sock_clt);
+    servs.at(sock_srv).clts.erase(sock_clt);
 }
 
 int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& response)
@@ -157,7 +160,7 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
     else
     {
         file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
-        if (!file.is_open()) { interruptResponse(sock_clt, sock_srv);
+        if (!file.is_open()) { std::cout << "ayoo\n"; interruptResponse(sock_clt, sock_srv);
             return (1); }
         // std::cout << "current_position = " << servs.at(sock_srv).clts.at(sock_clt).current_position << "\n";
         size = file.tellg();
@@ -172,11 +175,19 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
         }
         file.seekg (servs.at(sock_srv).clts.at(sock_clt).current_position, file.beg);
         file.read (buffer, chunk); // protect read
-        if (send(sock_clt, buffer, chunk, 0) != chunk)
+        int temp = send(sock_clt, buffer, chunk, 0);
+        if (temp != chunk)
         {
             std::cout << "SEND POSED\n";
+            // exit(0);
+            std::cout << temp << " * " << chunk << strerror(errno) <<std::endl;
             close(sock_clt);
-            i -= 1;
+            // it->second.clts.erase(w);
+            servs.at(sock_srv).clts.erase(sock_clt);
+            std::cout << "i av === " << i << "\n";
+            // i--;
+            std::cout << "i ap === " << i << "\n";
+            // exit(0);
             delete[] buffer;
             return (1);
         }
@@ -186,6 +197,7 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
         {
             i -= 1;
             close(sock_clt);
+            servs.at(sock_srv).clts.erase(sock_clt);
             delete[] buffer;
             return (1);
         }
@@ -196,27 +208,42 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
 
 int		response_part(int sock_clt, int sock_srv)
 {
-    std::map <std::string, std::string> response;
     
+    std::map <std::string, std::string> response;
+    std::cout << "new sock_clt ============>>>> " << sock_clt << "\n";
     print_request_header(sock_clt, sock_srv);
     if (!servs.at(sock_srv).clts.at(sock_clt).new_client) {
         if (!proceedResponse(sock_clt, sock_srv, response))
         {
             std::cout << "quit response.\n";
             close(sock_clt);
+            servs.at(sock_srv).clts.erase(sock_clt);
             return (1);
         }
     }
     if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "GET")
     {
-        if (getMethod(sock_clt, sock_srv, response))
+        if (getMethod(sock_clt, sock_srv, response)) {
+            std::cout << "sock_clt = " << sock_clt << "\n";
+            std::cout << "done\n";
             return (1);
+        }
     }
     else if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "POST")
         postMethod(sock_clt, sock_srv);
     else
         deleteMethod(sock_clt, sock_srv);
     return (0);
+    
+   
+    // std::cout << sock_clt << "sock_clt" << "\n";
+    // std::cout << sock_srv << "sock_srv" << "\n";
+    // std::cout << "err = |" << servs.at(sock_srv).clts.at(sock_clt).err << "|" << "\n";
+    // std::cout << "err_msg = |" << servs.at(sock_srv).clts.at(sock_clt).err_msg << "|" << "\n";
+    // (void)sock_srv;
+    // char hello[] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+    // write(sock_clt , hello , sizeof(hello));
+    // return 1;
 }
 
 // int response_part(int sock_clt, int sock_srv)
