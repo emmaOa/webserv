@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/26 21:22:51 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/27 02:04:08 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,30 +35,9 @@ int main(int arc, char *arg[])
         exit (1);
     }
     std::deque<int> socket_srv = int_socket_srvs();
-    std::map<int, srvs_set>::iterator it = servs.begin();
     while (42)
     {
-        it = servs.begin();
-        while (it != servs.end())
-        {
-            r = wait_on_clients(it->first);
-            if (r >= 0) {
-                read_ret = read(r, buffer, 1024);
-                if (read_ret < 0){
-                    exit (1);
-                }
-                else
-                    request_part(buffer, read_ret, r, it->first);
-            }
-                w = check_response(it->first);
-                if (w >= 0) {
-                    if (response_part(w, it->first) > 0) {
-                        // close(w);
-                        it->second.clts.erase(w);
-                    }
-                }
-            ++it;
-        }
+        wait_on_clients();
     }
     return 0;
 }

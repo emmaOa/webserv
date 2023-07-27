@@ -38,10 +38,10 @@ extern std::map<int, srvs_set> servs;
 
 int create_socket(int id);
 std::deque<int> int_socket_srvs(void);
-int wait_on_clients(int server);
+int wait_on_clients();
 std::deque<int> int_socket_srvs(void);
 int create_client(int sock);
 int check_request(fd_set reads, std::vector<int> v);
-int check_response(int sock);
+int check_response();
 
 #endif
