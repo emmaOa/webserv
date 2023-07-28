@@ -27,10 +27,13 @@
 #include <cmath>
 #include <ctime>
 #include <map>
+# include <fcntl.h>
+# include <stdio.h>
 
 # include "./parsing_file_cnf.hpp"
 # include "./socket.hpp"
 #include "./request.hpp"
 #include "./response.hpp"
+#include "./cgi.hpp"
 
 #endif

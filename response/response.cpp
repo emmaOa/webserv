@@ -6,7 +6,7 @@
 /*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 18:28:46 by namine            #+#    #+#             */
-/*   Updated: 2023/07/28 19:54:00 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/29 00:13:09 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ int proceedResponse(int sock_clt, int sock_srv, std::map <std::string, std::stri
     return (1);
 }
 
-int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& response)
+int send_response(int sock_clt, int sock_srv, std::map <std::string, std::string>& response)
 {
     struct dirent *read_dir;
     long long int size;
@@ -106,18 +106,33 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
         if (pathSecure(servs.at(sock_srv).clts.at(sock_clt).path) != -1)
             { interruptResponse(sock_clt, sock_srv); return (1);} // 404 Not Found
         if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1)
-            { interruptResponse(sock_clt, sock_srv); return (1); }
+            { interruptResponse(sock_clt, sock_srv); return (1); } // 404 Not Found
         else if(S_ISREG(buf.st_mode)) // file
         {
-            std::cout << "lstat success.\n";
-        	if (!data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off"))
-			    file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-			else {
-			    // run CGI
+            if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "DELETE")
+            {
+                deleteMethod(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).path, "file");
+                return (1);
+            }
+        	if (!data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") || (\
+                data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("on") == 0 && \
+                servs.at(sock_srv).clts.at(sock_clt).is_ex_cgi == 0))
+                {
+				    file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+                }
+			else
+            {
+			    f_cgi(sock_srv,sock_clt);
+                file.open ("./hi", std::ios::in | std::ios::binary | std::ios::ate);
             }
         }
         else // dir
         {
+            if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "DELETE")
+            {
+                deleteMethod(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).path, "directory");
+                return (1);
+            }
 			if (servs.at(sock_srv).clts.at(sock_clt).path.at(servs.at(sock_srv).clts.at(sock_clt).path.size() - 1) != '/')
 			{
                 std::cout << "gonna add slash\n";
@@ -210,15 +225,8 @@ int response_part(int sock_clt, int sock_srv)
             return (1);
         }
     }
-    if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "GET")
-    {
-        if (getMethod(sock_clt, sock_srv, response))
-            return (1);
-    }
-    else if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "POST")
-        postMethod(sock_clt, sock_srv);
-    else
-        deleteMethod(sock_clt, sock_srv);
+    if (send_response(sock_clt, sock_srv, response))
+        return (1);
     return (0);
 }
 

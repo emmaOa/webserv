@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:17 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/24 22:05:05 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 17:18:37 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,21 @@ int pars_head(std::string line, int sock_clt, int sock_srv)
 {
     std::vector<std::string> out; 
     const char delim = ':';
-
+    std::string val;
     split_one(line, delim, out);
-    servs.at(sock_srv).clts.at(sock_clt).request_map[out[0]] = out[1].erase(0, 1);
+    
+    if(out.size() > 1){
+        if (out.size() > 2)
+        {
+            val =  out[1];
+            for(int i = 2; i < out.size(); i++){
+                val += ":" + out[i];
+            }
+        }
+        else
+            val = out[1];       
+    }
+        
+    servs.at(sock_srv).clts.at(sock_clt).request_map[out[0]] = val.erase(0, 1);
     return 0;
 }

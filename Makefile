@@ -19,17 +19,18 @@ SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			response/delete_method.cpp \
 			response/get_method.cpp \
 			response/utils.cpp \
+			cgi/cgi.cpp \
 
 OBJS = $(addprefix $(DIR_OBJ)/, $(SRCS:.cpp=.o))
 
 all:		$(NAME) $(INCS)
 
 $(NAME):	$(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
+	$(CXX) -g -fsanitize=address $(CXXFLAGS) $(OBJS) -o $(NAME)
 		
 $(DIR_OBJ)/%.o:		%.cpp
 	mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) -g -fsanitize=address $(CXXFLAGS) -c $< -o $@
 
 clean:
 	@$(RM) $(OBJS) file*
