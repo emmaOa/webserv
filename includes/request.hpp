@@ -8,7 +8,7 @@ int pars_head(std::string line, int sock_clt, int sock_srv);
 void split_one(std::string const &str, const char delim, std::vector<std::string> &out);
 int new_path(std::string path, int sock_clt, int sock_srv);
 void check_err_head(int sock_srv, int sock_clt);
-int port_srv(int port, std::string host, std::string s_name);
+int port_srv(int port, std::string host);
 int check_method(int id, std::string location, std::string method);
 bool check_allowed_chars(std::string str);
 int match_location(int sock_srv, int sock_clt);

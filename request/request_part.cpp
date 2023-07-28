@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/28 04:22:22 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 05:11:58 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ bool check_allowed_chars(std::string str)
     return 1;
 }
 
-int port_srv(int port, std::string host, std::string s_name)
+int port_srv(int port, std::string host)
 {
     // std::cout << "port : " << port << "host :"<< host << "\n";
     int i = 0;
@@ -34,8 +34,7 @@ int port_srv(int port, std::string host, std::string s_name)
     std::deque <m_mp_dq >::iterator it;
     for (it = data_cnf->servers.begin(); it != data_cnf->servers.end(); it++){
         if (strtod(data_cnf->servers.at(i).at("port").at("null").at(0).c_str(), NULL) == port && \
-                data_cnf->servers.at(i).at("host").at("null").at(0).compare(host) == 0 && \
-                data_cnf->servers.at(i).at("server_name").at("null").at(0).compare(s_name) == 0) 
+                data_cnf->servers.at(i).at("host").at("null").at(0).compare(host) == 0) 
             id = i;
         i++;
     }
@@ -135,6 +134,8 @@ std::string word_from_file(std::fstream &fd, int beg)
     return word;
 }
 
+
+
 int pars_bound( int sock_clt, int sock_srv, std::string line)
 {
     std::vector<std::string> out;
@@ -180,7 +181,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::string name2 = "test";
         std::string line;
         std::stringstream ss;
-        int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host, servs.at(sock_srv).s_name);
+        int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
         int i = 0;
         int size = 0;
     
@@ -211,7 +212,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (j == 2)
             {
                 if (line.find(':') != std::string::npos &&\
-                    data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host, servs.at(sock_srv).s_name)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0) {
+                    data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0) {
                     std::cout << "im heaaaaaar1\n";
                     pars_bound(sock_clt, sock_srv, line);
                 }
@@ -239,7 +240,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 
         if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Type") != servs.at(sock_srv).clts.at(sock_clt).request_map.end() && \
             servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"].find("form-data") != std:: string :: npos&&\
-            data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host, servs.at(sock_srv).s_name)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0){
+            data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0){
             size_t l2 = s2.find("\r\n\r\n") + 4;
             s2 = s2.substr(l2);
             fd.write(s2.c_str() , lent - (l2 + l));
@@ -272,13 +273,12 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             return -2;
         }
         if (lent < 1024 && servs.at(sock_srv).clts.at(sock_clt).is_boundary == 1 &&\
-            data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host, servs.at(sock_srv).s_name)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0) {
+            data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0) {
             std::cout << "im heaaaaaar2\n";
             std::string str;
             str = buffer;
             str.erase(lent - servs.at(sock_srv).clts.at(sock_clt).len_bound, lent);
             fd.write(str.c_str() , lent - servs.at(sock_srv).clts.at(sock_clt).len_bound);
-            //  fd.write(buffer , lent);
         }
         else
             fd.write(buffer , lent);
