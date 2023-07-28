@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/24 19:12:26 by namine            #+#    #+#             */
-/*   Updated: 2023/07/28 04:51:07 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 19:19:36 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,9 +127,13 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
         else if(S_ISREG(buf.st_mode)) // file
         {
             std::cout << "lstat success.\n";
-        	if (!data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off"))
+        	if (!data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") || (\
+                data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("on") == 0 && \
+                servs.at(sock_srv).clts.at(sock_clt).is_ex_cgi == 0)) {
 				file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+                }
 			else {
+                f_cgi(sock_srv,sock_clt);
 			    // run CGI
             }
         }
@@ -211,7 +215,7 @@ int		response_part(int sock_clt, int sock_srv)
     
     std::map <std::string, std::string> response;
     // std::cout << "new sock_clt ============>>>> " << sock_clt << "\n";
-    // print_request_header(sock_clt, sock_srv);
+    print_request_header(sock_clt, sock_srv);
     if (!servs.at(sock_srv).clts.at(sock_clt).new_client) {
         if (!proceedResponse(sock_clt, sock_srv, response))
         {

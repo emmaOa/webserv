@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/28 04:49:52 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 18:37:02 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,12 @@ int match_location(int sock_srv, int sock_clt)
                 while (i < len)
                 {
                     uri += "/" + out[i];
+                    if (i == len - 1) {
+                        if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("GET") == 0)
+                            servs.at(sock_srv).clts.at(sock_clt).fd_name = out[i];
+                        check_ex_cgi(out[i], sock_srv, sock_clt);
+                    }
+                        // std::cout << "out uri is : "<< out[i] << std::endl;
                     i++;
                 }
                 servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] = uri;

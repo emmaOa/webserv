@@ -24,6 +24,8 @@ struct client_info {
     int current_position;
     std::string path;
     int len_bound;
+    int is_ex_cgi;
+    std::string type_cgi;
 };
 
 typedef struct s_srvs_set {

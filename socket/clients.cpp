@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/28 02:50:22 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 15:59:37 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ int create_client(int sock)
     tmp->err_msg = "null";
     tmp->new_client = 0;
     tmp->current_position = 0;
+    tmp->is_ex_cgi = 0;
     servs[sock].clts.insert(std::pair<int, client_info> (tmp->socket, *tmp));
     int socke = tmp->socket;
     delete tmp;
