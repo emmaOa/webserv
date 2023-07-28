@@ -16,6 +16,7 @@ SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			request/pars_location.cpp \
 			response/get_method.cpp \
 			response/utils.cpp \
+			cgi/cgi.cpp \
 
 OBJS = $(addprefix $(DIR_OBJ)/, $(SRCS:.cpp=.o))
 
