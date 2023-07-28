@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/16 16:47:21 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 02:46:06 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,10 @@ int create_socket(int id)
     sv.socket= socket_sv;
     sv.port =atoi(port);
     sv.host =data_cnf->servers.at(id).at("host").at("null").at(0);
+    if (data_cnf->servers.at(id).at("server_name").at("null").size() > 0)
+        sv.s_name = data_cnf->servers.at(id).at("server_name").at("null").at(0);
+    else
+        sv.s_name = "null";
 
     servs.insert (std::pair<int, srvs_set> (socket_sv, sv));
     

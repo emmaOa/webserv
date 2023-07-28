@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
+/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/26 12:18:45 by namine            #+#    #+#             */
-/*   Updated: 2023/07/26 18:54:56 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/28 03:48:57 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,8 @@ void	print_request_header(int sock_clt, int sock_srv)
     }
     std::cout << "err = |" << servs.at(sock_srv).clts.at(sock_clt).err << "|" << "\n";
     std::cout << "err_msg = |" << servs.at(sock_srv).clts.at(sock_clt).err_msg << "|" << "\n";
-    std::cout << "location = |" << servs.at(sock_srv).clts.at(sock_clt).location << "|" << "\n";
+    if (!servs.at(sock_srv).clts.at(sock_clt).location.empty())
+        std::cout << "location = |" << servs.at(sock_srv).clts.at(sock_clt).location << "|" << "\n";
     std::cout << "-----------------------------------------------------------------------------------\n";
 }
 

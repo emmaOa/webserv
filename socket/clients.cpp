@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/27 02:33:55 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 02:50:22 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int create_client(int sock)
     servs[sock].clts.insert(std::pair<int, client_info> (tmp->socket, *tmp));
     int socke = tmp->socket;
     delete tmp;
-    std::cout << socke << std::endl;
+    // std::cout << socke << std::endl;
     return socke;
 }
 
@@ -61,7 +61,7 @@ int sock_s(int sock_c)
 
 int wait_on_clients()
 {
-    std::cout << "hi\n";
+    // std::cout << "hi\n";
     unsigned long i = 0;
     fd_set re;
 

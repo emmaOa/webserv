@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/26 21:22:57 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 03:45:09 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int check_return(int sock_srv, int sock_clt, std::string location)
 {
-    int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
+    int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host, servs.at(sock_srv).s_name);
 
     if (data_cnf->servers.at(id_srv).at(location).at("return").size() > 0) {
         servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] = data_cnf->servers.at(id_srv).at(location).at("return").at(0);
@@ -30,7 +30,7 @@ int check_return(int sock_srv, int sock_clt, std::string location)
 
 int match_location(int sock_srv, int sock_clt)
 {
-    int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host); 
+    int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host, servs.at(sock_srv).s_name); 
     std::string uri = servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"];
     // std::cout << "key  :  " << uri << "<===\n";
     bool is_find = 0;
@@ -78,6 +78,8 @@ int match_location(int sock_srv, int sock_clt)
             servs.at(sock_srv).clts.at(sock_clt).err_msg = "Method Not Allowed";
         }
     }
+    if (servs.at(sock_srv).clts.at(sock_clt).location.empty())
+        return 1;
     return 0;
 }
 

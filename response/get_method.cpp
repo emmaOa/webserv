@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/24 19:12:26 by namine            #+#    #+#             */
-/*   Updated: 2023/07/27 02:25:03 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 02:58:39 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ int	send_header(int sock_clt, int sock_srv, int size, const char *path, std::map
         return (0);
     }
     
-    response["Server: "] = data_cnf->servers.at(0).at("server_name").at("null").at(0);
+    response["Server: "] = data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host, servs.at(sock_srv).s_name)).at("server_name").at("null").at(0);
     header.append("Server: ");
     header.append(response["Server: "]).append("\r\n");
     
@@ -64,10 +64,10 @@ int	send_header(int sock_clt, int sock_srv, int size, const char *path, std::map
         servs.at(sock_srv).clts.erase(sock_clt);
         return (0);
     }
-    std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
-    std::cout << header << "\n";
-    std::cout << std::rand() << std::endl;
-    std::cout << "-------------------------------------------------------------------------------------\n";
+    // std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
+    // std::cout << header << "\n";
+    // std::cout << std::rand() << std::endl;
+    // std::cout << "-------------------------------------------------------------------------------------\n";
     return (1);
 }
 
@@ -127,7 +127,7 @@ int getMethod(int sock_clt, int sock_srv, std::map <std::string, std::string>& r
         else if(S_ISREG(buf.st_mode)) // file
         {
             std::cout << "lstat success.\n";
-        	if (!data_cnf->servers.at(0).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off"))
+        	if (!data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host, servs.at(sock_srv).s_name)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off"))
 				file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
 			else {
 			    // run CGI
@@ -210,8 +210,8 @@ int		response_part(int sock_clt, int sock_srv)
 {
     
     std::map <std::string, std::string> response;
-    std::cout << "new sock_clt ============>>>> " << sock_clt << "\n";
-    print_request_header(sock_clt, sock_srv);
+    // std::cout << "new sock_clt ============>>>> " << sock_clt << "\n";
+    // print_request_header(sock_clt, sock_srv);
     if (!servs.at(sock_srv).clts.at(sock_clt).new_client) {
         if (!proceedResponse(sock_clt, sock_srv, response))
         {

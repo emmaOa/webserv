@@ -30,6 +30,7 @@ typedef struct s_srvs_set {
     int socket;
     int port;
     std::string host;
+    std::string s_name;
     std::map<int, struct client_info> clts;
     struct sockaddr_in serv_addr;
 }      srvs_set;
