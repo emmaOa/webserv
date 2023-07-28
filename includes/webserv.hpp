@@ -6,10 +6,10 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
-#include <algorithm>
+# include <algorithm>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <iostream>
+# include <iostream>
 #include <unistd.h>
 #include <signal.h>
 #include <dirent.h>

@@ -6,19 +6,37 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/16 16:47:21 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 05:07:44 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
 
+int check_creat_srv(std::vector<std::pair<std::string, std::string> > &v, std::vector<std::string > &v_name, std::string port, std::string host, std::string s_name)
+{
+    for (int i = 0; i < v.size(); i++)
+    {
+        if (v[i].first.compare(port) == 0 && v[i].second.compare(host) == 0 && v_name[i].compare(s_name) != 0)
+            return 1;
+    }
+    return 0;
+}
+
 std::deque<int> int_socket_srvs(void)
 {
     std::deque<int> srvs(data_cnf->servers.size());
     unsigned long i = 0;
+    std::vector<std::pair<std::string, std::string> > v;
+    
+    std::vector<std::string > v_name;
     while (i < data_cnf->servers.size())
     {
-        srvs[i] = create_socket(i);
+        if (check_creat_srv(v, v_name, data_cnf->servers.at(i).at("port").at("null").at(0), data_cnf->servers.at(i).at("host").at("null").at(0), data_cnf->servers.at(i).at("server_name").at("null").at(0)) == 0){
+            std::cout << "----creat server\n";
+            srvs[i] = create_socket(i);
+            v.push_back(std::make_pair(data_cnf->servers.at(i).at("port").at("null").at(0), data_cnf->servers.at(i).at("host").at("null").at(0)));
+            v_name.push_back(data_cnf->servers.at(i).at("server_name").at("null").at(0));
+        }
         i++;
     }
     return srvs;
@@ -69,6 +87,10 @@ int create_socket(int id)
     sv.socket= socket_sv;
     sv.port =atoi(port);
     sv.host =data_cnf->servers.at(id).at("host").at("null").at(0);
+    if (data_cnf->servers.at(id).at("server_name").at("null").size() > 0)
+        sv.s_name = data_cnf->servers.at(id).at("server_name").at("null").at(0);
+    else
+        sv.s_name = "null";
 
     servs.insert (std::pair<int, srvs_set> (socket_sv, sv));
     

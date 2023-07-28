@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/26 21:22:57 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 04:49:52 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,8 @@ int match_location(int sock_srv, int sock_clt)
             servs.at(sock_srv).clts.at(sock_clt).err_msg = "Method Not Allowed";
         }
     }
+    if (servs.at(sock_srv).clts.at(sock_clt).location.empty())
+        return 1;
     return 0;
 }
 

@@ -14,9 +14,10 @@ SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			request/request_part.cpp \
 			request/header_request.cpp \
 			request/pars_location.cpp \
-			response/get_method.cpp \
+			response/response.cpp \
 			response/post_method.cpp \
 			response/delete_method.cpp \
+			response/get_method.cpp \
 			response/utils.cpp \
 
 OBJS = $(addprefix $(DIR_OBJ)/, $(SRCS:.cpp=.o))

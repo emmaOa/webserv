@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_values.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
+/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:07:34 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 05:08:22 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/28 05:06:41 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ int check_lct_value(std::string key)
         }
     }
     else if (key.compare("index") == 0){
-        if (data_cnf->dq_2.size() != 1 || data_cnf->dq_2[0] != "index.html"){
+        if (data_cnf->dq_2.size() > 1){
             std::cout << "invalid form 18\n";
             return 1;
         }   
@@ -97,6 +97,8 @@ int check_srv_value(std::string key)
             std::cout << "invalid forme 14\n";
             return 1;
         }
+        else if(data_cnf->dq_2.size() == 0)
+            data_cnf->dq_2.push_back("null");
     }
     else if (key.compare("error_page_404") == 0){
         if (data_cnf->dq_2.size() > 1 || data_cnf->dq_2[0].compare("/error/404.html") != 0)
