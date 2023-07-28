@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/28 05:11:58 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/28 06:35:03 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,6 +134,29 @@ std::string word_from_file(std::fstream &fd, int beg)
     return word;
 }
 
+std::string get_extension_type(std::string type) {
+    std::cout << "type : " << type << std::endl;
+    std::vector<std::pair<std::string, std::string> > v;
+    v.push_back(std::make_pair("text/css\r", ".css"));
+    v.push_back(std::make_pair("text/csv\r", ".csv"));
+    v.push_back(std::make_pair("image/gif\r", ".gif"));
+    v.push_back(std::make_pair("text/html\r", ".html"));
+    v.push_back(std::make_pair("image/x-icon\r", ".ico"));
+    v.push_back(std::make_pair("image/jpeg\r", ".jpeg"));
+    v.push_back(std::make_pair("application/javascript\r", ".js"));
+    v.push_back(std::make_pair("application/json\r", ".json"));
+    v.push_back(std::make_pair("image/png\r", ".png"));
+    v.push_back(std::make_pair("application/pdf\r", ".pdf"));
+    v.push_back(std::make_pair("text/plain\r", ".txt"));
+    v.push_back(std::make_pair("image/svg+xml\r", ".svg"));
+    for (int i = 0; i < v.size(); i++)
+    {
+        std::cout << "v : "<< v[i].first << std::endl;
+        if (v[i].first.compare(type) == 0)
+            return v[i].second;
+    }
+    return "null";
+}
 
 
 int pars_bound( int sock_clt, int sock_srv, std::string line)
@@ -239,16 +262,16 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::string s2 = s.substr(l);
 
         if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Type") != servs.at(sock_srv).clts.at(sock_clt).request_map.end() && \
-            servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"].find("form-data") != std:: string :: npos&&\
-            data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0){
-            size_t l2 = s2.find("\r\n\r\n") + 4;
-            s2 = s2.substr(l2);
-            fd.write(s2.c_str() , lent - (l2 + l));
+            servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"].find("form-data") != std:: string :: npos){
             servs.at(sock_srv).clts.at(sock_clt).is_boundary = 1;
+            if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0){
+                size_t l2 = s2.find("\r\n\r\n") + 4;
+                s2 = s2.substr(l2);
+                fd.write(s2.c_str() , lent - (l2 + l));
+            }
         }
         else
             fd.write(s2.c_str() , lent - l);
-
         check_err_head(sock_srv, sock_clt);
         // std::cout << servs.at(sock_srv).clts.at(sock_clt).err << "\n";
         // fallocate(fd, FALLOC_FL_COLLAPSE_RANGE, 0, 900);
@@ -266,6 +289,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         fd2.close();
     }
     else if (servs.at(sock_srv).clts.at(sock_clt).is_done == 0 && servs.at(sock_srv).clts.at(sock_clt).err.compare("null") == 0){
+        std::cout << "im heaaaaaar1\n";
         std::fstream fd;
         fd.open(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), std::ios::in | std::ios::out | std::ios::app);
         if (!fd) {
@@ -316,12 +340,23 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 if (result != 0)
                     std::cout << "Error renaming file." << std::endl;
                 // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
-                // std::cout << "request end\n";
-                // std::cout << "-----------------------------------------------------------------------------------\n";
+                std::cout << "request end\n";
+                std::cout << "-----------------------------------------------------------------------------------\n";
             }
             servs.at(sock_srv).clts.at(sock_clt).err = "201";
+            if (servs.at(sock_srv).clts.at(sock_clt).is_boundary != 1) {
+                std::cout << "ext\n";
+                std::string ex = get_extension_type(servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"]);
+                std::string new_s = servs.at(sock_srv).clts.at(sock_clt).fd_name +  ex;
+                std::cout << "Content-Type : "<< servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"] << std::endl;
+                std::cout << "ex : "<< servs.at(sock_srv).clts.at(sock_clt).fd_name << std::endl;
+                int result = std::rename(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), new_s.c_str());
+                if (result != 0)
+                    std::cout << "Error renaming file." << std::endl;
+        }
             fd.close();
         }
+
     }
     return servs.at(sock_srv).clts.at(sock_clt).is_done;
 }
