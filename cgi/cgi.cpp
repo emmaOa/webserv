@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 16:31:30 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/29 20:00:26 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/29 22:13:25 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,12 +103,14 @@ int f_cgi(int sock_srv, int sock_clt)
         par[2] = NULL;
         // /goinfre/iouazzan/back/csnxgn_new.txt
         std::cout << "---> " << par[0] << " - " << par[1] << std::endl;
-        // int fd_in = open(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), O_CREAT | O_RDWR, 0644);
         int fd_out = open(servs.at(sock_srv).clts.at(sock_clt).file_cgi.c_str(), O_CREAT | O_RDWR, 0644);
         if (!fd_out) {
             std::cout << "sfsf\n";
         }
-        // dup2(fd_in, 0);
+        if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0){
+            int fd_in = open(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), O_CREAT | O_RDWR, 0644);
+            dup2(fd_in, 0);
+        }
 	    dup2(fd_out, 1);
 	    dup2(fd_out, 2);
 	    close(fd_out);
