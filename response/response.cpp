@@ -6,13 +6,14 @@
 /*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 18:28:46 by namine            #+#    #+#             */
-/*   Updated: 2023/07/29 00:13:09 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/29 02:23:45 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
 
-int send_header(int sock_clt, int sock_srv, int size, const char *path, std::map <std::string, std::string>& response)
+std::map <std::string, std::string> response;
+int send_header(int sock_clt, int sock_srv, int size, const char *path)
 {
     std::map<std::string,std::string>::iterator it;
     std::string header;
@@ -61,7 +62,7 @@ int send_header(int sock_clt, int sock_srv, int size, const char *path, std::map
     return (1);
 }
 
-int proceedResponse(int sock_clt, int sock_srv, std::map <std::string, std::string>& response)
+int proceedResponse(int sock_clt, int sock_srv)
 {
     if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") != 0)
     {
@@ -72,7 +73,7 @@ int proceedResponse(int sock_clt, int sock_srv, std::map <std::string, std::stri
             if (servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
                 servs.at(sock_srv).clts.at(sock_clt).err_msg = "Found";
             response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path.append(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
-            send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str(), response);
+            send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
             return (0);
         }
         else
@@ -89,7 +90,7 @@ int proceedResponse(int sock_clt, int sock_srv, std::map <std::string, std::stri
     return (1);
 }
 
-int send_response(int sock_clt, int sock_srv, std::map <std::string, std::string>& response)
+int send_response(int sock_clt, int sock_srv)
 {
     struct dirent *read_dir;
     long long int size;
@@ -122,8 +123,8 @@ int send_response(int sock_clt, int sock_srv, std::map <std::string, std::string
                 }
 			else
             {
-			    f_cgi(sock_srv,sock_clt);
-                file.open ("./hi", std::ios::in | std::ios::binary | std::ios::ate);
+			    // f_cgi(sock_srv,sock_clt);
+                // file.open ("./hi", std::ios::in | std::ios::binary | std::ios::ate);
             }
         }
         else // dir
@@ -141,7 +142,7 @@ int send_response(int sock_clt, int sock_srv, std::map <std::string, std::string
 				servs.at(sock_srv).clts.at(sock_clt).err = "301";
 				servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
                 response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path.append(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
-                send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str(), response);
+                send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
                 std::cout << "+++++++++++++++++++++++\n";
                 return (1);
 			}
@@ -167,7 +168,7 @@ int send_response(int sock_clt, int sock_srv, std::map <std::string, std::string
         size = file.tellg();
         file.seekg (0, file.beg);
         rest = size % chunk;
-        if (!send_header(sock_clt, sock_srv, size, servs.at(sock_srv).clts.at(sock_clt).path.c_str(), response))
+        if (!send_header(sock_clt, sock_srv, size, servs.at(sock_srv).clts.at(sock_clt).path.c_str()))
             return (1);
         file.close();
         servs.at(sock_srv).clts.at(sock_clt).new_client++;
@@ -213,11 +214,9 @@ int send_response(int sock_clt, int sock_srv, std::map <std::string, std::string
 
 int response_part(int sock_clt, int sock_srv)
 {
-    std::map <std::string, std::string> response;
-    
     print_request_header(sock_clt, sock_srv);
     if (!servs.at(sock_srv).clts.at(sock_clt).new_client) {
-        if (!proceedResponse(sock_clt, sock_srv, response))
+        if (!proceedResponse(sock_clt, sock_srv))
         {
             std::cout << "quit response.\n";
             close(sock_clt);
@@ -225,7 +224,7 @@ int response_part(int sock_clt, int sock_srv)
             return (1);
         }
     }
-    if (send_response(sock_clt, sock_srv, response))
+    if (send_response(sock_clt, sock_srv))
         return (1);
     return (0);
 }

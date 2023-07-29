@@ -6,7 +6,7 @@
 /*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/26 12:18:45 by namine            #+#    #+#             */
-/*   Updated: 2023/07/28 23:44:12 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/29 04:06:57 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,16 +54,22 @@ void	print_request_header(int sock_clt, int sock_srv)
 void serve_error_file(int sock_clt, int sock_srv)
 {
     std::string str;
-
-    std::cout << "serve error file...\n";
+    int index;
+    
     str.assign("<!DOCTYPEhtml><htmllang=\"en\"><head><metacharset=\"UTF-8\"><metaname=\"viewport\"content=\"width=device-width,initial-scale=1.0\"><title>statusCodeError</title><style>body{background-color:#f2f2f2;font-family:Arial,sans-serif;margin:0;padding:0;}.container{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;text-align:center;}.error-code{font-size:80px;font-weight:bold;margin-bottom:20px;}.error-message{font-size:24px;margin-bottom:40px;}.home-link{color:#333;text-decoration:none;font-weight:bold;}.home-link:hover{text-decoration:underline;}</style></head><body><divclass=\"container\"><h1class=\"error-code\">statusCode</h1><pclass=\"error-message\">statusMessage</p><p>Gobackto<aclass=\"home-link\"href=\"/\">homepage</a>.</p></div></body></html>");
     
-    std::cout << str << "\n";
+    send_header(sock_clt, sock_srv, str.size(), ".html");
+    // std::cout << "serve error file...\n";
     
+    // index = str.find("statusCode");
+    // str.replace(index, servs.at(sock_srv).clts.at(sock_clt).err.length(), servs.at(sock_srv).clts.at(sock_clt).err);
+    // index = str.find("statusMessage");
+    // str.replace(index, servs.at(sock_srv).clts.at(sock_clt).err_msg.length(), servs.at(sock_srv).clts.at(sock_clt).err_msg);
     // char hello[] = "HTTP/1.1 statusCode Not Found\nContent-Type: text/plain\nContent-Length: 107\n\nResource Not Found :( gonna add some html and css later with appropriate error message and status code ...!";
     // write(sock_clt , hello , sizeof(hello));
     // servs.at(sock_srv).clts.at(sock_clt).err.assign("statusCode");
     // servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("Not Found");
+    send(sock_clt, str.c_str(), str.length(), 0);
 }
 
 int pathSecure(std::string path)
