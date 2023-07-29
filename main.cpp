@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/27 02:04:08 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/29 19:06:43 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,6 @@ int main(int arc, char *arg[])
 {
     signal(SIGPIPE, SIG_IGN);
     std::ifstream CnfFile;
-    char buffer[1024] = {0};
-    int r = 0;
-    int w = 0;
-    int read_ret;
     if (arc != 2){
         std::cout << "invalid number arguments\n";
         exit (1);

@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/28 15:31:04 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/29 19:00:14 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ std::string get_extension_type(std::string type) {
     v.push_back(std::make_pair("application/pdf\r", ".pdf"));
     v.push_back(std::make_pair("text/plain\r", ".txt"));
     v.push_back(std::make_pair("image/svg+xml\r", ".svg"));
-    for (int i = 0; i < v.size(); i++)
+    for (unsigned long i = 0; i < v.size(); i++)
     {
         std::cout << "v : "<< v[i].first << std::endl;
         if (v[i].first.compare(type) == 0)
@@ -204,7 +204,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::string name2 = "test";
         std::string line;
         std::stringstream ss;
-        int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
+        // int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
         int i = 0;
         int size = 0;
     

@@ -2,9 +2,9 @@
 # define SOCKET_HPP
 # define ROOT /
 # define CGI_PATH_PY /usr/bin/python3
-# define CGI_PATH_SH /bin/bash
+# define CGI_PATH_PHP /Users/iouazzan/Desktop/back/php-cgi;
 # define CGI_EXT_1 .py
-# define CGI_EXT_2 .sh
+# define CGI_EXT_2 .php
 
 
 struct client_info {
@@ -25,6 +25,7 @@ struct client_info {
     std::string path;
     int len_bound;
     int is_ex_cgi;
+    std::string file_cgi;
     std::string type_cgi;
 };
 

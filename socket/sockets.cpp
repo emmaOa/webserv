@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/28 05:07:44 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/29 18:59:59 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int check_creat_srv(std::vector<std::pair<std::string, std::string> > &v, std::vector<std::string > &v_name, std::string port, std::string host, std::string s_name)
 {
-    for (int i = 0; i < v.size(); i++)
+    for (unsigned long i = 0; i < v.size(); i++)
     {
         if (v[i].first.compare(port) == 0 && v[i].second.compare(host) == 0 && v_name[i].compare(s_name) != 0)
             return 1;
