@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 16:31:30 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/29 19:06:05 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/29 20:00:26 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,30 +73,35 @@ int f_cgi(int sock_srv, int sock_clt)
     //     std::cout << v[i].first << v[i].second << std::endl;
     // }    
     char *env[v.size() + 1];
-
+    std::cout << "ahsdghlsdgjldfj-----------------------------\n";
     for (unsigned long i = 0; i < v.size(); i++)
     {
         std::string str = v[i].first + "=" + v[i].second;
         env[i] = new char[str.length() + 1];
         std::strcpy(env[i], str.c_str());
+       std::cout << v[i].first << v[i].second << std::endl; 
     }
+    std::cout << "ahsdghlsdgjldfj-----------------------------\n";
 
     env[v.size()] = nullptr; 
     int fr = fork();
 	if (fr == -1)
 		ft_exit("problem in first fork");
     servs.at(sock_srv).clts.at(sock_clt).file_cgi = random_String() + "_new.txt";
+    std::string s = "./file_cgi/" + servs.at(sock_srv).clts.at(sock_clt).file_cgi;
+    servs.at(sock_srv).clts.at(sock_clt).file_cgi = s;
 	if (fr == 0) {
         std::string ex;
         if (servs.at(sock_srv).clts.at(sock_clt).type_cgi == "py")
             ex = "/usr/bin/python3";
         else
-            ex = "/Users/iouazzan/Desktop/back/php-cgi";
+            ex = "./php-cgi";
         char *par[3];
         
         par[0] = (char *)ex.c_str();
         par[1] = (char *)servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"].c_str();
         par[2] = NULL;
+        // /goinfre/iouazzan/back/csnxgn_new.txt
         std::cout << "---> " << par[0] << " - " << par[1] << std::endl;
         // int fd_in = open(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), O_CREAT | O_RDWR, 0644);
         int fd_out = open(servs.at(sock_srv).clts.at(sock_clt).file_cgi.c_str(), O_CREAT | O_RDWR, 0644);
@@ -107,7 +112,7 @@ int f_cgi(int sock_srv, int sock_clt)
 	    dup2(fd_out, 1);
 	    dup2(fd_out, 2);
 	    close(fd_out);
-        // std::cout  << "-------------------------------------------->"<< par[0] << par[1] << std::endl;
+        std::cout  << "-------------------------------------------->"<< par[0] << par[1] << servs.at(sock_srv).clts.at(sock_clt).file_cgi<< std::endl;
         // if (execve(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"].c_str(), (char **)ex.c_str(), env) < 0){
         if (execve(par[0], par, env) < 0){
 		    ft_exit("first execution not valid");  
