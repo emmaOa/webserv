@@ -39,6 +39,7 @@ typedef struct s_srvs_set {
 }      srvs_set;
 
 extern std::map<int, srvs_set> servs;
+extern int exec_err;
 
 int create_socket(int id);
 std::deque<int> int_socket_srvs(void);

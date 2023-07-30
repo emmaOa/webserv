@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/28 15:59:37 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/30 03:00:37 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,15 @@ int create_client(int sock)
     struct client_info *tmp = new client_info;
     if (!tmp) {
         std::cout << "error 01\n";
-        exit (1);
+        exec_err = 500;
+        return -1; 
     }
     tmp->address_length = sizeof(tmp->address);
     tmp->socket = accept(sock, (struct sockaddr*) &(tmp->address), &(tmp->address_length));
     if (tmp->socket < 0){
         std::cout << "accept field\n";
-       return -1; 
+        exec_err = 500;
+        return -1; 
     }
     tmp->socket_srv = sock;
     tmp->is_done = -1;
@@ -99,19 +101,20 @@ int wait_on_clients()
                 max_socket = it2->first;
             ++it2;
         }
-            ++it;
+        ++it;
     }
 
     if (select(max_socket+1, &re, &wr, 0, 0) < 0){
         std::cout << "error 03\n";
-        exit (1);
+        exec_err = 500;
     }
     it = servs.begin();
     while (it != servs.end())
     {
         if (FD_ISSET(it->first, &re)) {
-
-            create_client(servs.at(it->first).socket);
+            if (create_client(servs.at(it->first).socket) < 0){
+                exec_err = 500;
+            }
             return 0;
         }
         ++it;
@@ -125,12 +128,13 @@ int wait_on_clients()
         if (FD_ISSET(vr[i], &re)){
             read_ret = read(vr[i], buffer, 1024);
             if (read_ret < 0){
-                exit (1);
+                exec_err = 500;
             }
             else{
 
                 int s = sock_s(vr[i]);
-                request_part(buffer, read_ret, vr[i], s);
+                if (request_part(buffer, read_ret, vr[i], s) < 0)
+                    exec_err = 500;
             }
             return 0;
         }
@@ -143,5 +147,5 @@ int wait_on_clients()
             response_part(vw[i], sock_s(vw[i]));
         i++;
     }
-    return -1;
+    return 0;
 }

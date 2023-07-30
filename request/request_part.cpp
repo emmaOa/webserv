@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/29 19:56:06 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/30 01:51:31 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,7 +212,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         fd2.open(name2.c_str(),  std::ios::in | std::ios::out);
         if (!fd2) {
             std::cout << "Open failed2" << std::endl;
-            return -2;
+            return -1;
         }
         fd2.write(buffer , lent);
         fd2.seekp(0, std::ios::beg);
@@ -262,7 +262,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
             if (!fd ) {
                 std::cout << "Open failed" << std::endl;
-                return -2;
+                return -1;
             }
 
             std::string s = buffer ;
@@ -296,7 +296,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         fd.open(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), std::ios::in | std::ios::out | std::ios::app);
         if (!fd) {
             std::cout << "Open failed" << std::endl;
-            return -2;
+            return -1;
         }
         if (lent < 1024 && servs.at(sock_srv).clts.at(sock_clt).is_boundary == 1 &&\
             data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0) {
@@ -316,7 +316,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 fd2.open("ttt", std::ios::in | std::ios::out | std::ios::app);
                 if (!fd2) {
                     std::cout << "Open failed3" << std::endl;
-                    return -2;
+                    return -1;
                 }
 
                 servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
@@ -339,8 +339,10 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 fd.close();
                 fd2.close();
                 int result = std::rename("ttt", servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str());
-                if (result != 0)
+                if (result != 0) {
                     std::cout << "Error renaming file." << std::endl;
+                    return -1;
+                }
                 // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
                 std::cout << "request end\n";
                 std::cout << "-----------------------------------------------------------------------------------\n";
@@ -353,8 +355,10 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 std::cout << "Content-Type : "<< servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"] << std::endl;
                 std::cout << "ex : "<< servs.at(sock_srv).clts.at(sock_clt).fd_name << std::endl;
                 int result = std::rename(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), new_s.c_str());
-                if (result != 0)
+                if (result != 0) {
                     std::cout << "Error renaming file." << std::endl;
+                    return -1;
+                }
         }
             fd.close();
         }
