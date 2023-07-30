@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/30 04:07:11 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/30 20:22:44 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,8 @@ std::string get_extension_type(std::string type) {
     v.push_back(std::make_pair("application/pdf\r", ".pdf"));
     v.push_back(std::make_pair("text/plain\r", ".txt"));
     v.push_back(std::make_pair("image/svg+xml\r", ".svg"));
+    v.push_back(std::make_pair("application/x-httpd-php\r", ".php"));
+
     for (unsigned long i = 0; i < v.size(); i++)
     {
         std::cout << "v : "<< v[i].first << std::endl;
@@ -280,18 +282,18 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             }
             else
                 fd.write(s2.c_str() , lent - l);
+            std::cout << "request end\n";
+            std::cout << "-----------------------------------------------------------------------------------\n";
         }
         else {
             // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
-            std::cout << "request end\n";
-            std::cout << "-----------------------------------------------------------------------------------\n";
+
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             // fd.close();
         }
         fd2.close();
     }
     else if (servs.at(sock_srv).clts.at(sock_clt).is_done == 0 && servs.at(sock_srv).clts.at(sock_clt).err.compare("null") == 0){
-        std::cout << "im heaaaaaar1\n";
         std::fstream fd;
         fd.open(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), std::ios::in | std::ios::out | std::ios::app);
         if (!fd) {
@@ -346,9 +348,12 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
                 std::cout << "request end\n";
                 std::cout << "-----------------------------------------------------------------------------------\n";
+                servs.at(sock_srv).clts.at(sock_clt).err = "201";
+                fd.close();
                 return servs.at(sock_srv).clts.at(sock_clt).is_done;
             }
             if (servs.at(sock_srv).clts.at(sock_clt).is_boundary != 1) {
+                std::cout << "im heaaaaaar1\n";
                 std::cout << "ext\n";
                 std::string ex = get_extension_type(servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"]);
                 std::string new_s = servs.at(sock_srv).clts.at(sock_clt).fd_name +  ex;
@@ -360,6 +365,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                     return -1;
                 }
             }
+            std::cout << "request end\n";
+            std::cout << "-----------------------------------------------------------------------------------\n";
             servs.at(sock_srv).clts.at(sock_clt).err = "201";
             fd.close();
         }

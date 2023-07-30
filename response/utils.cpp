@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/26 12:18:45 by namine            #+#    #+#             */
-/*   Updated: 2023/07/29 19:03:11 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/30 20:23:39 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ std::string	getContentType(const char* path)
         if (strcmp(last_dot, ".pdf") == 0) return "application/pdf";
         if (strcmp(last_dot, ".svg") == 0) return "image/svg+xml";
         if (strcmp(last_dot, ".txt") == 0) return "text/plain";
+        if (strcmp(last_dot, ".php") == 0) return "application/x-httpd-php";
+
     }
     return "application/octet-stream";
 }
