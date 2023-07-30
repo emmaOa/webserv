@@ -6,7 +6,7 @@
 /*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 18:28:46 by namine            #+#    #+#             */
-/*   Updated: 2023/07/30 04:58:03 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/30 20:23:30 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int send_header(int sock_clt, int sock_srv, int size, const char *path)
     response["Server: "] = data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at("server_name").at("null").at(0);
     header.append("Server: ");
     header.append(response["Server: "]).append("\r\n");
-    
+ 
     header.append("Content-Type: ");
     response["Content-Type: "] = getContentType(path).append(";charset=UTF-8");
     header.append(response["Content-Type: "]).append("\r\n");
@@ -106,10 +106,10 @@ int send_response(int sock_clt, int sock_srv)
     {
         servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
         if (pathSecure(servs.at(sock_srv).clts.at(sock_clt).path) != -1)
-            { interruptResponse(sock_clt, sock_srv); return (1);} // 404 Not Found
+            { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return (1);}
         if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1)
-            { interruptResponse(sock_clt, sock_srv); return (1); } // 404 Not Found
-        else if(S_ISREG(buf.st_mode)) // file
+            { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1); }
+        if(S_ISREG(buf.st_mode)) // file
         {
             if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "DELETE")
             {
@@ -128,19 +128,19 @@ int send_response(int sock_clt, int sock_srv)
                 servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
                 file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
                 
-                std::string line;
-                std::cout << "=======================================\n";
-                while(getline(file, line))
-                {
-                    // if (line.compare("\r") != 0)
-                    // {
-                    //     
-                        // line.replace(line.find(line),line.length(),"");
-                        std::cout << line << "\n";
-                    // }
-                }
-                file.close();
-                std::cout << "=======================================\n";
+                // std::string line;
+                // std::cout << "=======================================\n";
+                // while(getline(file, line))
+                // {
+                //     // if (line.compare("\r") != 0)
+                //     // {
+                //     //     
+                //         // line.replace(line.find(line),line.length(),"");
+                //         std::cout << line << "\n";
+                //     // }
+                // }
+                // file.close();
+                // std::cout << "=======================================\n";
             }
         }
         else // dir
@@ -177,13 +177,12 @@ int send_response(int sock_clt, int sock_srv)
                 //     while ((read_dir = readdir(dir)) != NULL)
                 //     {
                 //         std::cout << read_dir->d_name << "\n";
-                //         closedir(dir);
                 //     }
+                //         closedir(dir);
             }
         }
         size = file.tellg();
         file.seekg (0, file.beg);
-        // std::cout << "size = " << size << "\n";
         rest = size % chunk;
         if (!send_header(sock_clt, sock_srv, size, servs.at(sock_srv).clts.at(sock_clt).path.c_str()))
             return (1);
@@ -194,7 +193,7 @@ int send_response(int sock_clt, int sock_srv)
     else
     {
         file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-        if (!file.is_open()) { interruptResponse(sock_clt, sock_srv);
+        if (!file.is_open()) { interruptResponse(sock_clt, sock_srv, "FIXIT", "FIXIT");
             return (1); }
         buffer = new char[1024];
         size = file.tellg();
@@ -232,10 +231,10 @@ int send_response(int sock_clt, int sock_srv)
 int response_part(int sock_clt, int sock_srv)
 {
     print_request_header(sock_clt, sock_srv);
+    
     if (!servs.at(sock_srv).clts.at(sock_clt).new_client) {
         if (!proceedResponse(sock_clt, sock_srv))
         {
-            std::cout << "quit response.\n";
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);
             return (1);

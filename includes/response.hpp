@@ -1,6 +1,7 @@
 #ifndef RESPONSE_HPP
 # define RESPONSE_HPP
 
+void		interruptResponse(int sock_clt, int sock_srv, std::string statusCode, std::string statusMessage);
 void        deleteMethod(int sock_clt, int sock_srv, std::string path, std::string resource);
 int         send_header(int sock_clt, int sock_srv, int size, const char *path);
 void		print_request_header(int sock_clt, int sock_srv);

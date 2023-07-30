@@ -11,7 +11,7 @@ server {
       autoindex on
       allow_methods POST GET
       index index.html
-      cgi_is on
+      cgi_is off
       upload_is on
       return   
     }

@@ -6,7 +6,7 @@
 /*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/26 12:18:45 by namine            #+#    #+#             */
-/*   Updated: 2023/07/30 05:21:14 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/30 19:52:20 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,17 +53,18 @@ void		print_request_header(int sock_clt, int sock_srv)
 
 void		serve_error_file(int sock_clt, int sock_srv)
 {
-    std::string str;
-    int index;
+    std::string	str;
     
+    // TODO how to check this
+    // if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at("error_page_404").at("null").at(0).size() == 1)
+    // exit(0);
+    // {
+    //     std::cout << "found\n";
+    // }
     str.assign("<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <title> statusCode </title> <style> body { background-color: #f2f2f2; font-family: Arial, sans-serif; margin: 0; padding: 0; } .container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; } .error-code { font-size: 80px; font-weight: bold; margin-bottom: 20px; } .error-message { font-size: 24px; margin-bottom: 40px; } .home-link { color: #333; text-decoration: none; font-weight: bold; } .home-link:hover { text-decoration: underline; } </style> </head> <body> <div class=\"container\"> <h1 class=\"error-code\"> statusCode </h1> <p class=\"error-message\"> statusMessage </p> <p>Go back to <a class=\"home-link\" href=\"/\">homepage</a>.</p> </div> </body> </html>");
-    
-    index = str.find("statusCode");
-    str.replace(index, 11, servs.at(sock_srv).clts.at(sock_clt).err);
-    index = str.find("statusCode");
-    str.replace(index, 11, servs.at(sock_srv).clts.at(sock_clt).err);
-    index = str.find("statusMessage");
-    str.replace(index, 14, servs.at(sock_srv).clts.at(sock_clt).err_msg);
+    str.replace(str.find("statusCode"), 11, servs.at(sock_srv).clts.at(sock_clt).err);
+    str.replace(str.find("statusCode"), 11, servs.at(sock_srv).clts.at(sock_clt).err);
+    str.replace(str.find("statusMessage"), 14, servs.at(sock_srv).clts.at(sock_clt).err_msg);
     send_header(sock_clt, sock_srv, str.size(), ".html");
     send(sock_clt, str.c_str(), str.length(), 0);
 }
@@ -73,8 +74,10 @@ int			pathSecure(std::string path)
     return (path.find(".."));
 }
 
-void		interruptResponse(int sock_clt, int sock_srv)
+void		interruptResponse(int sock_clt, int sock_srv, std::string statusCode, std::string statusMessage)
 {
+	servs.at(sock_srv).clts.at(sock_clt).err.assign(statusCode);
+	servs.at(sock_srv).clts.at(sock_clt).err_msg.assign(statusMessage);
     serve_error_file(sock_clt, sock_srv);
     close(sock_clt);
     servs.at(sock_srv).clts.erase(sock_clt);

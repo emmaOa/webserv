@@ -1,20 +1,16 @@
-GET /favicon.ico HTTP/1.1
+GET /toto/video_3min.mp4 HTTP/1.1
 Host: localhost:8001
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:109.0) Gecko/20100101 Firefox/114.0
-Accept: image/avif,image/webp,*/*
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
 Accept-Language: en-US,en;q=0.5
 Accept-Encoding: gzip, deflate, br
 Connection: keep-alive
-Referer: http://localhost:8001/toto/form1.ph
-Sec-Fetch-Dest: image
-Sec-Fetch-Mode: no-cors
-Sec-Fetch-Site: same-origin
-
-ch-Mode: navigate
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
 Sec-Fetch-Site: none
 Sec-Fetch-User: ?1
 
-
-tch-Site: none
+ same-origin
 Sec-Fetch-User: ?1
 

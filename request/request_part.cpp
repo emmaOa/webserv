@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/29 19:56:06 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/30 16:46:47 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,7 +261,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             name = "./file_post/file_" + ss.str() + random_String();
             fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
             if (!fd ) {
-                std::cout << "Open failed" << std::endl;
+                std::cout << "Open failed01" << std::endl;
                 return -2;
             }
 
@@ -276,10 +276,12 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                     size_t l2 = s2.find("\r\n\r\n") + 4;
                     s2 = s2.substr(l2);
                     fd.write(s2.c_str() , lent - (l2 + l));
+                    fd.close();
                 }
             }
             else
                 fd.write(s2.c_str() , lent - l);
+                fd.close();
         }
         else {
             // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
@@ -295,7 +297,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::fstream fd;
         fd.open(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), std::ios::in | std::ios::out | std::ios::app);
         if (!fd) {
-            std::cout << "Open failed" << std::endl;
+            std::cout << "Open failed02" << std::endl;
             return -2;
         }
         if (lent < 1024 && servs.at(sock_srv).clts.at(sock_clt).is_boundary == 1 &&\

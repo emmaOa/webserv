@@ -36,7 +36,7 @@ clean:
 	@$(RM) $(OBJS)
 
 fclean:		clean
-	@$(RM) $(NAME) obj rm ./file_cgi/*txt
+	@$(RM) $(NAME) obj rm ./file_cgi/*txt ./file_post/file*
 
 re:			fclean all
 
