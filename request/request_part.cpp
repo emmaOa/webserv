@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/30 01:51:31 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/30 04:07:11 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -346,8 +346,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
                 std::cout << "request end\n";
                 std::cout << "-----------------------------------------------------------------------------------\n";
+                return servs.at(sock_srv).clts.at(sock_clt).is_done;
             }
-            servs.at(sock_srv).clts.at(sock_clt).err = "201";
             if (servs.at(sock_srv).clts.at(sock_clt).is_boundary != 1) {
                 std::cout << "ext\n";
                 std::string ex = get_extension_type(servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"]);
@@ -359,7 +359,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                     std::cout << "Error renaming file." << std::endl;
                     return -1;
                 }
-        }
+            }
+            servs.at(sock_srv).clts.at(sock_clt).err = "201";
             fd.close();
         }
 
