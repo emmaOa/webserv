@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:05:06 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/25 02:13:11 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/29 21:26:06 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ void initial_key_loc(void)
     data_cnf->m_l_key["index"] = 0;
     data_cnf->m_l_key["return"] = 0;
     data_cnf->m_l_key["cgi_is"] = 0;
+    data_cnf->m_l_key["upload_is"] = 0;
 }
 
 void init(void)

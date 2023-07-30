@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/28 15:31:04 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/29 19:56:06 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ std::string get_extension_type(std::string type) {
     v.push_back(std::make_pair("application/pdf\r", ".pdf"));
     v.push_back(std::make_pair("text/plain\r", ".txt"));
     v.push_back(std::make_pair("image/svg+xml\r", ".svg"));
-    for (int i = 0; i < v.size(); i++)
+    for (unsigned long i = 0; i < v.size(); i++)
     {
         std::cout << "v : "<< v[i].first << std::endl;
         if (v[i].first.compare(type) == 0)
@@ -198,24 +198,18 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
     std::cout << "request starte\n";
     // std::cout << "-----------------------------------------------------------------------------------\n";
     if (servs.at(sock_srv).clts.at(sock_clt).is_done < 0) {
-        std::fstream fd;
+        
         std::fstream fd2;
         std::string name;
         std::string name2 = "test";
         std::string line;
         std::stringstream ss;
-        int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
+        // int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
         int i = 0;
         int size = 0;
     
         ss << sock_clt;
-        name = "file_" + ss.str() + random_String();
-        fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
         fd2.open(name2.c_str(),  std::ios::in | std::ios::out);
-        if (!fd ) {
-            std::cout << "Open failed" << std::endl;
-            return -2;
-        }
         if (!fd2) {
             std::cout << "Open failed2" << std::endl;
             return -2;
@@ -257,27 +251,35 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             }
             i++;
         }
-        std::string s = buffer ;
-        size_t l = s.find("\r\n\r\n") + 4;
-        std::string s2 = s.substr(l);
-
-        if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Type") != servs.at(sock_srv).clts.at(sock_clt).request_map.end() && \
-            servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"].find("form-data") != std:: string :: npos){
-            servs.at(sock_srv).clts.at(sock_clt).is_boundary = 1;
-            if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0){
-                size_t l2 = s2.find("\r\n\r\n") + 4;
-                s2 = s2.substr(l2);
-                fd.write(s2.c_str() , lent - (l2 + l));
-            }
-        }
-        else
-            fd.write(s2.c_str() , lent - l);
         check_err_head(sock_srv, sock_clt);
         // std::cout << servs.at(sock_srv).clts.at(sock_clt).err << "\n";
         // fallocate(fd, FALLOC_FL_COLLAPSE_RANGE, 0, 900);
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
             servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
             servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
+            std::fstream fd;
+            name = "./file_post/file_" + ss.str() + random_String();
+            fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
+            if (!fd ) {
+                std::cout << "Open failed" << std::endl;
+                return -2;
+            }
+
+            std::string s = buffer ;
+            size_t l = s.find("\r\n\r\n") + 4;
+            std::string s2 = s.substr(l);
+ 
+            if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Type") != servs.at(sock_srv).clts.at(sock_clt).request_map.end() && \
+                servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"].find("form-data") != std:: string :: npos){
+                servs.at(sock_srv).clts.at(sock_clt).is_boundary = 1;
+                if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0){
+                    size_t l2 = s2.find("\r\n\r\n") + 4;
+                    s2 = s2.substr(l2);
+                    fd.write(s2.c_str() , lent - (l2 + l));
+                }
+            }
+            else
+                fd.write(s2.c_str() , lent - l);
         }
         else {
             // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";

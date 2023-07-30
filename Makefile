@@ -1,7 +1,7 @@
 DIR_OBJ = ./obj
 NAME	=	webserv
 CXX		=	c++
-CXXFLAGS=
+CXXFLAGS=	-Wall -Werror -Wextra -std=c++98
 RM		=	rm -rf	
 SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			parsing_file_configuration/init.cpp \
@@ -33,10 +33,10 @@ $(DIR_OBJ)/%.o:		%.cpp
 	$(CXX) -g -fsanitize=address $(CXXFLAGS) -c $< -o $@
 
 clean:
-	@$(RM) $(OBJS) file*
+	@$(RM) $(OBJS)
 
 fclean:		clean
-	@$(RM) $(NAME) file* obj
+	@$(RM) $(NAME) obj rm ./file_cgi/*txt
 
 re:			fclean all
 

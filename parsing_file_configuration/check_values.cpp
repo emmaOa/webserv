@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:07:34 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/28 05:06:41 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/29 21:31:57 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,12 @@ int check_lct_value(std::string key)
             (data_cnf->dq_2.size() == 2 && data_cnf->dq_2[1].compare("301") != 0 && data_cnf->dq_2[1].compare("302"))){
             std::cout  << data_cnf->dq_2[0] << "<----\n";
             std::cout  << data_cnf->dq_2[1] << "<----\n";
+            std::cout  << "invalid form 19\n";
+            return 1;
+        }
+    }
+    else  if(key.compare("upload_is") == 0) {
+        if (data_cnf->dq_2.size() != 1 || (data_cnf->dq_2[0] != "on" && data_cnf->dq_2[0] != "off")) {
             std::cout  << "invalid form 19\n";
             return 1;
         }
