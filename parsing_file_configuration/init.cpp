@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 17:05:06 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/29 21:26:06 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/30 21:40:33 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,8 @@ void initial_key_srv(void)
     data_cnf->m_s_key["port"] = 0;
     data_cnf->m_s_key["host"] = 0;
     data_cnf->m_s_key["server_name"] = 0;
-    data_cnf->m_s_key["error_page_404"] = 0;
-    data_cnf->m_s_key["error_page_400"] = 0;
+    data_cnf->m_s_key["404"] = 0;
+    data_cnf->m_s_key["400"] = 0;
     data_cnf->m_s_key["client_max_body_size"] = 0;
 }
 

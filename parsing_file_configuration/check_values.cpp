@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_values.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:07:34 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/29 21:31:57 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/30 23:04:20 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,13 +106,13 @@ int check_srv_value(std::string key)
         else if(data_cnf->dq_2.size() == 0)
             data_cnf->dq_2.push_back("null");
     }
-    else if (key.compare("error_page_404") == 0){
+    else if (key.compare("404") == 0){
         if (data_cnf->dq_2.size() > 1 || data_cnf->dq_2[0].compare("/error/404.html") != 0)
-            data_cnf->dq_2[0] = "/error/404.html";
+            data_cnf->dq_2[0] = "./error/404.html";
     }
-    else if (key.compare("error_page_400") == 0){
+    else if (key.compare("400") == 0){
         if (data_cnf->dq_2.size() > 1 || data_cnf->dq_2[0].compare("/error/400.html") != 0)
-            data_cnf->dq_2[0] = "/error/400.html";
+            data_cnf->dq_2[0] = "./error/400.html";
     }
     else if (key.compare("client_max_body_size") == 0){
        size = strtod(data_cnf->dq_2[0].c_str(), NULL);

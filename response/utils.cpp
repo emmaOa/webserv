@@ -6,7 +6,7 @@
 /*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/26 12:18:45 by namine            #+#    #+#             */
-/*   Updated: 2023/07/30 19:52:20 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/31 00:06:35 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,16 +51,45 @@ void		print_request_header(int sock_clt, int sock_srv)
     std::cout << "-----------------------------------------------------------------------------------\n";
 }
 
+int			get_customized_error_file(int sock_clt, int sock_srv, const char *statusCode)
+{
+	char			*buffer;
+	std::ifstream	file;
+    int				size;
+	
+	file.open (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(statusCode).at("null").at(0), std::ios::in | std::ios::binary | std::ios::ate);
+	if (!file)
+	{
+		servs.at(sock_srv).clts.at(sock_clt).err.assign("404");
+		servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("Not Found");
+		return (0);
+	}
+	else
+	{
+		size = file.tellg();
+		buffer = new char[size];
+		file.seekg (0, file.beg);
+		file.read (buffer, size);
+		send_header(sock_clt, sock_srv, size, ".html");
+		send(sock_clt, buffer, size, 0);
+	}
+	return (1);
+}
+
 void		serve_error_file(int sock_clt, int sock_srv)
 {
     std::string	str;
-    
-    // TODO how to check this
-    // if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at("error_page_404").at("null").at(0).size() == 1)
-    // exit(0);
-    // {
-    //     std::cout << "found\n";
-    // }
+
+    if (servs.at(sock_srv).clts.at(sock_clt).err.compare("404") == 0)
+	{
+		if (get_customized_error_file(sock_clt, sock_srv, "404"))
+			return ;
+	}
+	else if (servs.at(sock_srv).clts.at(sock_clt).err.compare("400") == 0)
+	{
+		if (get_customized_error_file(sock_clt, sock_srv, "400"))
+			return ;
+	}
     str.assign("<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <title> statusCode </title> <style> body { background-color: #f2f2f2; font-family: Arial, sans-serif; margin: 0; padding: 0; } .container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; } .error-code { font-size: 80px; font-weight: bold; margin-bottom: 20px; } .error-message { font-size: 24px; margin-bottom: 40px; } .home-link { color: #333; text-decoration: none; font-weight: bold; } .home-link:hover { text-decoration: underline; } </style> </head> <body> <div class=\"container\"> <h1 class=\"error-code\"> statusCode </h1> <p class=\"error-message\"> statusMessage </p> <p>Go back to <a class=\"home-link\" href=\"/\">homepage</a>.</p> </div> </body> </html>");
     str.replace(str.find("statusCode"), 11, servs.at(sock_srv).clts.at(sock_clt).err);
     str.replace(str.find("statusCode"), 11, servs.at(sock_srv).clts.at(sock_clt).err);
