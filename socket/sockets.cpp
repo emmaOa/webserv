@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/29 18:59:59 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/30 02:15:04 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ std::deque<int> int_socket_srvs(void)
         if (check_creat_srv(v, v_name, data_cnf->servers.at(i).at("port").at("null").at(0), data_cnf->servers.at(i).at("host").at("null").at(0), data_cnf->servers.at(i).at("server_name").at("null").at(0)) == 0){
             std::cout << "----creat server\n";
             srvs[i] = create_socket(i);
+            if (srvs[i] < 0)
+                exit (0);
             v.push_back(std::make_pair(data_cnf->servers.at(i).at("port").at("null").at(0), data_cnf->servers.at(i).at("host").at("null").at(0)));
             v_name.push_back(data_cnf->servers.at(i).at("server_name").at("null").at(0));
         }
@@ -65,14 +67,14 @@ int create_socket(int id)
         bind_address->ai_socktype, bind_address->ai_protocol);
     if (socket_sv < 0) {
         std::cout << "open failed socket\n";
-        exit(1);
+        return -1;
     }
     setsockopt(socket_sv, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     std::cout << "Binding socket to local address...\n";
 
     if (bind(socket_sv, bind_address->ai_addr, bind_address->ai_addrlen)) {
         std::cout << "bind failed\n";
-        exit(1);
+        return -1;
     }
 
     freeaddrinfo(bind_address);
@@ -80,7 +82,7 @@ int create_socket(int id)
     std::cout << "Listening...\n";
     if (listen(socket_sv, 128) < 0){
         std::cout << "listen failed\n";
-        exit (1);
+        return -1;
     }
     
     srvs_set sv;

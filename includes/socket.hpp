@@ -1,8 +1,8 @@
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
 # define ROOT /
-// # define CGI_PATH_PY /usr/bin/python3
-// # define CGI_PATH_PHP /Users/namine/Desktop/webserv/php-cgi;
+# define CGI_PATH_PY /usr/bin/python3
+# define CGI_PATH_PHP /Users/iouazzan/Desktop/back/php-cgi;
 # define CGI_EXT_1 .py
 # define CGI_EXT_2 .php
 
@@ -39,6 +39,7 @@ typedef struct s_srvs_set {
 }      srvs_set;
 
 extern std::map<int, srvs_set> servs;
+extern int exec_err;
 
 int create_socket(int id);
 std::deque<int> int_socket_srvs(void);

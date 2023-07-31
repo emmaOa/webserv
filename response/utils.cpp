@@ -6,7 +6,7 @@
 /*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/26 12:18:45 by namine            #+#    #+#             */
-/*   Updated: 2023/07/31 00:06:35 by namine           ###   ########.fr       */
+/*   Updated: 2023/07/31 02:26:36 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ int			pathSecure(std::string path)
     return (path.find(".."));
 }
 
-void		interruptResponse(int sock_clt, int sock_srv, std::string statusCode, std::string statusMessage)
+void		interruptResponse(int sock_clt, int sock_srv, const char *statusCode, const char *statusMessage)
 {
 	servs.at(sock_srv).clts.at(sock_clt).err.assign(statusCode);
 	servs.at(sock_srv).clts.at(sock_clt).err_msg.assign(statusMessage);

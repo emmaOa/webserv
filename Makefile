@@ -14,10 +14,9 @@ SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			request/request_part.cpp \
 			request/header_request.cpp \
 			request/pars_location.cpp \
-			response/response.cpp \
+			response/get_method.cpp \
 			response/post_method.cpp \
 			response/delete_method.cpp \
-			response/get_method.cpp \
 			response/utils.cpp \
 			cgi/cgi.cpp \
 
@@ -36,7 +35,7 @@ clean:
 	@$(RM) $(OBJS)
 
 fclean:		clean
-	@$(RM) $(NAME) obj rm ./file_cgi/*txt ./file_post/file*
+	@$(RM) $(NAME) obj rm ./file_cgi/*new ./file_post/file*
 
 re:			fclean all
 

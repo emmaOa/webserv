@@ -1,13 +1,9 @@
-GET /toto/gunsNRoses.gif HTTP/1.1
+GET /toto/form1.php HTTP/1.1
 Host: localhost:8001
-User-Agent: curl/7.54.0
-Accept: */*
-
-c OS X 10.14; rv:109.0) Gecko/20100101 Firefox/114.0
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:109.0) Gecko/20100101 Firefox/114.0
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
 Accept-Language: en-US,en;q=0.5
 Accept-Encoding: gzip, deflate, br
-DNT: 1
 Connection: keep-alive
 Upgrade-Insecure-Requests: 1
 Sec-Fetch-Dest: document
@@ -15,11 +11,15 @@ Sec-Fetch-Mode: navigate
 Sec-Fetch-Site: none
 Sec-Fetch-User: ?1
 
-?1
+no-cache
+Cache-Control: no-cache
 
+ment
+sec-ch-ua: "Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "macOS"
+Accept-Encoding: gzip, deflate, br
+Accept-Language: en-US,en;q=0.9
 
-
-ntrol: no-cache
-
-
+9
 

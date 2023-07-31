@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/30 16:46:47 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/30 20:22:44 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,8 @@ std::string get_extension_type(std::string type) {
     v.push_back(std::make_pair("application/pdf\r", ".pdf"));
     v.push_back(std::make_pair("text/plain\r", ".txt"));
     v.push_back(std::make_pair("image/svg+xml\r", ".svg"));
+    v.push_back(std::make_pair("application/x-httpd-php\r", ".php"));
+
     for (unsigned long i = 0; i < v.size(); i++)
     {
         std::cout << "v : "<< v[i].first << std::endl;
@@ -212,7 +214,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         fd2.open(name2.c_str(),  std::ios::in | std::ios::out);
         if (!fd2) {
             std::cout << "Open failed2" << std::endl;
-            return -2;
+            return -1;
         }
         fd2.write(buffer , lent);
         fd2.seekp(0, std::ios::beg);
@@ -261,8 +263,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             name = "./file_post/file_" + ss.str() + random_String();
             fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
             if (!fd ) {
-                std::cout << "Open failed01" << std::endl;
-                return -2;
+                std::cout << "Open failed" << std::endl;
+                return -1;
             }
 
             std::string s = buffer ;
@@ -276,29 +278,27 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                     size_t l2 = s2.find("\r\n\r\n") + 4;
                     s2 = s2.substr(l2);
                     fd.write(s2.c_str() , lent - (l2 + l));
-                    fd.close();
                 }
             }
             else
                 fd.write(s2.c_str() , lent - l);
-                fd.close();
+            std::cout << "request end\n";
+            std::cout << "-----------------------------------------------------------------------------------\n";
         }
         else {
             // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
-            std::cout << "request end\n";
-            std::cout << "-----------------------------------------------------------------------------------\n";
+
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             // fd.close();
         }
         fd2.close();
     }
     else if (servs.at(sock_srv).clts.at(sock_clt).is_done == 0 && servs.at(sock_srv).clts.at(sock_clt).err.compare("null") == 0){
-        std::cout << "im heaaaaaar1\n";
         std::fstream fd;
         fd.open(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), std::ios::in | std::ios::out | std::ios::app);
         if (!fd) {
-            std::cout << "Open failed02" << std::endl;
-            return -2;
+            std::cout << "Open failed" << std::endl;
+            return -1;
         }
         if (lent < 1024 && servs.at(sock_srv).clts.at(sock_clt).is_boundary == 1 &&\
             data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0) {
@@ -318,7 +318,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 fd2.open("ttt", std::ios::in | std::ios::out | std::ios::app);
                 if (!fd2) {
                     std::cout << "Open failed3" << std::endl;
-                    return -2;
+                    return -1;
                 }
 
                 servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
@@ -341,23 +341,33 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 fd.close();
                 fd2.close();
                 int result = std::rename("ttt", servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str());
-                if (result != 0)
+                if (result != 0) {
                     std::cout << "Error renaming file." << std::endl;
+                    return -1;
+                }
                 // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
                 std::cout << "request end\n";
                 std::cout << "-----------------------------------------------------------------------------------\n";
+                servs.at(sock_srv).clts.at(sock_clt).err = "201";
+                fd.close();
+                return servs.at(sock_srv).clts.at(sock_clt).is_done;
             }
-            servs.at(sock_srv).clts.at(sock_clt).err = "201";
             if (servs.at(sock_srv).clts.at(sock_clt).is_boundary != 1) {
+                std::cout << "im heaaaaaar1\n";
                 std::cout << "ext\n";
                 std::string ex = get_extension_type(servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"]);
                 std::string new_s = servs.at(sock_srv).clts.at(sock_clt).fd_name +  ex;
                 std::cout << "Content-Type : "<< servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"] << std::endl;
                 std::cout << "ex : "<< servs.at(sock_srv).clts.at(sock_clt).fd_name << std::endl;
                 int result = std::rename(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), new_s.c_str());
-                if (result != 0)
+                if (result != 0) {
                     std::cout << "Error renaming file." << std::endl;
-        }
+                    return -1;
+                }
+            }
+            std::cout << "request end\n";
+            std::cout << "-----------------------------------------------------------------------------------\n";
+            servs.at(sock_srv).clts.at(sock_clt).err = "201";
             fd.close();
         }
 
