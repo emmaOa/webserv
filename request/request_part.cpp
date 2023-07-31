@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/30 20:22:44 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/31 05:52:43 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,17 +120,8 @@ std::string word_from_file(std::fstream &fd, int beg)
     {
         fd >> std::noskipws >> c;
         word += c;
-        // std::cout << c << "\n";
     }
-    
 
-    // int len = end - big;
-    // char *c =  new char ;
-    // fd.seekg(big, std::ios::beg);
-    // fd.read(c, len);
-    // // std::cout << "word : " << c ;
-    // word = c;
-    // delete(c);
     return word;
 }
 
@@ -203,7 +194,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         
         std::fstream fd2;
         std::string name;
-        std::string name2 = "test";
+        std::string name2 = "headr";
         std::string line;
         std::stringstream ss;
         // int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
@@ -232,7 +223,6 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             {
                 if (line.find(':') != std::string::npos &&\
                     data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0) {
-                    std::cout << "im heaaaaaar1\n";
                     pars_bound(sock_clt, sock_srv, line);
                 }
             }
@@ -253,6 +243,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             }
             i++;
         }
+
         check_err_head(sock_srv, sock_clt);
         // std::cout << servs.at(sock_srv).clts.at(sock_clt).err << "\n";
         // fallocate(fd, FALLOC_FL_COLLAPSE_RANGE, 0, 900);
@@ -263,7 +254,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             name = "./file_post/file_" + ss.str() + random_String();
             fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
             if (!fd ) {
-                std::cout << "Open failed" << std::endl;
+                std::cout << "Open failed---" << std::endl;
                 return -1;
             }
 
@@ -282,6 +273,11 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             }
             else
                 fd.write(s2.c_str() , lent - l);
+            if (std::remove(name2.c_str()) != 0) {
+            std::perror("Error removing file");
+            } else {
+                std::puts("File successfully removed");
+            }
             std::cout << "request end\n";
             std::cout << "-----------------------------------------------------------------------------------\n";
         }

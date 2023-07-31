@@ -29,6 +29,7 @@
 #include <map>
 # include <fcntl.h>
 # include <stdio.h>
+#include <cstdio>
 
 # include "./parsing_file_cnf.hpp"
 # include "./socket.hpp"
