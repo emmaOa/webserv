@@ -6,7 +6,7 @@
 /*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 16:31:30 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/30 23:28:33 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/31 04:34:56 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,18 +39,21 @@ void check_ex_cgi(std::string file, int sock_srv, int sock_clt)
 
 void int_env_cgi(std::vector<std::pair<std::string, std::string> > &v, int sock_srv, int sock_clt)
 {
-    v.push_back(std::make_pair("CONTENT_TYPE=", servs.at(sock_srv).clts.at(sock_clt).request_map["CONTENT_TYPE"]));
-    v.push_back(std::make_pair("CONTENT_LENGTH=", servs.at(sock_srv).clts.at(sock_clt).request_map["CONTENT_LENGTH"]));
+//     v.push_back(std::make_pair("CONTENT_TYPE=", servs.at(sock_srv).clts.at(sock_clt).request_map["CONTENT_TYPE"]));
+//     v.push_back(std::make_pair("CONTENT_LENGTH=", servs.at(sock_srv).clts.at(sock_clt).request_map["CONTENT_LENGTH"]));
     v.push_back(std::make_pair("REQUEST_METHOD=", servs.at(sock_srv).clts.at(sock_clt).request_map["method"]));
     // v.push_back(std::make_pair("PATH_INFO=/Users/iouazzan/goinfre/back", "/public/upload_session.php"));
     v.push_back(std::make_pair("PATH_INFO=", servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]));
     v.push_back(std::make_pair("QUERY_STRING=", servs.at(sock_srv).clts.at(sock_clt).request_map["query"]));
     v.push_back(std::make_pair("HTTP_COOKIE=", servs.at(sock_srv).clts.at(sock_clt).request_map["COOKIE"]));
     v.push_back(std::make_pair("SCRIPT_FILENAME=",  servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]));
-    //v.push_back(std::make_pair("GATEWAY_INTERFACE=", "CGI/1.1"));
+    v.push_back(std::make_pair("GATEWAY_INTERFACE=", "CGI/1.1"));
     v.push_back(std::make_pair("REDIRECT_STATUS=", "200"));
+    // v.push_back(std::make_pair("SERVER_PORT=", "8001"));
     v.push_back(std::make_pair("REQUEST_URI=", servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]));
     v.push_back(std::make_pair("HTTP_HOST=", servs.at(sock_srv).clts.at(sock_clt).request_map["Host"]));
+    // v.push_back(std::make_pair("SCRIPT_NAME=",  "/public/form.php"));
+    v.push_back(std::make_pair("REMOTE_ADDER=", "127.0.0.1"));
     // v.push_back(std::make_pair("REDIRECT_STATUS=", "1"));
 }
 void	ft_exit(std::string s)
@@ -77,10 +80,10 @@ int f_cgi(int sock_srv, int sock_clt)
     std::cout << "ahsdghlsdgjldfj-----------------------------\n";
     for (unsigned long i = 0; i < v.size(); i++)
     {
-        std::string str = v[i].first + "=" + v[i].second;
+        std::string str = v[i].first + v[i].second;
         env[i] = new char[str.length() + 1];
         std::strcpy(env[i], str.c_str());
-       std::cout << v[i].first << v[i].second << std::endl; 
+       std::cout << env[i] << std::endl; 
     }
     std::cout << "ahsdghlsdgjldfj-----------------------------\n";
 
@@ -94,7 +97,7 @@ int f_cgi(int sock_srv, int sock_clt)
 	if (fr == 0) {
         std::string ex;
         if (servs.at(sock_srv).clts.at(sock_clt).type_cgi == "php")
-            ex = "/usr/bin/php";
+            ex = "./public/php-cgi";
         else
             ex = "/usr/bin/python3";
         char *par[3];
