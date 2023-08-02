@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   delete_method.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 16:46:46 by namine            #+#    #+#             */
-/*   Updated: 2023/07/30 18:34:37 by namine           ###   ########.fr       */
+/*   Updated: 2023/08/02 21:39:10 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 void deleteMethod(int sock_clt, int sock_srv, std::string path, std::string resource)
 {
+	(void)sock_clt;
+	(void)sock_srv;
 	// struct dirent	*read_dir;
 	std::string		file_name;
 	

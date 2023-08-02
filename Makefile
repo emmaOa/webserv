@@ -1,7 +1,7 @@
 DIR_OBJ = ./obj
 NAME	=	webserv
 CXX		=	c++
-CXXFLAGS=	-Wall -Werror -Wextra -std=c++98
+CXXFLAGS=	
 RM		=	rm -rf	
 SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			parsing_file_configuration/init.cpp \
@@ -14,28 +14,29 @@ SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			request/request_part.cpp \
 			request/header_request.cpp \
 			request/pars_location.cpp \
+			cgi/cgi.cpp \
 			response/get_method.cpp \
 			response/post_method.cpp \
 			response/delete_method.cpp \
+			response/response.cpp \
 			response/utils.cpp \
-			cgi/cgi.cpp \
 
 OBJS = $(addprefix $(DIR_OBJ)/, $(SRCS:.cpp=.o))
 
 all:		$(NAME) $(INCS)
 
 $(NAME):	$(OBJS)
-	$(CXX) -g -fsanitize=address $(CXXFLAGS) $(OBJS) -o $(NAME)
+	$(CXX)  $(CXXFLAGS) $(OBJS) -o $(NAME)
 		
 $(DIR_OBJ)/%.o:		%.cpp
 	mkdir -p $(@D)
-	$(CXX) -g -fsanitize=address $(CXXFLAGS) -c $< -o $@
+	$(CXX)  $(CXXFLAGS) -c $< -o $@
 
 clean:
 	@$(RM) $(OBJS)
 
 fclean:		clean
-	@$(RM) $(NAME) obj rm ./file_cgi/*new ./file_post/file*
+	@$(RM) $(NAME) obj rm ./file_cgi/*txt ./file_post/file*
 
 re:			fclean all
 

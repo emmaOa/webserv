@@ -3,17 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   get_method.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 18:28:46 by namine            #+#    #+#             */
-/*   Updated: 2023/07/31 06:05:20 by namine           ###   ########.fr       */
+/*   Updated: 2023/08/02 21:38:32 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
-
 std::map <std::string, std::string> response;
-
 int send_header(int sock_clt, int sock_srv, int size, const char *path)
 {
     std::map<std::string,std::string>::iterator it;
@@ -93,17 +91,19 @@ int proceedResponse(int sock_clt, int sock_srv)
 
 int get_method(int sock_clt, int sock_srv)
 {
-    // struct dirent *read_dir;
-    long long int size;
+    struct dirent *read_dir;
     std::ifstream file;
+    long long int size;
     int chunk = 1024;
     struct stat buf;
-    int i = 0;
     char *buffer;
+    int i = 0;
     int rest;
+    DIR *dir;
     
     if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0)
     {
+        std::cout << "new client ...\n";
         servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
         if (pathSecure(servs.at(sock_srv).clts.at(sock_clt).path) != -1)
             { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return (1);}
@@ -119,8 +119,7 @@ int get_method(int sock_clt, int sock_srv)
                 }
 			else
             {
-                // std::string str;
-                f_cgi(sock_srv, sock_clt);
+                f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path);
                 servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
                 if (servs.at(sock_srv).clts.at(sock_clt).type_cgi.compare("php") == 0)
                     file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::out);
@@ -130,37 +129,40 @@ int get_method(int sock_clt, int sock_srv)
                 {
                     std::cout << "opened\n";
                 }
-                std::cout << "=======================================\n";
-                int         position;
-                std::string line;
+                // std::cout << "=======================================\n";
+                // int         position;
+                // std::string line;
                 
-                while(getline(file, line, '\n'))
-                {
-                    position = line.find("\r");
-                    std::cout << "pos = " << position << "\n";
-                    if (position == -1)
-                    {
-                        line.replace(line.find(line), line.length(), "");
-                    }
+                // while(getline(file, line, '\n'))
+                // {
+                //     position = line.find("\r");
+                //     std::cout << "pos = " << position << "\n";
+                //     if (position == -1)
+                //     {
+                //         line.replace(line.find(line), line.length(), "");
+                //     }
                    
-                    // getline(file, line, '\n');
-                    // if (line.compare("\r") == 0)
-                    // {
-                    //     break ;
-                    //     // line.replace(line.find(line),line.length(),"");
-                    // }
-                    std::cout << line << "\n";
-                }
-                file.close();
-                std::cout << "=======================================\n";
-                exit (0);
+                //     // getline(file, line, '\n');
+                //     // if (line.compare("\r") == 0)
+                //     // {
+                //     //     break ;
+                //     //     // line.replace(line.find(line),line.length(),"");
+                //     // }
+                //     std::cout << line << "\n";
+                // }
+                // file.close();
+                // std::cout << "=======================================\n";
             }
         }
         else // dir
         {
 			if (servs.at(sock_srv).clts.at(sock_clt).path.at(servs.at(sock_srv).clts.at(sock_clt).path.size() - 1) != '/')
 			{
+                std::cout << "dir without / ... \n";
+                servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]);
                 servs.at(sock_srv).clts.at(sock_clt).path.append("/");
+                std::cout <<  "path = " << servs.at(sock_srv).clts.at(sock_clt).path << "\n";
+                // exit(0);
 				servs.at(sock_srv).clts.at(sock_clt).err = "301";
 				servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
                 response["Location: "].assign(servs.at(sock_srv).clts.at(sock_clt).path);
@@ -168,28 +170,65 @@ int get_method(int sock_clt, int sock_srv)
                 
                 close(sock_clt);
                 servs.at(sock_srv).clts.erase(sock_clt);
+                // exit(0);
                 return (1);
 			}
             else
-            {
-                // check if i have index in config file
-                // if yes:
-                //      if cgi on -> Return Code Depend on cgi
-                //     if cgi off ->return requested file
-                //     if file has .py or .php extension and cgi off (mgs d'erreur)
-                // if no 
-                //     get autoindex file placed in root (should be "index.html")
-                //     if (autoindex off) -> 403 Forbidden
-                //     if (autoindex on) -> (list files)200 OK
-                //     DIR *dir = opendir(servs.at(sock_srv).clts.at(sock_clt).path.c_str());
-                //     while ((read_dir = readdir(dir)) != NULL)
-                //     {
-                //         std::cout << read_dir->d_name << "\n";
-                //     }
-                //         closedir(dir);
+            {   
+                std::cout << "dir with / ... \n";
+
+                // initialisation ----------------------------------------------------------------------
+                std::string index_name;
+                index_name.assign(data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("index").at(0));
+                int cgi_state;
+                if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0)
+                    cgi_state = 0;
+                else
+                    cgi_state = 1;
+                int index_exist = data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("index").size();
+                int extension;
+                if (check_ex_cgi_index(index_name, sock_clt, sock_srv).compare("null") == 0)
+                    extension = 0; //false
+                else
+                    extension = 1; //true
+                
+                int autoindex;
+                if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("autoindex").at(0).compare("off") == 0)
+                    autoindex = 0;
+                else
+                    autoindex = 1;
+                std::cout << "|index_name = " << index_name << "|\n";
+                std::cout << "|cgi_state = " << cgi_state << "|\n";
+                std::cout << "|extention = " << extension << "|\n";
+                std::cout << "|autoindex = " << autoindex << "|\n";
+                // --------------------------------------------------------------------------------------
+                if (index_exist && cgi_state == 0 && extension == 0) 
+                {
+                    servs.at(sock_srv).clts.at(sock_clt).path.append(index_name);
+                    // std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
+                    file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+                    if (!file)
+                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1);}
+                }
+                else if (index_exist && cgi_state == 1 && extension == 1)
+                {
+                    std::cout << "run cgi\n";
+                    std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
+                    f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path.append(index_name));
+                    servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
+                    file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+                    if (!file)
+                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1);}
+                }
+                else
+                {
+                    { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1);}
+                }
             }
         }
         size = file.tellg();
+        std::cout << "size = " << size << "\n";
+        // exit(0);
         file.seekg (0, file.beg);
         rest = size % chunk;
         if (!send_header(sock_clt, sock_srv, size, servs.at(sock_srv).clts.at(sock_clt).path.c_str()))
@@ -233,30 +272,5 @@ int get_method(int sock_clt, int sock_srv)
         }
     }
     delete[] buffer;
-    return (0);
-}
-
-int response_part(int sock_clt, int sock_srv)
-{
-    print_request_header(sock_clt, sock_srv);
-    
-    if (exec_err == 500)
-    {
-        interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
-        return (1);
-    }
-    if (!servs.at(sock_srv).clts.at(sock_clt).new_client) {
-        if (!proceedResponse(sock_clt, sock_srv))
-        {
-            close(sock_clt);
-            servs.at(sock_srv).clts.erase(sock_clt);
-            return (1);
-        }
-    }
-    if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "GET")
-    {
-        if (get_method(sock_clt, sock_srv))
-            return (1);
-    }
     return (0);
 }

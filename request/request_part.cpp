@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request_part.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/30 20:22:44 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/08/02 21:28:37 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -303,10 +303,14 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         if (lent < 1024 && servs.at(sock_srv).clts.at(sock_clt).is_boundary == 1 &&\
             data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0) {
             std::cout << "im heaaaaaar2\n";
+            servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             std::string str;
             str = buffer;
             str.erase(lent - servs.at(sock_srv).clts.at(sock_clt).len_bound, lent);
             fd.write(str.c_str() , lent - servs.at(sock_srv).clts.at(sock_clt).len_bound);
+            fd.close();
+            std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
+            return servs.at(sock_srv).clts.at(sock_clt).is_done;
         }
         else
             fd.write(buffer , lent);
@@ -350,9 +354,10 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 std::cout << "-----------------------------------------------------------------------------------\n";
                 servs.at(sock_srv).clts.at(sock_clt).err = "201";
                 fd.close();
+                std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
                 return servs.at(sock_srv).clts.at(sock_clt).is_done;
             }
-            if (servs.at(sock_srv).clts.at(sock_clt).is_boundary != 1) {
+            else if (servs.at(sock_srv).clts.at(sock_clt).is_boundary != 1) {
                 std::cout << "im heaaaaaar1\n";
                 std::cout << "ext\n";
                 std::string ex = get_extension_type(servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"]);
@@ -370,7 +375,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             servs.at(sock_srv).clts.at(sock_clt).err = "201";
             fd.close();
         }
-
+        std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
     }
     return servs.at(sock_srv).clts.at(sock_clt).is_done;
 }

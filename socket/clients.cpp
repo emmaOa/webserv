@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   clients.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/30 19:35:08 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/08/02 20:26:10 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,8 @@ int wait_on_clients()
         if (FD_ISSET(vr[i], &re)){
             read_ret = read(vr[i], buffer, 1024);
             if (read_ret < 0){
+                close(vr[i]);
+                // servs.at(sock_srv).clts.erase(vr[i]);
                 exec_err = 500;
             }
             else{

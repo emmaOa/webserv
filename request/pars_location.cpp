@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pars_location.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/29 02:07:52 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/08/02 13:19:49 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,14 +30,17 @@ int check_return(int sock_srv, int sock_clt, std::string location)
 
 int match_location(int sock_srv, int sock_clt)
 {
+    int s =0;
     int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host); 
     std::string uri = servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"];
+    if (uri[uri.length() - 1] == '/')
+        s =1;
     // std::cout << "key  :  " << uri << "<===\n";
     bool is_find = 0;
     std::vector<std::string> out; 
     const char delim = '/';
     split_one(uri, delim, out);
-
+    
     if (out.size() > 1)
         out.erase(out.begin());
     unsigned int i = out.size();
@@ -68,6 +71,8 @@ int match_location(int sock_srv, int sock_clt)
                     i++;
                 }
                 servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] = uri;
+                if (s == 1)
+                    servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] =  servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] + "/";
             }
             is_find = 1;
             break;

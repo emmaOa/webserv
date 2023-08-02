@@ -3,16 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   post_method.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/27 16:46:49 by namine            #+#    #+#             */
-/*   Updated: 2023/07/30 19:13:59 by namine           ###   ########.fr       */
+/*   Updated: 2023/08/02 20:41:37 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
 
-void postMethod(int sock_clt, int sock_srv)
+int postMethod(int sock_clt, int sock_srv)
 {
-    interruptResponse(sock_clt, sock_srv, "201", "Created");
+    (void)sock_clt;
+    (void)sock_srv;
+    std::cout << "post methode \n";
+    return (1);
+    // interruptResponse(sock_clt, sock_srv, "201", "Created");
 }
