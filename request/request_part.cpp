@@ -300,13 +300,14 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         if (lent < 1024 && servs.at(sock_srv).clts.at(sock_clt).is_boundary == 1) {
             std::cout << "im heaaaaaar2\n";
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-            std::string str;
-            str = buffer;
-            std::cout << str << "<<--------------------\n";
-            str.erase(lent - servs.at(sock_srv).clts.at(sock_clt).len_bound, lent);
-            fd.write(str.c_str() , lent - servs.at(sock_srv).clts.at(sock_clt).len_bound);
+            fd.write(buffer, lent);
+            fd.seekg(0, std::ios::end);
+            long long file_len = fd.tellg();
+            fd.seekp(0, std::ios::beg);
+            fd.close();
+            truncate(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), file_len - servs.at(sock_srv).clts.at(sock_clt).len_bound);
             long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
-            if (fd.tellg() > len) {
+            if (file_len > len) {
                 std::cout << "===============================\n";
                 fd.close();
                 return -1;

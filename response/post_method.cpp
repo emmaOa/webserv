@@ -16,6 +16,8 @@ int postMethod(int sock_clt, int sock_srv)
 {
     (void)sock_clt;
     (void)sock_srv;
+     close(sock_clt);
+    servs.at(sock_srv).clts.erase(sock_clt);
     std::cout << "post methode \n";
     return (1);
     // interruptResponse(sock_clt, sock_srv, "201", "Created");
