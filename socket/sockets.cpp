@@ -16,8 +16,10 @@ int check_creat_srv(std::vector<std::pair<std::string, std::string> > &v, std::v
 {
     for (unsigned long i = 0; i < v.size(); i++)
     {
-        if (v[i].first.compare(port) == 0 && v[i].second.compare(host) == 0 && v_name[i].compare(s_name) != 0)
-            return 1;
+        if (v[i].first.compare(port) == 0 && v[i].second.compare(host) == 0 && v_name[i].compare(s_name) != 0){
+            std::cout << "the same configuration server twice \n";
+            exit(0);
+        }
     }
     return 0;
 }
@@ -74,6 +76,7 @@ int create_socket(int id)
 
     if (bind(socket_sv, bind_address->ai_addr, bind_address->ai_addrlen)) {
         std::cout << "bind failed\n";
+        close(socket_sv);
         return -1;
     }
 

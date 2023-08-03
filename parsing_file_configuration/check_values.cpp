@@ -69,6 +69,21 @@ int check_lct_value(std::string key)
     return 0;
 }
 
+int check_host(std::string host)
+{
+    std::vector<std::string> out; 
+    const char delim = '.';
+    split_one(host, delim, out);
+    if (out.size() != 4)
+        return 1;
+    for(unsigned long i = 0; i < out.size(); i++)
+    {
+        if (strtod(out[i].c_str(), NULL) < 0 || strtod(out[i].c_str(), NULL) > 255)
+            return 1;
+    }
+    return 0;
+}
+
 int check_srv_value(std::string key)
 {
     unsigned long i = 0;
@@ -90,10 +105,11 @@ int check_srv_value(std::string key)
             std::cout << "invalid forme 13\n";
             return 1;
         }
-        if (data_cnf->dq_2[0].compare("127.0.0.1") != 0 && data_cnf->dq_2[0].compare("0.0.0.0") != 0 && \
-             data_cnf->dq_2[0].compare("localhost") != 0 &&  !data_cnf->dq_2.empty()){
-                        std::cout << "invalid forme 13\n";
-            return 1;
+        if (data_cnf->dq_2.empty() || data_cnf->dq_2.size() > 1 || data_cnf->dq_2[0].compare("localhost") != 0){
+            if (check_host(data_cnf->dq_2[0]) != 0) {
+                std::cout << "invalid forme 13\n";
+                return 1;
+            }
         }
         else
             return 0;
