@@ -213,7 +213,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         int size = 0;
     
         ss << sock_clt;
-        fd2.open(name2.c_str(),  std::ios::in | std::ios::out);
+        servs.at(sock_srv).clts.at(sock_clt).len_bound  = 53;
+        fd2.open(name2.c_str(),  std::ios::in | std::ios::out | std::ios::app);
         if (!fd2) {
             std::cout << "Open failed2" << std::endl;
             return -1;
@@ -246,7 +247,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (!(line.find(':') != std::string::npos) && !(i == 0)) {
                 j++;
                 if (j == 2){
-                    std::cout << line << "---- "<< line.length() << std::endl;
+                    std::cout << line << "<<---- " << std::endl;
                     servs.at(sock_srv).clts.at(sock_clt).len_bound = line.length() + 5;
                 }
                 if (j > 2)
@@ -285,6 +286,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             // fd.close();
         }
         fd2.close();
+        if (std::remove(name2.c_str()) != 0)
+            std::perror("Error deleting the file");
     }
     else if (servs.at(sock_srv).clts.at(sock_clt).is_done == 0){
         std::cout << "first in body\n";
@@ -299,9 +302,9 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             std::string str;
             str = buffer;
+            std::cout << str << "<<--------------------\n";
             str.erase(lent - servs.at(sock_srv).clts.at(sock_clt).len_bound, lent);
             fd.write(str.c_str() , lent - servs.at(sock_srv).clts.at(sock_clt).len_bound);
-            std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
             long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
             if (fd.tellg() > len) {
                 std::cout << "===============================\n";
