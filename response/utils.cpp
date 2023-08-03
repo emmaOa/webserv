@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/26 12:18:45 by namine            #+#    #+#             */
-/*   Updated: 2023/07/30 20:23:39 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/07/31 02:26:36 by namine           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,13 +30,11 @@ std::string	getContentType(const char* path)
         if (strcmp(last_dot, ".pdf") == 0) return "application/pdf";
         if (strcmp(last_dot, ".svg") == 0) return "image/svg+xml";
         if (strcmp(last_dot, ".txt") == 0) return "text/plain";
-        if (strcmp(last_dot, ".php") == 0) return "application/x-httpd-php";
-
     }
     return "application/octet-stream";
 }
 
-void	print_request_header(int sock_clt, int sock_srv)
+void		print_request_header(int sock_clt, int sock_srv)
 {
     std::cout << "\n-------------------------------- REQUEST HEADER : --------------------------------\n";
     std::cout << "sock_clt" << sock_clt << "\n";
@@ -53,30 +51,62 @@ void	print_request_header(int sock_clt, int sock_srv)
     std::cout << "-----------------------------------------------------------------------------------\n";
 }
 
-void serve_error_file(int sock_clt, int sock_srv)
+int			get_customized_error_file(int sock_clt, int sock_srv, const char *statusCode)
 {
-    (void)sock_clt;
-    (void)sock_srv;
-    std::string str;
-
-    std::cout << "serve error file...\n";
-    // str.assign("<!DOCTYPEhtml><htmllang=\"en\"><head><metacharset=\"UTF-8\"><metaname=\"viewport\"content=\"width=device-width,initial-scale=1.0\"><title>statusCodeError</title><style>body{background-color:#f2f2f2;font-family:Arial,sans-serif;margin:0;padding:0;}.container{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;text-align:center;}.error-code{font-size:80px;font-weight:bold;margin-bottom:20px;}.error-message{font-size:24px;margin-bottom:40px;}.home-link{color:#333;text-decoration:none;font-weight:bold;}.home-link:hover{text-decoration:underline;}</style></head><body><divclass=\"container\"><h1class=\"error-code\">statusCode</h1><pclass=\"error-message\">statusMessage</p><p>Gobackto<aclass=\"home-link\"href=\"/\">homepage</a>.</p></div></body></html>");
-    
-    std::cout << str << "\n";
-    
-    // char hello[] = "HTTP/1.1 statusCode Not Found\nContent-Type: text/plain\nContent-Length: 107\n\nResource Not Found :( gonna add some html and css later with appropriate error message and status code ...!";
-    // write(sock_clt , hello , sizeof(hello));
-    // servs.at(sock_srv).clts.at(sock_clt).err.assign("statusCode");
-    // servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("Not Found");
+	char			*buffer;
+	std::ifstream	file;
+    int				size;
+	
+	file.open (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(statusCode).at("null").at(0), std::ios::in | std::ios::binary | std::ios::ate);
+	if (!file)
+	{
+		servs.at(sock_srv).clts.at(sock_clt).err.assign("404");
+		servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("Not Found");
+		return (0);
+	}
+	else
+	{
+		size = file.tellg();
+		buffer = new char[size];
+		file.seekg (0, file.beg);
+		file.read (buffer, size);
+		send_header(sock_clt, sock_srv, size, ".html");
+		send(sock_clt, buffer, size, 0);
+	}
+	return (1);
 }
 
-int pathSecure(std::string path)
+void		serve_error_file(int sock_clt, int sock_srv)
+{
+    std::string	str;
+
+    if (servs.at(sock_srv).clts.at(sock_clt).err.compare("404") == 0)
+	{
+		if (get_customized_error_file(sock_clt, sock_srv, "404"))
+			return ;
+	}
+	else if (servs.at(sock_srv).clts.at(sock_clt).err.compare("400") == 0)
+	{
+		if (get_customized_error_file(sock_clt, sock_srv, "400"))
+			return ;
+	}
+    str.assign("<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> <title> statusCode </title> <style> body { background-color: #f2f2f2; font-family: Arial, sans-serif; margin: 0; padding: 0; } .container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; } .error-code { font-size: 80px; font-weight: bold; margin-bottom: 20px; } .error-message { font-size: 24px; margin-bottom: 40px; } .home-link { color: #333; text-decoration: none; font-weight: bold; } .home-link:hover { text-decoration: underline; } </style> </head> <body> <div class=\"container\"> <h1 class=\"error-code\"> statusCode </h1> <p class=\"error-message\"> statusMessage </p> <p>Go back to <a class=\"home-link\" href=\"/\">homepage</a>.</p> </div> </body> </html>");
+    str.replace(str.find("statusCode"), 11, servs.at(sock_srv).clts.at(sock_clt).err);
+    str.replace(str.find("statusCode"), 11, servs.at(sock_srv).clts.at(sock_clt).err);
+    str.replace(str.find("statusMessage"), 14, servs.at(sock_srv).clts.at(sock_clt).err_msg);
+    send_header(sock_clt, sock_srv, str.size(), ".html");
+    send(sock_clt, str.c_str(), str.length(), 0);
+}
+
+int			pathSecure(std::string path)
 {
     return (path.find(".."));
 }
 
-void interruptResponse(int sock_clt, int sock_srv)
+void		interruptResponse(int sock_clt, int sock_srv, const char *statusCode, const char *statusMessage)
 {
+	servs.at(sock_srv).clts.at(sock_clt).err.assign(statusCode);
+	servs.at(sock_srv).clts.at(sock_clt).err_msg.assign(statusMessage);
     serve_error_file(sock_clt, sock_srv);
     close(sock_clt);
     servs.at(sock_srv).clts.erase(sock_clt);
