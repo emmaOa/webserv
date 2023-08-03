@@ -194,6 +194,8 @@ int pars_bound( int sock_clt, int sock_srv, std::string line)
 
 int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
+        int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host); 
+
     std::cout << "\n-------------------------------- REQUEST PART : --------------------------------\n";
     std::cout << "sock_clt" << sock_clt << "\n";
     std::cout << "sock_srv" << sock_srv << "\n";
@@ -244,7 +246,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (!(line.find(':') != std::string::npos) && !(i == 0)) {
                 j++;
                 if (j == 2){
-                    // std::cout << line.length() << std::endl;
+                    std::cout << line << "---- "<< line.length() << std::endl;
                     servs.at(sock_srv).clts.at(sock_clt).len_bound = line.length() + 5;
                 }
                 if (j > 2)
@@ -299,8 +301,14 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             str = buffer;
             str.erase(lent - servs.at(sock_srv).clts.at(sock_clt).len_bound, lent);
             fd.write(str.c_str() , lent - servs.at(sock_srv).clts.at(sock_clt).len_bound);
-            fd.close();
             std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
+            long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
+            if (fd.tellg() > len) {
+                std::cout << "===============================\n";
+                fd.close();
+                return -1;
+            }
+            fd.close();
             return servs.at(sock_srv).clts.at(sock_clt).is_done;
         }
         else
@@ -341,7 +349,14 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                     return -1;
                 }
                 std::cout << "request end\n";
+                
                 std::cout << "-----------------------------------------------------------------------------------\n";
+                long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
+                if (fd.tellg() > len) {
+                    std::cout << "===============================\n";
+                    fd.close();
+                    return -1;
+                }
                 servs.at(sock_srv).clts.at(sock_clt).err = "201";
                 fd.close();
                 std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
@@ -359,6 +374,12 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                     std::cout << "Error renaming file." << std::endl;
                     return -1;
                 }
+            }
+            long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
+            if (fd.tellg() > len) {
+                std::cout << "===============================\n";
+                fd.close();
+                return -1;
             }
             std::cout << "request end\n";
             std::cout << "-----------------------------------------------------------------------------------\n";
