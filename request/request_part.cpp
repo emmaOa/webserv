@@ -278,6 +278,13 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             }
             else
                 fd.write(s2.c_str() , lent - l);
+            fd.seekp(0, std::ios::end);
+            if (fd.tellg() == 0){
+                servs.at(sock_srv).clts.at(sock_clt).err = "400";
+                servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+                return servs.at(sock_srv).clts.at(sock_clt).is_done;
+            }
+                // std::cout << "/////////////////////////////////\n";
             std::cout << "request end with 0\n";
             std::cout << "-----------------------------------------------------------------------------------\n";
         }
@@ -357,11 +364,12 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 std::cout << "-----------------------------------------------------------------------------------\n";
                 long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
                 if (fd.tellg() > len) {
+                    // servs.at(sock_srv).clts.at(sock_clt).err = "201";
                     std::cout << "===============================\n";
                     fd.close();
                     return -1;
                 }
-                servs.at(sock_srv).clts.at(sock_clt).err = "201";
+                // servs.at(sock_srv).clts.at(sock_clt).err = "201";
                 fd.close();
                 std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
                 return servs.at(sock_srv).clts.at(sock_clt).is_done;
@@ -387,7 +395,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             }
             std::cout << "request end\n";
             std::cout << "-----------------------------------------------------------------------------------\n";
-            servs.at(sock_srv).clts.at(sock_clt).err = "201";
+            // servs.at(sock_srv).clts.at(sock_clt).err = "201";
             fd.close();
         }
         std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
