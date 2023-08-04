@@ -6,7 +6,7 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/02 19:59:15 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/02 21:39:35 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/03 23:00:10 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int response_part(int sock_clt, int sock_srv)
     }
     if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "GET")
     {
-        if (get_method(sock_clt, sock_srv))
+        if (getMethod(sock_clt, sock_srv))
             return (1);
     }
     if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "POST")
@@ -40,11 +40,11 @@ int response_part(int sock_clt, int sock_srv)
         if (postMethod(sock_clt, sock_srv))
             return (1);
     }
-    // if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "DELETE")
-    // {
-    //     std::cout << "delete called ... \n";
-    //     if (deleteMethod(sock_clt, sock_srv))
-    //         return (1);
-    // }
+    if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"] == "DELETE")
+    {
+        std::cout << "delete called ... \n";
+        if (deleteMethod(sock_clt, sock_srv))
+            return (1);
+    }
     return (0);
 }

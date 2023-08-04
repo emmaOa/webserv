@@ -6,12 +6,14 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 18:28:46 by namine            #+#    #+#             */
-/*   Updated: 2023/08/02 21:38:32 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/03 23:14:56 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
+
 std::map <std::string, std::string> response;
+
 int send_header(int sock_clt, int sock_srv, int size, const char *path)
 {
     std::map<std::string,std::string>::iterator it;
@@ -35,10 +37,6 @@ int send_header(int sock_clt, int sock_srv, int size, const char *path)
         send(sock_clt, header.c_str(), header.length(), 0);
         return (0);
     }
-    
-    response["Server: "] = data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at("server_name").at("null").at(0);
-    header.append("Server: ");
-    header.append(response["Server: "]).append("\r\n");
  
     header.append("Content-Type: ");
     response["Content-Type: "] = getContentType(path).append(";charset=UTF-8");
@@ -89,7 +87,7 @@ int proceedResponse(int sock_clt, int sock_srv)
     return (1);
 }
 
-int get_method(int sock_clt, int sock_srv)
+int getMethod(int sock_clt, int sock_srv)
 {
     struct dirent *read_dir;
     std::ifstream file;
@@ -103,10 +101,9 @@ int get_method(int sock_clt, int sock_srv)
     
     if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0)
     {
-        std::cout << "new client ...\n";
         servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
-        if (pathSecure(servs.at(sock_srv).clts.at(sock_clt).path) != -1)
-            { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return (1);}
+        // if (pathSecure(servs.at(sock_srv).clts.at(sock_clt).path) != -1)
+        //     { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return (1);}
         if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1)
             { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1); }
         if(S_ISREG(buf.st_mode)) // file
@@ -176,7 +173,6 @@ int get_method(int sock_clt, int sock_srv)
             else
             {   
                 std::cout << "dir with / ... \n";
-
                 // initialisation ----------------------------------------------------------------------
                 std::string index_name;
                 index_name.assign(data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("index").at(0));
@@ -222,13 +218,47 @@ int get_method(int sock_clt, int sock_srv)
                 }
                 else
                 {
-                    { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1);}
+                    if (autoindex = 0)
+                        { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return (1);} 
+                    else
+                    {
+                        std::string str;
+                        std::cout << "path ===== |" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
+                        // exit(0);
+                        if ((dir = opendir (servs.at(sock_srv).clts.at(sock_clt).path.c_str())) != NULL)
+                        {
+                            str += "<html><head><title>Index of " + servs.at(sock_srv).clts.at(sock_clt).path + "</title></head><body bgcolor=\"white\"><h1>Index of "
+                                    + servs.at(sock_srv).clts.at(sock_clt).path + "</h1><hr><ul><li><a href=\"../\">..</a></li>";
+
+                            while ((read_dir = readdir (dir)) != NULL)
+                            {
+                                if (read_dir->d_name[0] != '.')
+                                    str += "<li><a href=\"" + std::string(read_dir->d_name) + "\">" + std::string(read_dir->d_name) + "</a></li>";
+                            }
+                            str += "</ul><hr></body></html>";
+                            closedir (dir);
+                            send_header(sock_clt, sock_srv, str.length(), ".html");
+                            send(sock_clt, str.c_str(), str.length(), 0);
+                            close(sock_clt);
+                            servs.at(sock_srv).clts.erase(sock_clt);
+                            return (1);
+                        }
+                        // if no 
+                        //     get autoindex file placed in root (should be "index.html")
+                        //     if (autoindex off) -> 403 Forbidden
+                        //     if (autoindex on) -> (list files)200 OK
+                        //     DIR *dir = opendir(servs.at(sock_srv).clts.at(sock_clt).path.c_str());
+                        //     while ((read_dir = readdir(dir)) != NULL)
+                        //     {
+                        //         std::cout << read_dir->d_name << "\n";
+                        //     }
+                        //         closedir(dir);
+                    }
                 }
             }
         }
         size = file.tellg();
         std::cout << "size = " << size << "\n";
-        // exit(0);
         file.seekg (0, file.beg);
         rest = size % chunk;
         if (!send_header(sock_clt, sock_srv, size, servs.at(sock_srv).clts.at(sock_clt).path.c_str()))

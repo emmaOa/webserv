@@ -89,7 +89,7 @@ int wait_on_clients()
         it2 = servs.at(it->first).clts.begin();
         while (it2 != servs.at(it->first).clts.end())
         {
-            if (it2->second.is_done != 1){
+            if (it2->second.is_done < 1){
                 FD_SET (it2->first, &re);
                 vr.push_back(it2->first);
             }

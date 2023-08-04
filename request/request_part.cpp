@@ -194,6 +194,8 @@ int pars_bound( int sock_clt, int sock_srv, std::string line)
 
 int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
+        int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host); 
+
     std::cout << "\n-------------------------------- REQUEST PART : --------------------------------\n";
     std::cout << "sock_clt" << sock_clt << "\n";
     std::cout << "sock_srv" << sock_srv << "\n";
@@ -203,7 +205,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         
         std::fstream fd2;
         std::string name;
-        std::string name2 = "test";
+        std::string name2 = "headr";
         std::string line;
         std::stringstream ss;
         // int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
@@ -211,7 +213,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         int size = 0;
     
         ss << sock_clt;
-        fd2.open(name2.c_str(),  std::ios::in | std::ios::out);
+        servs.at(sock_srv).clts.at(sock_clt).len_bound  = 53;
+        fd2.open(name2.c_str(),  std::ios::in | std::ios::out | std::ios::app);
         if (!fd2) {
             std::cout << "Open failed2" << std::endl;
             return -1;
@@ -244,7 +247,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (!(line.find(':') != std::string::npos) && !(i == 0)) {
                 j++;
                 if (j == 2){
-                    // std::cout << line.length() << std::endl;
+                    std::cout << line << "<<---- " << std::endl;
                     servs.at(sock_srv).clts.at(sock_clt).len_bound = line.length() + 5;
                 }
                 if (j > 2)
@@ -254,16 +257,14 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             i++;
         }
         check_err_head(sock_srv, sock_clt);
-        // std::cout << servs.at(sock_srv).clts.at(sock_clt).err << "\n";
-        // fallocate(fd, FALLOC_FL_COLLAPSE_RANGE, 0, 900);
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
-            servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
             servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
             std::fstream fd;
             name = "./file_post/file_" + ss.str() + random_String();
+            servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
             fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
             if (!fd ) {
-                std::cout << "Open failed" << std::endl;
+                std::cout << "Open failed-------" << std::endl;
                 return -1;
             }
 
@@ -274,42 +275,44 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Type") != servs.at(sock_srv).clts.at(sock_clt).request_map.end() && \
                 servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"].find("form-data") != std:: string :: npos){
                 servs.at(sock_srv).clts.at(sock_clt).is_boundary = 1;
-                if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0){
-                    size_t l2 = s2.find("\r\n\r\n") + 4;
-                    s2 = s2.substr(l2);
-                    fd.write(s2.c_str() , lent - (l2 + l));
-                }
             }
             else
                 fd.write(s2.c_str() , lent - l);
-            std::cout << "request end\n";
+            std::cout << "request end with 0\n";
             std::cout << "-----------------------------------------------------------------------------------\n";
         }
         else {
-            // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
-
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             // fd.close();
         }
         fd2.close();
+        if (std::remove(name2.c_str()) != 0)
+            std::perror("Error deleting the file");
     }
-    else if (servs.at(sock_srv).clts.at(sock_clt).is_done == 0 && servs.at(sock_srv).clts.at(sock_clt).err.compare("null") == 0){
+    else if (servs.at(sock_srv).clts.at(sock_clt).is_done == 0){
+        std::cout << "first in body\n";
         std::fstream fd;
         fd.open(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), std::ios::in | std::ios::out | std::ios::app);
         if (!fd) {
-            std::cout << "Open failed" << std::endl;
+            std::cout << "Open failed"  << servs.at(sock_srv).clts.at(sock_clt).fd_name<< std::endl;
             return -1;
         }
-        if (lent < 1024 && servs.at(sock_srv).clts.at(sock_clt).is_boundary == 1 &&\
-            data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0) {
+        if (lent < 1024 && servs.at(sock_srv).clts.at(sock_clt).is_boundary == 1) {
             std::cout << "im heaaaaaar2\n";
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-            std::string str;
-            str = buffer;
-            str.erase(lent - servs.at(sock_srv).clts.at(sock_clt).len_bound, lent);
-            fd.write(str.c_str() , lent - servs.at(sock_srv).clts.at(sock_clt).len_bound);
+            fd.write(buffer, lent);
+            fd.seekg(0, std::ios::end);
+            long long file_len = fd.tellg();
+            fd.seekp(0, std::ios::beg);
             fd.close();
-            std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
+            truncate(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), file_len - servs.at(sock_srv).clts.at(sock_clt).len_bound);
+            long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
+            if (file_len > len) {
+                std::cout << "===============================\n";
+                fd.close();
+                return -1;
+            }
+            fd.close();
             return servs.at(sock_srv).clts.at(sock_clt).is_done;
         }
         else
@@ -349,9 +352,15 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                     std::cout << "Error renaming file." << std::endl;
                     return -1;
                 }
-                // std::cout << "uri_new = |" << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "|" << "\n";
                 std::cout << "request end\n";
+                
                 std::cout << "-----------------------------------------------------------------------------------\n";
+                long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
+                if (fd.tellg() > len) {
+                    std::cout << "===============================\n";
+                    fd.close();
+                    return -1;
+                }
                 servs.at(sock_srv).clts.at(sock_clt).err = "201";
                 fd.close();
                 std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
@@ -369,6 +378,12 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                     std::cout << "Error renaming file." << std::endl;
                     return -1;
                 }
+            }
+            long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
+            if (fd.tellg() > len) {
+                std::cout << "===============================\n";
+                fd.close();
+                return -1;
             }
             std::cout << "request end\n";
             std::cout << "-----------------------------------------------------------------------------------\n";
