@@ -258,7 +258,10 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         }
         check_err_head(sock_srv, sock_clt);
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
-            servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
+            if (lent >= 1024)
+                servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
+            else
+                servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             std::fstream fd;
             name = "./file_post/file_" + ss.str() + random_String();
             servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
