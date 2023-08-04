@@ -35,6 +35,7 @@ int create_client(int sock)
     tmp->new_client = 0;
     tmp->current_position = 0;
     tmp->is_ex_cgi = 0;
+    tmp->first_time_cgi = 0;
     servs[sock].clts.insert(std::pair<int, client_info> (tmp->socket, *tmp));
     int socke = tmp->socket;
     delete tmp;

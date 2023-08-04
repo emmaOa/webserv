@@ -27,6 +27,8 @@ struct client_info {
     int is_ex_cgi;
     std::string file_cgi;
     std::string type_cgi;
+    long first_time_cgi;
+    int pid;
 };
 
 typedef struct s_srvs_set {
