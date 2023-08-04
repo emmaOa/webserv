@@ -192,6 +192,59 @@ int pars_bound( int sock_clt, int sock_srv, std::string line)
     return 0;
 }
 
+
+int pars_chunked_body(int sock_clt, int sock_srv, std::fstream &fd)
+{
+    std::cout << "pars chunked body \n";
+    int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host); 
+    std::fstream fd2;
+    int dec;
+    fd2.open("ttt", std::ios::in | std::ios::out | std::ios::app);
+    if (!fd2) {
+        std::cout << "Open failed3" << std::endl;
+        return -1;
+    }
+
+    servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+    fd.seekg(0, std::ios::beg);
+    std::string f_word = word_from_file(fd, 0);
+    int beg = f_word.length();
+    // std::cout << f_word ;
+    dec = he_to_in(f_word);
+    while (dec != 0)
+    {
+        beg += dec + 2;
+        char buff[dec];
+        fd.read(buff, dec);
+        fd2.write(buff, dec);
+        f_word = word_from_file(fd, beg);
+        beg += f_word.length();
+        // std::cout << f_word ;
+        dec = he_to_in(f_word);
+    }
+    fd.close();
+    fd2.close();
+    int result = std::rename("ttt", servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str());
+    if (result != 0) {
+        std::cout << "Error renaming file." << std::endl;
+        return -1;
+    }
+    std::cout << "request end\n";
+                
+    std::cout << "-----------------------------------------------------------------------------------\n";
+    long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
+    if (fd.tellg() > len) {
+    // servs.at(sock_srv).clts.at(sock_clt).err = "201";
+    std::cout << "===============================\n";
+    fd.close();
+    return -1;
+    }
+    // servs.at(sock_srv).clts.at(sock_clt).err = "201";
+    fd.close();
+    std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
+    return servs.at(sock_srv).clts.at(sock_clt).is_done;
+}
+
 int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
         int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host); 
@@ -207,6 +260,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::string name;
         std::string name2 = "headr";
         std::string line;
+        int is_bound_empty = 0;
         std::stringstream ss;
         // int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
         int i = 0;
@@ -233,8 +287,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             size += line.length() + 1;
             if (j == 2)
             {
-                if (line.find(':') != std::string::npos &&\
-                    data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0) {
+                if (line.find(':') != std::string::npos) {
                     std::cout << "im heaaaaaar1\n";
                     pars_bound(sock_clt, sock_srv, line);
                 }
@@ -247,6 +300,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (!(line.find(':') != std::string::npos) && !(i == 0)) {
                 j++;
                 if (j == 2){
+                    if (line.find('-') == std::string::npos)
+                        is_bound_empty = 1;
                     std::cout << line << "<<---- " << std::endl;
                     servs.at(sock_srv).clts.at(sock_clt).len_bound = line.length() + 5;
                 }
@@ -277,8 +332,14 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
  
             if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Type") != servs.at(sock_srv).clts.at(sock_clt).request_map.end() && \
                 servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"].find("form-data") != std:: string :: npos){
+                if (is_bound_empty == 1) {
+                    servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+                    fd.close();
+                    return 1;
+                }
                 servs.at(sock_srv).clts.at(sock_clt).is_boundary = 1;
                 servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
+
             }
             else {
                 fd.write(s2.c_str() , lent - l);
@@ -288,6 +349,11 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                         servs.at(sock_srv).clts.at(sock_clt).err = "400";
                         servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
                         return servs.at(sock_srv).clts.at(sock_clt).is_done;
+                    } else if((servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) && fd.tellg() != 0){
+                        fd2.close();
+                        if (std::remove(name2.c_str()) != 0)
+                            std::perror("Error deleting the file");
+                        return pars_chunked_body(sock_clt, sock_srv, fd);
                     }
                 }
             }
@@ -336,52 +402,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         if (lent < 1024) {
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) {
-                std::fstream fd2;
-                int dec;
-                fd2.open("ttt", std::ios::in | std::ios::out | std::ios::app);
-                if (!fd2) {
-                    std::cout << "Open failed3" << std::endl;
-                    return -1;
-                }
-
-                servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-                fd.seekg(0, std::ios::beg);
-                std::string f_word = word_from_file(fd, 0);
-                int beg = f_word.length();
-                // std::cout << f_word ;
-                dec = he_to_in(f_word);
-                while (dec != 0)
-                {
-                    beg += dec + 2;
-                    char buff[dec];
-                    fd.read(buff, dec);
-                    fd2.write(buff, dec);
-                    f_word = word_from_file(fd, beg);
-                    beg += f_word.length();
-                    // std::cout << f_word ;
-                    dec = he_to_in(f_word);
-                }
-                fd.close();
-                fd2.close();
-                int result = std::rename("ttt", servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str());
-                if (result != 0) {
-                    std::cout << "Error renaming file." << std::endl;
-                    return -1;
-                }
-                std::cout << "request end\n";
-                
-                std::cout << "-----------------------------------------------------------------------------------\n";
-                long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
-                if (fd.tellg() > len) {
-                    // servs.at(sock_srv).clts.at(sock_clt).err = "201";
-                    std::cout << "===============================\n";
-                    fd.close();
-                    return -1;
-                }
-                // servs.at(sock_srv).clts.at(sock_clt).err = "201";
-                fd.close();
-                std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
-                return servs.at(sock_srv).clts.at(sock_clt).is_done;
+                return (pars_chunked_body(sock_clt, sock_srv, fd));
             }
             else if (servs.at(sock_srv).clts.at(sock_clt).is_boundary != 1) {
                 std::cout << "im heaaaaaar1\n";
