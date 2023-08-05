@@ -6,7 +6,7 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 14:18:36 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/05 14:18:37 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/05 15:07:55 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ void recursive_deletion(int sock_clt, int sock_srv, std::string path)
 	return ;
 }
 
-int deleteMethod(int sock_clt, int sock_srv)
+void deleteMethod(int sock_clt, int sock_srv)
 {
 	struct stat buf;
 	
@@ -105,5 +105,4 @@ int deleteMethod(int sock_clt, int sock_srv)
 			servs.at(sock_srv).clts.erase(sock_clt);
 		}
 	}
-	return (1);
 }

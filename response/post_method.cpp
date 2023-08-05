@@ -6,13 +6,13 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 14:18:55 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/05 14:18:56 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/05 15:12:09 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
 
-int postMethod(int sock_clt, int sock_srv)
+void postMethod(int sock_clt, int sock_srv)
 {
     if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("upload_is").at(0).compare("on") == 0)
     {
@@ -37,5 +37,4 @@ int postMethod(int sock_clt, int sock_srv)
     }
 	close(sock_clt);
     servs.at(sock_srv).clts.erase(sock_clt);
-    return (1);
 }

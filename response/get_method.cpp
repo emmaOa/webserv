@@ -6,58 +6,13 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 14:18:46 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/05 14:18:47 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/05 15:25:04 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
 
-int send_header(int sock_clt, int sock_srv, int size, const char *path)
-{
-    std::map<std::string,std::string>::iterator it;
-    std::string header;
-
-    response["ProtocolVersion"] = servs.at(sock_srv).clts.at(sock_clt).request_map["http_vr"].erase(8);
-    response["StatusCode"] = servs.at(sock_srv).clts.at(sock_clt).err;
-    response["ErrorMsg"] = servs.at(sock_srv).clts.at(sock_clt).err_msg;
-    header.append(response["ProtocolVersion"]).append(" ");
-    header.append(response["StatusCode"]).append(" ");
-    header.append(response["ErrorMsg"]).append("\r\n");
-    
-    it = response.find("Location: ");
-    if (it != response.end())
-    {
-        header.append("Location: ");
-        header.append(response["Location: "]).append("\r\n\r\n");
-        std::cout << "\n-------------------------------- RESPONSE WITH LOCATION HEADER : --------------------------------\n";
-        std::cout << header << "\n";
-        std::cout << "-------------------------------------------------------------------------------------\n";
-        send(sock_clt, header.c_str(), header.length(), 0);
-        return (0);
-    }
- 
-    header.append("Content-Type: ");
-    response["Content-Type: "] = getContentType(path).append(";charset=UTF-8");
-    header.append(response["Content-Type: "]).append("\r\n");
-    
-    header.append("Content-Length: ");
-    response["Content-Length: "] = std::to_string(size);
-    header.append(response["Content-Length: "]).append("\r\n\r\n");
-    
-    if (send(sock_clt, header.c_str(), header.length(), 0) < (ssize_t)header.length())
-    {
-        std::cout << "SEND POSED IN HEADER !!!!\n";
-        close(sock_clt);
-        servs.at(sock_srv).clts.erase(sock_clt);
-        return (0);
-    }
-    std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
-    std::cout << header << "\n";
-    std::cout << "-------------------------------------------------------------------------------------\n";
-    return (1);
-}
-
-int getMethod(int sock_clt, int sock_srv)
+void getMethod(int sock_clt, int sock_srv)
 {
     struct dirent *read_dir;
     std::ifstream file;
@@ -72,10 +27,8 @@ int getMethod(int sock_clt, int sock_srv)
     if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0)
     {
         servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
-        // if (pathSecure(servs.at(sock_srv).clts.at(sock_clt).path) != -1)
-        //     { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return (1);}
         if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1)
-            { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1); }
+            { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ; }
         if(S_ISREG(buf.st_mode)) // file
         {
         	if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0 || (\
@@ -96,29 +49,6 @@ int getMethod(int sock_clt, int sock_srv)
                 {
                     std::cout << "opened\n";
                 }
-                // std::cout << "=======================================\n";
-                // int         position;
-                // std::string line;
-                
-                // while(getline(file, line, '\n'))
-                // {
-                //     position = line.find("\r");
-                //     std::cout << "pos = " << position << "\n";
-                //     if (position == -1)
-                //     {
-                //         line.replace(line.find(line), line.length(), "");
-                //     }
-                   
-                //     // getline(file, line, '\n');
-                //     // if (line.compare("\r") == 0)
-                //     // {
-                //     //     break ;
-                //     //     // line.replace(line.find(line),line.length(),"");
-                //     // }
-                //     std::cout << line << "\n";
-                // }
-                // file.close();
-                // std::cout << "=======================================\n";
             }
         }
         else // dir
@@ -135,7 +65,7 @@ int getMethod(int sock_clt, int sock_srv)
                 send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
                 close(sock_clt);
                 servs.at(sock_srv).clts.erase(sock_clt);
-                return (1);
+                return ;
 			}
             else
             {   
@@ -171,7 +101,7 @@ int getMethod(int sock_clt, int sock_srv)
                     // std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
                     file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
                     if (!file)
-                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1);}
+                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
                 }
                 else if (index_exist && cgi_state == 1 && extension == 1)
                 {
@@ -181,17 +111,17 @@ int getMethod(int sock_clt, int sock_srv)
                     servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
                     file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
                     if (!file)
-                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1);}
+                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
                 }
                 else
                 {
                     if (autoindex = 0)
-                        { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return (1);} 
+                        { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return ;} 
                     else
                     {
+                        // get autoindex file placed in folder (should be "index.html")
                         std::string str;
                         std::cout << "path ===== |" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
-                        // exit(0);
                         if ((dir = opendir (servs.at(sock_srv).clts.at(sock_clt).path.c_str())) != NULL)
                         {
                             str += "<html><head><title>Index of " + servs.at(sock_srv).clts.at(sock_clt).path + "</title></head><body bgcolor=\"white\"><h1>Index of "
@@ -208,18 +138,8 @@ int getMethod(int sock_clt, int sock_srv)
                             send(sock_clt, str.c_str(), str.length(), 0);
                             close(sock_clt);
                             servs.at(sock_srv).clts.erase(sock_clt);
-                            return (1);
+                            return ;
                         }
-                        // if no 
-                        //     get autoindex file placed in root (should be "index.html")
-                        //     if (autoindex off) -> 403 Forbidden
-                        //     if (autoindex on) -> (list files)200 OK
-                        //     DIR *dir = opendir(servs.at(sock_srv).clts.at(sock_clt).path.c_str());
-                        //     while ((read_dir = readdir(dir)) != NULL)
-                        //     {
-                        //         std::cout << read_dir->d_name << "\n";
-                        //     }
-                        //         closedir(dir);
                     }
                 }
             }
@@ -228,17 +148,16 @@ int getMethod(int sock_clt, int sock_srv)
         std::cout << "size = " << size << "\n";
         file.seekg (0, file.beg);
         rest = size % chunk;
-        if (!send_header(sock_clt, sock_srv, size, servs.at(sock_srv).clts.at(sock_clt).path.c_str()))
-            return (1);
+        send_header(sock_clt, sock_srv, size, servs.at(sock_srv).clts.at(sock_clt).path.c_str()); // check if send header fail !
         file.close();
         servs.at(sock_srv).clts.at(sock_clt).new_client++;
-        return (0);
+        return ;
     }
     else
     {
         file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-        if (!file.is_open()) { interruptResponse(sock_clt, sock_srv, "404", "Not Found");
-            return (1); }
+        if (!file.is_open())
+            { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
         buffer = new char[1024];
         size = file.tellg();
         rest = size % chunk;
@@ -253,21 +172,22 @@ int getMethod(int sock_clt, int sock_srv)
         if (send(sock_clt, buffer, chunk, 0) != chunk)
         {
             std::cout << "SEND POSED\n";
+            file.close();
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);
             delete[] buffer;
-            return (1);
+            return ;
         }
         file.close();
         servs.at(sock_srv).clts.at(sock_clt).current_position += chunk;
         if (i)
         {
+            file.close();
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);
             delete[] buffer;
-            return (1);
+            return ;
         }
     }
     delete[] buffer;
-    return (0);
 }

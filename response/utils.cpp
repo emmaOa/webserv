@@ -6,7 +6,7 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 14:19:01 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/05 14:19:06 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/05 15:14:20 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,11 +98,6 @@ void		serve_error_file(int sock_clt, int sock_srv)
     send(sock_clt, str.c_str(), str.length(), 0);
 }
 
-int			pathSecure(std::string path)
-{
-    return (path.find(".."));
-}
-
 void		interruptResponse(int sock_clt, int sock_srv, const char *statusCode, const char *statusMessage)
 {
 	servs.at(sock_srv).clts.at(sock_clt).err.assign(statusCode);
@@ -137,5 +132,50 @@ int			proceedResponse(int sock_clt, int sock_srv)
         servs.at(sock_srv).clts.at(sock_clt).err.assign("200");
         servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("OK");
     }
+    return (1);
+}
+
+int send_header(int sock_clt, int sock_srv, int size, const char *path)
+{
+    std::map<std::string,std::string>::iterator it;
+    std::string header;
+
+    response["ProtocolVersion"] = servs.at(sock_srv).clts.at(sock_clt).request_map["http_vr"].erase(8);
+    response["StatusCode"] = servs.at(sock_srv).clts.at(sock_clt).err;
+    response["ErrorMsg"] = servs.at(sock_srv).clts.at(sock_clt).err_msg;
+    header.append(response["ProtocolVersion"]).append(" ");
+    header.append(response["StatusCode"]).append(" ");
+    header.append(response["ErrorMsg"]).append("\r\n");
+    
+    it = response.find("Location: ");
+    if (it != response.end())
+    {
+        header.append("Location: ");
+        header.append(response["Location: "]).append("\r\n\r\n");
+        std::cout << "\n-------------------------------- RESPONSE WITH LOCATION HEADER : --------------------------------\n";
+        std::cout << header << "\n";
+        std::cout << "-------------------------------------------------------------------------------------\n";
+        send(sock_clt, header.c_str(), header.length(), 0);
+        return (0);
+    }
+ 
+    header.append("Content-Type: ");
+    response["Content-Type: "] = getContentType(path).append(";charset=UTF-8");
+    header.append(response["Content-Type: "]).append("\r\n");
+    
+    header.append("Content-Length: ");
+    response["Content-Length: "] = std::to_string(size);
+    header.append(response["Content-Length: "]).append("\r\n\r\n");
+    
+    if (send(sock_clt, header.c_str(), header.length(), 0) < (ssize_t)header.length())
+    {
+        std::cout << "SEND POSED IN HEADER !!!!\n";
+        close(sock_clt);
+        servs.at(sock_srv).clts.erase(sock_clt);
+        return (0);
+    }
+    std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
+    std::cout << header << "\n";
+    std::cout << "-------------------------------------------------------------------------------------\n";
     return (1);
 }
