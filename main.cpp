@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/30 18:40:46 by iouazzan         ###   ########.fr       */
+/*   Created: 2023/08/05 14:21:16 by nidor             #+#    #+#             */
+/*   Updated: 2023/08/05 14:21:21 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "./includes/webserv.hpp"
+
+std::map <std::string, std::string> response;
 std::map<int, srvs_set> servs;
 int exec_err;
 

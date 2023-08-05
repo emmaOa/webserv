@@ -5,14 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/28 18:28:46 by namine            #+#    #+#             */
-/*   Updated: 2023/08/03 23:14:56 by nidor            ###   ########.fr       */
+/*   Created: 2023/08/05 14:18:46 by nidor             #+#    #+#             */
+/*   Updated: 2023/08/05 14:18:47 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
-
-std::map <std::string, std::string> response;
 
 int send_header(int sock_clt, int sock_srv, int size, const char *path)
 {
@@ -56,34 +54,6 @@ int send_header(int sock_clt, int sock_srv, int size, const char *path)
     std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
     std::cout << header << "\n";
     std::cout << "-------------------------------------------------------------------------------------\n";
-    return (1);
-}
-
-int proceedResponse(int sock_clt, int sock_srv)
-{
-    if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") != 0)
-    {
-        if (servs.at(sock_srv).clts.at(sock_clt).err.compare("301") == 0 || servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
-        {
-            if (servs.at(sock_srv).clts.at(sock_clt).err.compare("301") == 0)
-                servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
-            if (servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
-                servs.at(sock_srv).clts.at(sock_clt).err_msg = "Found";
-            response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path.append(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
-            send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
-            return (0);
-        }
-        else
-        {
-            serve_error_file(sock_clt, sock_srv);
-            return (0);
-        }
-    }
-    else if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") == 0)
-    {
-        servs.at(sock_srv).clts.at(sock_clt).err.assign("200");
-        servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("OK");
-    }
     return (1);
 }
 
@@ -159,15 +129,12 @@ int getMethod(int sock_clt, int sock_srv)
                 servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]);
                 servs.at(sock_srv).clts.at(sock_clt).path.append("/");
                 std::cout <<  "path = " << servs.at(sock_srv).clts.at(sock_clt).path << "\n";
-                // exit(0);
 				servs.at(sock_srv).clts.at(sock_clt).err = "301";
 				servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
                 response["Location: "].assign(servs.at(sock_srv).clts.at(sock_clt).path);
                 send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
-                
                 close(sock_clt);
                 servs.at(sock_srv).clts.erase(sock_clt);
-                // exit(0);
                 return (1);
 			}
             else

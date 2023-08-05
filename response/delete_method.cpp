@@ -5,59 +5,73 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/27 16:46:46 by namine            #+#    #+#             */
-/*   Updated: 2023/08/03 20:40:42 by nidor            ###   ########.fr       */
+/*   Created: 2023/08/05 14:18:36 by nidor             #+#    #+#             */
+/*   Updated: 2023/08/05 14:18:37 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
 
-int recursive_deletion(int sock_clt, int sock_srv, std::string path)
+void recursive_deletion(int sock_clt, int sock_srv, std::string path)
 {
-	std::cout << "old path << " << path << "\n";
-	std::string oldPath;
-	
-	oldPath.assign(path);
+	struct dirent *read_dir;
 	struct stat buf;
-	DIR *dir = opendir(path.c_str());
+	DIR *dir;
+	
+	std::cout << " path" << path << "\n";
+	dir = opendir(path.c_str());
 	if (dir == NULL)
 	{
+		std::cout << "open faild\n";
 		interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
-		return (1);
+		return ;
 	}
-	struct dirent *read_dir;
-	
-	// path.append("/");
+	if (path.at(path.size() - 1) != '/')
+		path.append("/");
 	while ((read_dir = readdir(dir)) != NULL)
 	{
-		std::cout << "gonna loup \n";
 		if (read_dir->d_name[0] != '.')
 		{
-			std::cout <<  "file name = " << read_dir->d_name<<  "\n";
-			lstat(path.append(read_dir->d_name).c_str(), &buf);
+			std::cout <<  "readir-name = " << read_dir->d_name <<  "\n";
+			if (lstat(path.append(read_dir->d_name).c_str(), &buf) == -1) {
+				interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
+				return ; }
 			if(S_ISREG(buf.st_mode)) // file
 			{
 				if (!access(path.c_str(), W_OK)) // success
 				{
 					std::cout << "gonna delete ...\n";
 					std::remove(path.c_str());
+					std::cout << "path befor" << path << "\n";
+					int pos = path.find(read_dir->d_name);
+					std::string str(read_dir->d_name);
+					path.erase(pos, str.length());
+					std::cout << "path after" << path << "\n";
 				}
 				else
 				{
-					std::cout << "|can't delete = " << path.c_str() << "|\n";
-					interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
-					return (1);
+					std::cout << "can't delete = " << path.c_str() << "\n";
+					servs.at(sock_srv).clts.at(sock_clt).err.assign("500");
+					servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("Internal Server Error");
+					return ;
 				}
 			}
-			else
+			else // dir
 			{
+				std::string RootFolderName = read_dir->d_name;
+				std::cout << "RootFolderName " << RootFolderName << "\n";
+				std::cout << "path " << path << "\n";
 				recursive_deletion(sock_clt, sock_srv, path);
+				int pos = path.find(read_dir->d_name);
+				std::string str(read_dir->d_name);
+				path.erase(pos, str.length());
+				std::cout << "path after" << path << "\n";
 			}
 		}
-		std::remove(oldPath.c_str());
 	}
 	closedir(dir);
-	return (0);
+	std::remove(path.c_str());
+	return ;
 }
 
 int deleteMethod(int sock_clt, int sock_srv)
@@ -82,8 +96,14 @@ int deleteMethod(int sock_clt, int sock_srv)
 		if (servs.at(sock_srv).clts.at(sock_clt).path.at(servs.at(sock_srv).clts.at(sock_clt).path.size() - 1) != '/')
 			interruptResponse(sock_clt, sock_srv, "409", "Conflict");
 		else
-			if (!recursive_deletion(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).path))
-				interruptResponse(sock_clt, sock_srv, "204", "No Content");
+		{
+			servs.at(sock_srv).clts.at(sock_clt).err.assign("204");
+			servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("No content");
+			recursive_deletion(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).path);
+			serve_error_file(sock_clt, sock_srv);
+			close(sock_clt);
+			servs.at(sock_srv).clts.erase(sock_clt);
+		}
 	}
 	return (1);
 }

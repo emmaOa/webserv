@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/26 12:18:45 by namine            #+#    #+#             */
-/*   Updated: 2023/07/31 02:26:36 by namine           ###   ########.fr       */
+/*   Created: 2023/08/05 14:19:01 by nidor             #+#    #+#             */
+/*   Updated: 2023/08/05 14:19:06 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,4 +110,32 @@ void		interruptResponse(int sock_clt, int sock_srv, const char *statusCode, cons
     serve_error_file(sock_clt, sock_srv);
     close(sock_clt);
     servs.at(sock_srv).clts.erase(sock_clt);
+}
+
+int			proceedResponse(int sock_clt, int sock_srv)
+{
+    if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") != 0)
+    {
+        if (servs.at(sock_srv).clts.at(sock_clt).err.compare("301") == 0 || servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
+        {
+            if (servs.at(sock_srv).clts.at(sock_clt).err.compare("301") == 0)
+                servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
+            if (servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
+                servs.at(sock_srv).clts.at(sock_clt).err_msg = "Found";
+            response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
+            send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
+            return (0);
+        }
+        else
+        {
+            serve_error_file(sock_clt, sock_srv);
+            return (0);
+        }
+    }
+    else if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") == 0)
+    {
+        servs.at(sock_srv).clts.at(sock_clt).err.assign("200");
+        servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("OK");
+    }
+    return (1);
 }

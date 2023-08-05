@@ -179,7 +179,7 @@ int pars_bound( int sock_clt, int sock_srv, std::string line)
             if (out2[i].find('=') != std::string::npos){   
                 split_one(out2[i], delim3, out3);
                 servs.at(sock_srv).clts.at(sock_clt).request_map[out3[0]] = out3[1];
-                // std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map[out3[0]] << "\n";
+                std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map[out3[0]] << "\n";
                 out3.clear();
             }
         }
@@ -258,7 +258,10 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         }
         check_err_head(sock_srv, sock_clt);
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
-            servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
+            if (lent == 1024)
+                servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
+            else
+                servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             std::fstream fd;
             name = "./file_post/file_" + ss.str() + random_String();
             servs.at(sock_srv).clts.at(sock_clt).fd_name = name;
@@ -275,9 +278,22 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Type") != servs.at(sock_srv).clts.at(sock_clt).request_map.end() && \
                 servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"].find("form-data") != std:: string :: npos){
                 servs.at(sock_srv).clts.at(sock_clt).is_boundary = 1;
+                servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
             }
-            else
+            else {
                 fd.write(s2.c_str() , lent - l);
+                if ( servs.at(sock_srv).clts.at(sock_clt).is_done == 1) {
+                    fd.seekp(0, std::ios::end);
+                    if (fd.tellg() == 0){
+                        servs.at(sock_srv).clts.at(sock_clt).err = "400";
+                        servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+                        return servs.at(sock_srv).clts.at(sock_clt).is_done;
+                    }
+                }
+            }
+
+  
+                // std::cout << "/////////////////////////////////\n";
             std::cout << "request end with 0\n";
             std::cout << "-----------------------------------------------------------------------------------\n";
         }
@@ -357,11 +373,12 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 std::cout << "-----------------------------------------------------------------------------------\n";
                 long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
                 if (fd.tellg() > len) {
+                    // servs.at(sock_srv).clts.at(sock_clt).err = "201";
                     std::cout << "===============================\n";
                     fd.close();
                     return -1;
                 }
-                servs.at(sock_srv).clts.at(sock_clt).err = "201";
+                // servs.at(sock_srv).clts.at(sock_clt).err = "201";
                 fd.close();
                 std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";
                 return servs.at(sock_srv).clts.at(sock_clt).is_done;
@@ -387,7 +404,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             }
             std::cout << "request end\n";
             std::cout << "-----------------------------------------------------------------------------------\n";
-            servs.at(sock_srv).clts.at(sock_clt).err = "201";
+            // servs.at(sock_srv).clts.at(sock_clt).err = "201";
             fd.close();
         }
         std::cout << servs.at(sock_srv).clts.at(sock_clt).is_done << "<<--------------------\n";

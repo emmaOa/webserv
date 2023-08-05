@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/27 16:46:49 by namine            #+#    #+#             */
-/*   Updated: 2023/08/04 01:07:38 by nidor            ###   ########.fr       */
+/*   Created: 2023/08/05 14:18:55 by nidor             #+#    #+#             */
+/*   Updated: 2023/08/05 14:18:56 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,21 +20,22 @@ int postMethod(int sock_clt, int sock_srv)
 		struct stat buf;
 
         root.assign(data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("root").at(0));
-        root.c_str();
-        std::cout << "root " << root << "\n";
-        exit(0);
-        std::cout << "upload is on \n";
+        root.append("/toto");
+        std::cout << "|root = " << root.c_str() << "|\n";
+		// exit(0);
         
-        std::cout << "||||||||||||" << servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str() << "|||||||||||||\n";
-        if (std::rename(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), "file.txt") != 0)
+        std::cout << "|fd_mame ="  << servs.at(sock_srv).clts.at(sock_clt).fd_name.append("null") << "|\n";
+		if (std::rename(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), root.c_str()) != 0)
             perror("Error renaming file");
         else
 		    std::cout << "File renamed successfully";
-    	interruptResponse(sock_clt, sock_srv, "201", "Created");
+    	// interruptResponse(sock_clt, sock_srv, "201", "Created");
     }
     else if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("upload_is").at(0).compare("off") == 0)
     {
 		// get(sock_clt, sock_srv); adapter avec post
     }
+	close(sock_clt);
+    servs.at(sock_srv).clts.erase(sock_clt);
     return (1);
 }
