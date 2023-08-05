@@ -88,7 +88,7 @@ void int_env_cgi(std::vector<std::pair<std::string, std::string> > &v, int sock_
     v.push_back(std::make_pair("REQUEST_URI=", path));
     v.push_back(std::make_pair("HTTP_HOST=", servs.at(sock_srv).clts.at(sock_clt).request_map["Host"]));
     // v.push_back(std::make_pair("SCRIPT_NAME=",  "/public/form.php"));
-    v.push_back(std::make_pair("REMOTE_ADDER=", "127.0.0.1"));
+    // v.push_back(std::make_pair("REMOTE_ADDER=", "127.0.0.1"));
     // v.push_back(std::make_pair("REDIRECT_STATUS=", "1"));
 }
 void	ft_exit(std::string s)
@@ -112,15 +112,15 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
         //     std::cout << v[i].first << v[i].second << std::endl;
         // }    
         char *env[v.size() + 1];
-        // std::cout << "ahsdghlsdgjldfj-----------------------------\n";
+        std::cout << "ahsdghlsdgjldfj-----------------------------\n";
         for (unsigned long i = 0; i < v.size(); i++)
         {
             std::string str = v[i].first + v[i].second;
             env[i] = new char[str.length() + 1];
             std::strcpy(env[i], str.c_str());
-        //    std::cout << env[i] << std::endl; 
+           std::cout << env[i] << std::endl; 
         }
-        // std::cout << "ahsdghlsdgjldfj-----------------------------\n";
+        std::cout << "ahsdghlsdgjldfj-----------------------------\n";
 
         env[v.size()] = nullptr; 
         servs.at(sock_srv).clts.at(sock_clt).pid = fork();
@@ -139,16 +139,17 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
 
             par[0] = (char *)ex.c_str();
             par[1] = (char *)path.c_str();
+            // std::cout << path;
             par[2] = NULL;
             // /goinservs.at(sock_srv).clts.at(sock_clt).pide/iouazzan/back/csnxgn_new.txt
-            // std::cout << "---> " << par[0] << " - " << par[1] << std::endl;
+            std::cout <<servs.at(sock_srv).clts.at(sock_clt).fd_name << std::endl;
             int fd_out = open(servs.at(sock_srv).clts.at(sock_clt).file_cgi.c_str(), O_CREAT | O_RDWR, 0644);
             if (!fd_out) {
                 exec_err = 500;
                 return -1;
             }
             if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0){
-                int fd_in = open(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), O_CREAT | O_RDWR, 0644);
+                int fd_in = open(path.c_str(), O_CREAT | O_RDWR, 0644);
                 dup2(fd_in, 0);
             }
             // int fd_in = open("static.txt", O_CREAT | O_RDWR, 0644);
@@ -188,3 +189,4 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
     }
     return 0;
 }
+

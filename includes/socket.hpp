@@ -28,6 +28,7 @@ struct client_info {
     std::string file_cgi;
     std::string type_cgi;
     long first_time_cgi;
+    std::string boundry;
     int pid;
 };
 
