@@ -292,9 +292,9 @@ int pars_chunked_body(int sock_clt, int sock_srv, std::fstream &fd)
     long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
     if (fd.tellg() > len) {
     // servs.at(sock_srv).clts.at(sock_clt).err = "201";
-    std::cout << "===============================\n";
-    fd.close();
-    return -1;
+        std::cout << "===============================\n";
+        fd.close();
+        return 1;
     }
     // servs.at(sock_srv).clts.at(sock_clt).err = "201";
     fd.close();
@@ -328,8 +328,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         fd2.open(name2.c_str(),  std::ios::in | std::ios::out | std::ios::app);
         if (!fd2) {
             std::cout << "Open failed2" << std::endl;
-            if (std::remove(name2.c_str()) != 0)
-                std::perror("Error deleting the file");
+            if (std::remove(name2.c_str()) != 0) 
+                std::cout << "Error deleting the file";
             return -1;
         }
         fd2.write(buffer , lent);
@@ -388,7 +388,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (!fd ) {
                 std::cout << "Open failed-------" << std::endl;
                 if (std::remove(name2.c_str()) != 0)
-                    std::perror("Error deleting the file");
+                    std::cout << "Error deleting the file";
                 return -1;
             }
 
@@ -435,7 +435,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                             if (file_len > len) {
                                 std::cout << "===============================\n";
                                 fd.close();
-                                return -1;
+                                return 1;
                             }
                             fd.close();
                             return servs.at(sock_srv).clts.at(sock_clt).is_done;
@@ -520,7 +520,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (file_len > len) {
                 std::cout << "===============================\n";
                 fd.close();
-                return -1;
+                return 1;
             }
             fd.close();
             return servs.at(sock_srv).clts.at(sock_clt).is_done;
@@ -549,7 +549,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (fd.tellg() > len) {
                 std::cout << "===============================\n";
                 fd.close();
-                return -1;
+                return 1;
             }
             std::cout << "request end\n";
             std::cout << "-----------------------------------------------------------------------------------\n";
