@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   store.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:10:45 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/02 19:28:50 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/06 11:21:43 by emma             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ int store(std::string line)
     }
     return 0;
 }
+
 
 int is_location(std::string line)
 {

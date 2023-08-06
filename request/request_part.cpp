@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request_part.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/08/02 21:28:37 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/06 06:35:05 by emma             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ bool check_allowed_chars(std::string str)
 
 int port_srv(int port, std::string host)
 {
-    // std::cout << "port : " << port << "host :"<< host << "\n";
+    // std::cout << "port : "<< port << "host :"<< host << "\n";
     int i = 0;
     int id = -1;
     std::deque <m_mp_dq >::iterator it;
@@ -61,7 +61,7 @@ void check_err_head(int sock_srv, int sock_clt)
     }
     if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") == servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Length") == servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
         servs.at(sock_srv).clts.at(sock_clt).err = "400";
-        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request1";
+        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
     }
     if (servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"].length() > 2048) {
         servs.at(sock_srv).clts.at(sock_clt).err = "414";
@@ -69,8 +69,12 @@ void check_err_head(int sock_srv, int sock_clt)
     }
     if (check_allowed_chars(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]) < 1) {
         servs.at(sock_srv).clts.at(sock_clt).err = "400";
-        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request2";
-    } 
+        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
+    }
+    if (servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"].length() > 2048) {
+        servs.at(sock_srv).clts.at(sock_clt).err = "414";
+        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Request-URI Too long";
+    }
 }
 
 std::string random_String()
@@ -317,19 +321,17 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::string name;
         std::string name2 = "headr";
         std::string line;
-        int is_bound_empty = 0;
+        // int is_bound_empty = 0;
         std::stringstream ss;
         // int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
         int i = 0;
         int size = 0;
     
         ss << sock_clt;
-        servs.at(sock_srv).clts.at(sock_clt).len_bound  = 53;
+        // servs.at(sock_srv).clts.at(sock_clt).len_bound  = 53;
         fd2.open(name2.c_str(),  std::ios::in | std::ios::out | std::ios::app);
         if (!fd2) {
             std::cout << "Open failed2" << std::endl;
-            if (std::remove(name2.c_str()) != 0) 
-                std::cout << "Error deleting the file";
             return -1;
         }
         fd2.write(buffer , lent);
@@ -338,9 +340,10 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::getline(fd2, line);
         first_line(line, sock_clt, sock_srv);
         if (match_location(sock_srv, sock_clt) > 0) {
-            servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
+            fd2.close();
             if (std::remove(name2.c_str()) != 0)
-                std::perror("Error deleting the file");
+                std::cout << "Error deleting the file\n";
+            servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             return 1;
         }
                     // exit(0);
@@ -375,6 +378,9 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 }
             i++;
         }
+        fd2.close();
+        if (std::remove(name2.c_str()) != 0)
+            std::cout << "Error deleting the file\n";
         check_err_head(sock_srv, sock_clt);
         if (servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
             if (lent < 1024)
@@ -387,8 +393,6 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             fd.open(name.c_str(), std::ios::in | std::ios::out | std::ios::app);
             if (!fd ) {
                 std::cout << "Open failed-------" << std::endl;
-                if (std::remove(name2.c_str()) != 0)
-                    std::cout << "Error deleting the file";
                 return -1;
             }
 
@@ -415,10 +419,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
                             if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("upload_is").at(0).compare("on") == 0){
                                 servs.at(sock_srv).clts.at(sock_clt).err = "400";
-                                servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request1";
+                                servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
                             }
-                            if (std::remove(name2.c_str()) != 0)
-                                std::perror("Error deleting the file");
                             return 1;
                         }
                         fd.write(s.c_str() , s.length() - 4);
@@ -475,16 +477,11 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                     fd.seekp(0, std::ios::end);
                     if (fd.tellg() == 0){
                         servs.at(sock_srv).clts.at(sock_clt).err = "400";
+                        servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
                         servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
-                        if (std::remove(name2.c_str()) != 0)
-                            std::perror("Error deleting the file");
                         return servs.at(sock_srv).clts.at(sock_clt).is_done;
-                    } else if((servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) && fd.tellg() != 0){
-                        fd2.close();
-                        if (std::remove(name2.c_str()) != 0)
-                            std::perror("Error deleting the file");
+                    } else if((servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) && fd.tellg() != 0)
                         return pars_chunked_body(sock_clt, sock_srv, fd);
-                    }
                 }
             }
             // std::cout << "/////////////////////////////////\n";
@@ -495,9 +492,6 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             // fd.close();
         }
-        fd2.close();
-        if (std::remove(name2.c_str()) != 0)
-            std::perror("Error deleting the file");
     }
     else if (servs.at(sock_srv).clts.at(sock_clt).is_done == 0){
         std::cout << "first in body\n";

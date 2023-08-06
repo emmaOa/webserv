@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pars_location.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/07 18:20:28 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/08/02 13:19:49 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/06 06:35:12 by emma             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int check_return(int sock_srv, int sock_clt, std::string location)
 
     if (data_cnf->servers.at(id_srv).at(location).at("return").size() > 0) {
         servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] = data_cnf->servers.at(id_srv).at(location).at("return").at(0);
-        // std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "<===\n";
+        // std::cout <<servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"] << "<===\n";
         if (data_cnf->servers.at(id_srv).at(location).at("return").size() == 2)
             servs.at(sock_srv).clts.at(sock_clt).err = data_cnf->servers.at(id_srv).at(location).at("return").at(1);
         else

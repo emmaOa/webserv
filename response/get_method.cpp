@@ -3,155 +3,129 @@
 /*                                                        :::      ::::::::   */
 /*   get_method.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/28 18:28:46 by namine            #+#    #+#             */
-/*   Updated: 2023/08/02 21:38:32 by nidor            ###   ########.fr       */
+/*   Created: 2023/08/05 14:18:46 by nidor             #+#    #+#             */
+/*   Updated: 2023/08/06 11:21:20 by emma             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
-std::map <std::string, std::string> response;
-int send_header(int sock_clt, int sock_srv, int size, const char *path)
-{
-    std::map<std::string,std::string>::iterator it;
-    std::string header;
 
-    response["ProtocolVersion"] = servs.at(sock_srv).clts.at(sock_clt).request_map["http_vr"].erase(8);
-    response["StatusCode"] = servs.at(sock_srv).clts.at(sock_clt).err;
-    response["ErrorMsg"] = servs.at(sock_srv).clts.at(sock_clt).err_msg;
-    header.append(response["ProtocolVersion"]).append(" ");
-    header.append(response["StatusCode"]).append(" ");
-    header.append(response["ErrorMsg"]).append("\r\n");
-    
-    it = response.find("Location: ");
-    if (it != response.end())
-    {
-        header.append("Location: ");
-        header.append(response["Location: "]).append("\r\n\r\n");
-        std::cout << "\n-------------------------------- RESPONSE WITH LOCATION HEADER : --------------------------------\n";
-        std::cout << header << "\n";
-        std::cout << "-------------------------------------------------------------------------------------\n";
-        send(sock_clt, header.c_str(), header.length(), 0);
-        return (0);
-    }
-    
-    response["Server: "] = data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at("server_name").at("null").at(0);
-    header.append("Server: ");
-    header.append(response["Server: "]).append("\r\n");
- 
-    header.append("Content-Type: ");
-    response["Content-Type: "] = getContentType(path).append(";charset=UTF-8");
-    header.append(response["Content-Type: "]).append("\r\n");
-    
-    header.append("Content-Length: ");
-    response["Content-Length: "] = std::to_string(size);
-    header.append(response["Content-Length: "]).append("\r\n\r\n");
-    
-    if (send(sock_clt, header.c_str(), header.length(), 0) < (ssize_t)header.length())
-    {
-        std::cout << "SEND POSED IN HEADER !!!!\n";
-        close(sock_clt);
-        servs.at(sock_srv).clts.erase(sock_clt);
-        return (0);
-    }
-    std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
-    std::cout << header << "\n";
-    std::cout << "-------------------------------------------------------------------------------------\n";
-    return (1);
-}
-
-int proceedResponse(int sock_clt, int sock_srv)
+typedef struct s_getVariables
 {
-    if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") != 0)
-    {
-        if (servs.at(sock_srv).clts.at(sock_clt).err.compare("301") == 0 || servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
-        {
-            if (servs.at(sock_srv).clts.at(sock_clt).err.compare("301") == 0)
-                servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
-            if (servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
-                servs.at(sock_srv).clts.at(sock_clt).err_msg = "Found";
-            response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path.append(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
-            send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
-            return (0);
-        }
-        else
-        {
-            serve_error_file(sock_clt, sock_srv);
-            return (0);
-        }
-    }
-    else if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") == 0)
-    {
-        servs.at(sock_srv).clts.at(sock_clt).err.assign("200");
-        servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("OK");
-    }
-    return (1);
-}
-
-int get_method(int sock_clt, int sock_srv)
-{
+    std::string cgiState;
+    std::string cgiExtension;
+    
     struct dirent *read_dir;
     std::ifstream file;
     long long int size;
-    int chunk = 1024;
-    struct stat buf;
+    int chunk;
     char *buffer;
-    int i = 0;
+    int i;
     int rest;
     DIR *dir;
+
+}t_getVariables;
+
+
+void initializeVariables(int sock_clt, int sock_srv, t_getVariables *var)
+{
+    var->chunk = 1024;
+    var->i = 0;
+    if(data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0)
+        var->cgiState.assign("false");
+    else
+        var->cgiState.assign("true");
+    if (servs.at(sock_srv).clts.at(sock_clt).is_ex_cgi == 0)
+        var->cgiExtension.assign("false");
+    else
+        var->cgiExtension.assign("true");
+}
+std::string get_extension_type2(std::string type) {
+    std::cout << "type : " << type << std::endl;
+    std::vector<std::pair<std::string, std::string> > v;
+    v.push_back(std::make_pair("text/css\r", ".css"));
+    v.push_back(std::make_pair("text/csv\r", ".csv"));
+    v.push_back(std::make_pair("image/gif\r", ".gif"));
+    v.push_back(std::make_pair("text/html\r", ".html"));
+    v.push_back(std::make_pair("image/x-icon\r", ".ico"));
+    v.push_back(std::make_pair("image/jpeg\r", ".jpeg"));
+    v.push_back(std::make_pair("application/javascript\r", ".js"));
+    v.push_back(std::make_pair("application/json\r", ".json"));
+    v.push_back(std::make_pair("image/png\r", ".png"));
+    v.push_back(std::make_pair("application/pdf\r", ".pdf"));
+    v.push_back(std::make_pair("text/plain\r", ".txt"));
+    v.push_back(std::make_pair("image/svg+xml\r", ".svg"));
+    v.push_back(std::make_pair("application/x-httpd-php\r", ".php"));
+
+    for (unsigned long i = 0; i < v.size(); i++)
+    {
+        std::cout << "v : "<< v[i].first << std::endl;
+        if (v[i].first.compare(type) == 0)
+            return v[i].second;
+    }
+    return "null";
+}
+
+void getMethod(int sock_clt, int sock_srv)
+{
+    t_getVariables *var = new t_getVariables; // ne pas oublier de le delete !!!
+    struct stat buf;
+    std::vector<std::string> out;
     
+    initializeVariables(sock_clt, sock_srv, var);
     if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0)
     {
-        std::cout << "new client ...\n";
         servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
-        if (pathSecure(servs.at(sock_srv).clts.at(sock_clt).path) != -1)
-            { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return (1);}
         if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1)
-            { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1); }
+            { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ; }
         if(S_ISREG(buf.st_mode)) // file
         {
-        	if (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0 || (\
-                data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("on") == 0 && \
-                servs.at(sock_srv).clts.at(sock_clt).is_ex_cgi == 0))
-                {
-				    file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-                }
+        	if (var->cgiState == "off" || (var->cgiState == "on" && var->cgiExtension == "false"))
+            {
+                var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+            }
 			else
             {
                 f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path);
-                servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
+                //     // if (std::remove("example") != 0)
+                //     //     std::cout << "remove faild\n";
+                 servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
                 if (servs.at(sock_srv).clts.at(sock_clt).type_cgi.compare("php") == 0)
-                    file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::out);
-                else
-                    file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-                if (file)
                 {
-                    std::cout << "opened\n";
+                    std::string str;
+                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::out);
+                    std::fstream myfile;
+                    myfile.open("example", std::ios::in | std::ios::out | std::ios::app);
+                    while(getline(var->file, str))
+                    {   
+                        std::cout << str << "\n";
+                        ft_split(str.c_str(), ':', out);
+                        std::cout << "key = " << out[0] << "value = " << out[1] << "\n";
+                        response[out[0]] = out[1];
+                        out.clear();
+                        if (str == "\r")
+                        {
+                            while (getline(var->file, str))
+                            {
+                                myfile << str;
+                                myfile << "\n";
+                            }
+                        }
+                    }
+                    ft_split(response["Content-type"].c_str(), ';', out);
+                    std::string ext;
+                    if (out.size() == 2)
+                        ext = get_extension_type2(out[0]);
+                    else
+                        ext = out[0];
+                    out.clear();
+                    servs.at(sock_srv).clts.at(sock_clt).path = servs.at(sock_srv).clts.at(sock_clt).path + ext;
+                    rename("example", servs.at(sock_srv).clts.at(sock_clt).path.c_str());
                 }
-                // std::cout << "=======================================\n";
-                // int         position;
-                // std::string line;
-                
-                // while(getline(file, line, '\n'))
-                // {
-                //     position = line.find("\r");
-                //     std::cout << "pos = " << position << "\n";
-                //     if (position == -1)
-                //     {
-                //         line.replace(line.find(line), line.length(), "");
-                //     }
-                   
-                //     // getline(file, line, '\n');
-                //     // if (line.compare("\r") == 0)
-                //     // {
-                //     //     break ;
-                //     //     // line.replace(line.find(line),line.length(),"");
-                //     // }
-                //     std::cout << line << "\n";
-                // }
-                // file.close();
-                // std::cout << "=======================================\n";
+                else
+                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
             }
         }
         else // dir
@@ -162,21 +136,17 @@ int get_method(int sock_clt, int sock_srv)
                 servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]);
                 servs.at(sock_srv).clts.at(sock_clt).path.append("/");
                 std::cout <<  "path = " << servs.at(sock_srv).clts.at(sock_clt).path << "\n";
-                // exit(0);
 				servs.at(sock_srv).clts.at(sock_clt).err = "301";
 				servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
                 response["Location: "].assign(servs.at(sock_srv).clts.at(sock_clt).path);
                 send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
-                
                 close(sock_clt);
                 servs.at(sock_srv).clts.erase(sock_clt);
-                // exit(0);
-                return (1);
+                return ;
 			}
             else
             {   
                 std::cout << "dir with / ... \n";
-
                 // initialisation ----------------------------------------------------------------------
                 std::string index_name;
                 index_name.assign(data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("index").at(0));
@@ -206,9 +176,9 @@ int get_method(int sock_clt, int sock_srv)
                 {
                     servs.at(sock_srv).clts.at(sock_clt).path.append(index_name);
                     // std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
-                    file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-                    if (!file)
-                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1);}
+                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+                    if (!var->file)
+                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
                 }
                 else if (index_exist && cgi_state == 1 && extension == 1)
                 {
@@ -216,61 +186,85 @@ int get_method(int sock_clt, int sock_srv)
                     std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
                     f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path.append(index_name));
                     servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
-                    file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-                    if (!file)
-                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1);}
+                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+                    if (!var->file)
+                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
                 }
                 else
                 {
-                    { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return (1);}
+                    if (autoindex == 0)
+                        { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return ;} 
+                    else
+                    {
+                        // get autoindex file placed in folder (should be "index.html")
+                        std::string str;
+                        std::cout << "path ===== |" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
+                        if ((var->dir = opendir (servs.at(sock_srv).clts.at(sock_clt).path.c_str())) != NULL)
+                        {
+                            str += "<html><head><title>Index of " + servs.at(sock_srv).clts.at(sock_clt).path + "</title></head><body bgcolor=\"white\"><h1>Index of "
+                                    + servs.at(sock_srv).clts.at(sock_clt).path + "</h1><hr><ul><li><a href=\"../\">..</a></li>";
+
+                            while ((var->read_dir = readdir (var->dir)) != NULL)
+                            {
+                                if (var->read_dir->d_name[0] != '.')
+                                    str += "<li><a href=\"" + std::string(var->read_dir->d_name) + "\">" + std::string(var->read_dir->d_name) + "</a></li>";
+                            }
+                            str += "</ul><hr></body></html>";
+                            closedir (var->dir);
+                            send_header(sock_clt, sock_srv, str.length(), ".html");
+                            send(sock_clt, str.c_str(), str.length(), 0);
+                            close(sock_clt);
+                            servs.at(sock_srv).clts.erase(sock_clt);
+                            return ;
+                        }
+                    }
                 }
             }
         }
-        size = file.tellg();
-        std::cout << "size = " << size << "\n";
-        // exit(0);
-        file.seekg (0, file.beg);
-        rest = size % chunk;
-        if (!send_header(sock_clt, sock_srv, size, servs.at(sock_srv).clts.at(sock_clt).path.c_str()))
-            return (1);
-        file.close();
+        var->size = var->file.tellg();
+        std::cout << "size = " << var->size << "\n";
+        var->file.seekg (0, var->file.beg);
+        var->rest = var->size % var->chunk;
+        send_header(sock_clt, sock_srv, var->size, servs.at(sock_srv).clts.at(sock_clt).path.c_str()); // check if send header fail !
+        var->file.close();
         servs.at(sock_srv).clts.at(sock_clt).new_client++;
-        return (0);
+        return ;
     }
     else
     {
-        file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-        if (!file.is_open()) { interruptResponse(sock_clt, sock_srv, "404", "Not Found");
-            return (1); }
-        buffer = new char[1024];
-        size = file.tellg();
-        rest = size % chunk;
-        if (servs.at(sock_srv).clts.at(sock_clt).current_position > size)
+        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+        if (!var->file.is_open())
+            { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
+        var->buffer = new char[1024];
+        var->size = var->file.tellg();
+        var->rest = var->size % var->chunk;
+        if (servs.at(sock_srv).clts.at(sock_clt).current_position > var->size)
         {
-            i = 1;
-            servs.at(sock_srv).clts.at(sock_clt).current_position -= chunk;
-            chunk = rest;
+            var->i = 1;
+            servs.at(sock_srv).clts.at(sock_clt).current_position -= var->chunk;
+            var->chunk = var->rest;
         }
-        file.seekg (servs.at(sock_srv).clts.at(sock_clt).current_position, file.beg);
-        file.read (buffer, chunk); // protect read
-        if (send(sock_clt, buffer, chunk, 0) != chunk)
+        var->file.seekg (servs.at(sock_srv).clts.at(sock_clt).current_position, var->file.beg);
+        var->file.read (var->buffer, var->chunk); // protect read
+        if (send(sock_clt, var->buffer, var->chunk, 0) != var->chunk)
         {
             std::cout << "SEND POSED\n";
+            var->file.close();
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);
-            delete[] buffer;
-            return (1);
+            delete[] var->buffer;
+            return ;
         }
-        file.close();
-        servs.at(sock_srv).clts.at(sock_clt).current_position += chunk;
-        if (i)
+        var->file.close();
+        servs.at(sock_srv).clts.at(sock_clt).current_position += var->chunk;
+        if (var->i)
         {
+            var->file.close();
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);
-            delete[] buffer;
-            return (1);
+            delete[] var->buffer;
+            return ;
         }
     }
-    delete[] buffer;
-    return (0);
+    delete[] var->buffer;
 }

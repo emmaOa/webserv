@@ -3,18 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: styes <styes@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 16:31:30 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/08/02 19:03:06 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/06 09:36:02 by styes            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
-#include <sys/wait.h> // TODO ADDED !!!!!!!!!!!!!!!!!!!!!!!
+#include <sys/wait.h> // TODO ADDED !!!!!!!!!!!!!!!!!!!!!!
 void check_ex_cgi(std::string file, int sock_srv, int sock_clt)
 {
     std::vector<std::string> out; 
+    
     const char delim = '.';
     std::string ext;
     split_one(file, delim, out);
@@ -26,7 +27,6 @@ void check_ex_cgi(std::string file, int sock_srv, int sock_clt)
     }
     else if(out.size() == 2){
         ext = "." + out[1];
-        // std::cout << "extantion is : "<< ex << std::endl;
     }
     if (!ext.empty() && (ext.compare(".py") == 0 || ext.compare(".php") == 0)) {
         servs.at(sock_srv).clts.at(sock_clt).is_ex_cgi = 1;
@@ -48,6 +48,8 @@ long	gettime(void)
 
 std::string  check_ex_cgi_index(std::string file_name, int sock_srv, int sock_clt)
 {
+    (void)sock_srv;
+    (void)sock_clt;
     std::vector<std::string> out; 
     const char delim = '.';
     std::string ext;
@@ -122,11 +124,11 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
         }
         std::cout << "ahsdghlsdgjldfj-----------------------------\n";
 
-        env[v.size()] = nullptr; 
+        env[v.size()] = NULL; 
         servs.at(sock_srv).clts.at(sock_clt).pid = fork();
 	    if (servs.at(sock_srv).clts.at(sock_clt).pid == -1)
 	    	ft_exit("problem in first fork");
-        servs.at(sock_srv).clts.at(sock_clt).file_cgi = random_String() + "_new.txt";
+        servs.at(sock_srv).clts.at(sock_clt).file_cgi = random_String() + "_new";
         std::string s = "./file_cgi/" + servs.at(sock_srv).clts.at(sock_clt).file_cgi;
         servs.at(sock_srv).clts.at(sock_clt).file_cgi = s;
 	    if (servs.at(sock_srv).clts.at(sock_clt).pid == 0) {
@@ -166,12 +168,11 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
         }
         sleep(1);
         int check = waitpid(servs.at(sock_srv).clts.at(sock_clt).pid, 0, WNOHANG);
-        if (check = -1)
+        if (check == -1)
         {
             exec_err = 500;
             return -1; 
         } else if(check == 0) {
-            long time_now = gettime();
             servs.at(sock_srv).clts.at(sock_clt).first_time_cgi = gettime();
         }
         for (unsigned long i = 0; i < v.size(); i++)

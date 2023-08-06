@@ -23,7 +23,7 @@ struct client_info {
     int new_client;
     int current_position;
     std::string path;
-    int len_bound;
+    unsigned long len_bound;
     int is_ex_cgi;
     std::string file_cgi;
     std::string type_cgi;

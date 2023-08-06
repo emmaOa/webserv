@@ -1,7 +1,7 @@
 DIR_OBJ = ./obj
 NAME	=	webserv
-CXX		=	c++
-CXXFLAGS=	
+CXX		=	clang++
+CXXFLAGS=	-Wall -Werror -Wextra -std=c++98
 RM		=	rm -rf	
 SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			parsing_file_configuration/init.cpp \

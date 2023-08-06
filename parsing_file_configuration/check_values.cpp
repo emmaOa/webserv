@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_values.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
+/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/09 18:07:34 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/30 23:04:20 by namine           ###   ########.fr       */
+/*   Updated: 2023/08/06 06:38:25 by emma             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int check_lct_value(std::string key)
     unsigned long i = 0;
 
     if (key.compare("autoindex") == 0){
-        if (data_cnf->dq_2.size() != 1 || (data_cnf->dq_2[0] != "on" && data_cnf->dq_2[0] != "off")){
+        if (data_cnf->dq_2.size() != 1 ||(data_cnf->dq_2[0] != "on" && data_cnf->dq_2[0] != "off")){
             std::cout << "invalid form 16\n";
             return 1;
         }   
@@ -132,7 +132,7 @@ int check_srv_value(std::string key)
     }
     else if (key.compare("client_max_body_size") == 0){
        size = strtod(data_cnf->dq_2[0].c_str(), NULL);
-       if (data_cnf->dq_2.size() > 1 || size < 0 || size > 1024){
+       if (data_cnf->dq_2.size() > 1 || size < 0){
             std::cout << "invalid forme 15\n";
             return 1;
        }

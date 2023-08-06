@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: namine <namine@student.42.fr>              +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/26 12:18:45 by namine            #+#    #+#             */
-/*   Updated: 2023/07/31 02:26:36 by namine           ###   ########.fr       */
+/*   Created: 2023/08/05 14:19:01 by nidor             #+#    #+#             */
+/*   Updated: 2023/08/06 06:39:24 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,11 +98,6 @@ void		serve_error_file(int sock_clt, int sock_srv)
     send(sock_clt, str.c_str(), str.length(), 0);
 }
 
-int			pathSecure(std::string path)
-{
-    return (path.find(".."));
-}
-
 void		interruptResponse(int sock_clt, int sock_srv, const char *statusCode, const char *statusMessage)
 {
 	servs.at(sock_srv).clts.at(sock_clt).err.assign(statusCode);
@@ -110,4 +105,91 @@ void		interruptResponse(int sock_clt, int sock_srv, const char *statusCode, cons
     serve_error_file(sock_clt, sock_srv);
     close(sock_clt);
     servs.at(sock_srv).clts.erase(sock_clt);
+}
+
+int			proceedResponse(int sock_clt, int sock_srv)
+{
+    if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") != 0)
+    {
+        if (servs.at(sock_srv).clts.at(sock_clt).err.compare("301") == 0 || servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
+        {
+            if (servs.at(sock_srv).clts.at(sock_clt).err.compare("301") == 0)
+                servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
+            if (servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
+                servs.at(sock_srv).clts.at(sock_clt).err_msg = "Found";
+            response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
+            send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
+            return (0);
+        }
+        else
+        {
+            serve_error_file(sock_clt, sock_srv);
+            return (0);
+        }
+    }
+    else if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") == 0)
+    {
+        servs.at(sock_srv).clts.at(sock_clt).err.assign("200");
+        servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("OK");
+    }
+    return (1);
+}
+
+int         send_header(int sock_clt, int sock_srv, int size, const char *path)
+{
+    std::map<std::string,std::string>::iterator it;
+    std::string header;
+
+    response["ProtocolVersion"] = servs.at(sock_srv).clts.at(sock_clt).request_map["http_vr"].erase(8);
+    response["StatusCode"] = servs.at(sock_srv).clts.at(sock_clt).err;
+    response["ErrorMsg"] = servs.at(sock_srv).clts.at(sock_clt).err_msg;
+    header.append(response["ProtocolVersion"]).append(" ");
+    header.append(response["StatusCode"]).append(" ");
+    header.append(response["ErrorMsg"]).append("\r\n");
+    
+    it = response.find("Location: ");
+    if (it != response.end())
+    {
+        header.append("Location: ");
+        header.append(response["Location: "]).append("\r\n\r\n");
+        std::cout << "\n-------------------------------- RESPONSE WITH LOCATION HEADER : --------------------------------\n";
+        std::cout << header << "\n";
+        std::cout << "-------------------------------------------------------------------------------------\n";
+        send(sock_clt, header.c_str(), header.length(), 0); // est ce que je close la connexion apres ??
+        return (0);
+    }
+ 
+    it = response.find("Content-Type: "); // cgi avec php
+    if (it == response.end())
+    {
+        header.append("Content-Type: ");
+        response["Content-Type: "] = getContentType(path).append(";charset=UTF-8");
+        header.append(response["Content-Type: "]).append("\r\n");
+    }
+    
+    header.append("Content-Length: ");
+    response["Content-Length: "] = std::to_string(size);
+    header.append(response["Content-Length: "]).append("\r\n\r\n");
+    
+    if (send(sock_clt, header.c_str(), header.length(), 0) < (ssize_t)header.length())
+    {
+        std::cout << "SEND POSED IN HEADER !!!!\n";
+        close(sock_clt);
+        servs.at(sock_srv).clts.erase(sock_clt);
+        return (0);
+    }
+    std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
+    std::cout << header << "\n";
+    std::cout << "-------------------------------------------------------------------------------------\n";
+    return (1);
+}
+
+void        ft_split(std::string const &str, const char delim, std::vector<std::string> &out) 
+{ 
+    std::stringstream ss(str); 
+ 
+    std::string s; 
+    while (std::getline(ss, s, delim)) { 
+        out.push_back(s); 
+    } 
 }
