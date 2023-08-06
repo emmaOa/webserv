@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   socket.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/05 14:17:54 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/05 14:17:55 by nidor            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef SOCKET_HPP
 # define SOCKET_HPP
 # define ROOT /
@@ -35,11 +23,12 @@ struct client_info {
     int new_client;
     int current_position;
     std::string path;
-    int len_bound;
+    unsigned long len_bound;
     int is_ex_cgi;
     std::string file_cgi;
     std::string type_cgi;
     long first_time_cgi;
+    std::string boundry;
     int pid;
 };
 

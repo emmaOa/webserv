@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sockets.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/30 02:15:04 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/08/06 06:38:44 by emma             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ int check_creat_srv(std::vector<std::pair<std::string, std::string> > &v, std::v
 std::deque<int> int_socket_srvs(void)
 {
     std::deque<int> srvs(data_cnf->servers.size());
-    unsigned long i = 0;
+    unsigned long i =0;
     std::vector<std::pair<std::string, std::string> > v;
     
     std::vector<std::string > v_name;
