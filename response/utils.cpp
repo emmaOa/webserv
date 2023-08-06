@@ -6,7 +6,7 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 14:19:01 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/05 15:14:20 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/06 05:08:57 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,13 +155,17 @@ int send_header(int sock_clt, int sock_srv, int size, const char *path)
         std::cout << "\n-------------------------------- RESPONSE WITH LOCATION HEADER : --------------------------------\n";
         std::cout << header << "\n";
         std::cout << "-------------------------------------------------------------------------------------\n";
-        send(sock_clt, header.c_str(), header.length(), 0);
+        send(sock_clt, header.c_str(), header.length(), 0); // est ce que je close la connexion apres ??
         return (0);
     }
  
-    header.append("Content-Type: ");
-    response["Content-Type: "] = getContentType(path).append(";charset=UTF-8");
-    header.append(response["Content-Type: "]).append("\r\n");
+    it = response.find("Content-Type: "); // cgi avec php
+    if (it == response.end())
+    {
+        header.append("Content-Type: ");
+        response["Content-Type: "] = getContentType(path).append(";charset=UTF-8");
+        header.append(response["Content-Type: "]).append("\r\n");
+    }
     
     header.append("Content-Length: ");
     response["Content-Length: "] = std::to_string(size);

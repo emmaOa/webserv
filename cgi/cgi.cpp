@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: styes <styes@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 16:31:30 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/08/02 19:03:06 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/06 00:10:50 by styes            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,7 +165,7 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
         }
         sleep(1);
         int check = waitpid(servs.at(sock_srv).clts.at(sock_clt).pid, 0, WNOHANG);
-        if (check = -1)
+        if (check == -1)
         {
             exec_err = 500;
             return -1; 
