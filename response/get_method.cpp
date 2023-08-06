@@ -6,7 +6,7 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 14:18:46 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/06 06:25:01 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/06 06:37:02 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,16 +39,6 @@ void initializeVariables(int sock_clt, int sock_srv, t_getVariables *var)
     else
         var->cgiExtension.assign("true");
 }
-
-void ft_split(std::string const &str, const char delim, std::vector<std::string> &out) 
-{ 
-    std::stringstream ss(str); 
- 
-    std::string s; 
-    while (std::getline(ss, s, delim)) { 
-        out.push_back(s); 
-    } 
-} 
 
 void getMethod(int sock_clt, int sock_srv)
 {

@@ -6,7 +6,7 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 14:17:50 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/05 15:14:51 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/06 06:38:01 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define RESPONSE_HPP
 
 void		interruptResponse(int sock_clt, int sock_srv, const char *statusCode, const char *statusMessage);
+void        ft_split(std::string const &str, const char delim, std::vector<std::string> &out) ;
 int			send_header(int sock_clt, int sock_srv, int size, const char *path);
 void		print_request_header(int sock_clt, int sock_srv);
 void		serve_error_file(int sock_clt, int sock_srv);

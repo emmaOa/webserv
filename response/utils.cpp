@@ -6,7 +6,7 @@
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/05 14:19:01 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/06 05:08:57 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/06 06:39:24 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,7 @@ int			proceedResponse(int sock_clt, int sock_srv)
     return (1);
 }
 
-int send_header(int sock_clt, int sock_srv, int size, const char *path)
+int         send_header(int sock_clt, int sock_srv, int size, const char *path)
 {
     std::map<std::string,std::string>::iterator it;
     std::string header;
@@ -182,4 +182,14 @@ int send_header(int sock_clt, int sock_srv, int size, const char *path)
     std::cout << header << "\n";
     std::cout << "-------------------------------------------------------------------------------------\n";
     return (1);
+}
+
+void        ft_split(std::string const &str, const char delim, std::vector<std::string> &out) 
+{ 
+    std::stringstream ss(str); 
+ 
+    std::string s; 
+    while (std::getline(ss, s, delim)) { 
+        out.push_back(s); 
+    } 
 }
