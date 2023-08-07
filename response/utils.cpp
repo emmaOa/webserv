@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   utils.cpp                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/05 14:19:01 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/06 06:39:24 by nidor            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../includes/webserv.hpp"
 
 std::string	getContentType(const char* path)
@@ -158,9 +146,9 @@ int         send_header(int sock_clt, int sock_srv, int size, const char *path)
         send(sock_clt, header.c_str(), header.length(), 0); // est ce que je close la connexion apres ??
         return (0);
     }
- 
-    it = response.find("Content-Type: "); // cgi avec php
-    if (it == response.end())
+
+    // cgi avec php
+    if (servs.at(sock_srv).clts.at(sock_clt).type_cgi != "php")
     {
         header.append("Content-Type: ");
         response["Content-Type: "] = getContentType(path).append(";charset=UTF-8");

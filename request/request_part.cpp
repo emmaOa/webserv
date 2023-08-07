@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   request_part.cpp                                   :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/26 21:13:23 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/08/06 06:35:05 by emma             ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../includes/webserv.hpp"
 
 bool check_allowed_chars(std::string str)
@@ -133,17 +121,7 @@ std::string word_from_file(std::fstream &fd, int beg)
     {
         fd >> std::noskipws >> c;
         word += c;
-        // std::cout << c << "\n";
     }
-    
-
-    // int len = end - big;
-    // char *c =  new char ;
-    // fd.seekg(big, std::ios::beg);
-    // fd.read(c, len);
-    // // std::cout << "word : " << c ;
-    // word = c;
-    // delete(c);
     return word;
 }
 
@@ -176,55 +154,7 @@ std::string get_extension_type(std::string type) {
 
 int pars_bound( int sock_clt, int sock_srv, std::string line)
 {
-    // std::string name2 = "bound";
-    // std::string line;
     std::vector<std::string> out;
-    // // std::cout << buff;
-    // std::fstream fd;
-    // fd.open(name2.c_str(),  std::ios::in | std::ios::out | std::ios::app);
-    // if (!fd) {
-    //     std::cout << "Open failed2" << std::endl;
-    //     return -1;
-    // }
-    // std::string s = buff.erase(0, 20);
-    // fd.write(s.c_str(), s.length());
-    // // std::getline(fd, line);
-    // std::cout << buff.length() << line<< "pars boun\n";
-    // int i = 0;
-    // while (std::getline(fd, line))
-    // {
-    //     if (i == 0) {
-    //         servs.at(sock_srv).clts.at(sock_clt).boundry = line;
-    //         servs.at(sock_srv).clts.at(sock_clt).len_bound = line.length()+5;
-    //     }
-    //     else if (i == 1){
-    //         std::vector<std::string> out2;
-    //         std::vector<std::string> out3;
-    //         const char delim = ':';
-    //         const char delim2 = ';';
-    //         const char delim3 = '=';
-
-    //         split_one(line, delim, out);
-    //         servs.at(sock_srv).clts.at(sock_clt).request_map[out[0]] = out[1];
-    //         split_one(out[1], delim2, out2);
-    //         for (unsigned long i = 0; i < out2.size(); i++){
-    //             if (out2[i].find('=') != std::string::npos){   
-    //                 split_one(out2[i], delim3, out3);
-    //                 servs.at(sock_srv).clts.at(sock_clt).request_map[out3[0]] = out3[1];
-    //                 std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map[out3[0]] << "\n";
-    //                 out3.clear();
-    //             }
-    //         }
-    //     }
-    //     else {
-    //         const char delim = ':';
-    //         split_one(line, delim, out);
-    //         servs.at(sock_srv).clts.at(sock_clt).request_map[out[0] + "-boundary"] = out[1];
-    //     }
-    //     i++;
-    // }
-    // if (std::remove(name2.c_str()) != 0)
-    //     std::perror("Error deleting the file");
 
     if (line.find(';') != std::string::npos){
         std::vector<std::string> out2;
@@ -270,7 +200,6 @@ int pars_chunked_body(int sock_clt, int sock_srv, std::fstream &fd)
     fd.seekg(0, std::ios::beg);
     std::string f_word = word_from_file(fd, 0);
     int beg = f_word.length();
-    // std::cout << f_word ;
     dec = he_to_in(f_word);
     while (dec != 0)
     {

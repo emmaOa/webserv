@@ -1,17 +1,5 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   cgi.cpp                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/28 16:31:30 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/08/06 06:34:40 by emma             ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../includes/webserv.hpp"
-#include <sys/wait.h> // TODO ADDED !!!!!!!!!!!!!!!!!!!!!!
+
 void check_ex_cgi(std::string file, int sock_srv, int sock_clt)
 {
     std::vector<std::string> out; 
@@ -108,11 +96,7 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
     if (servs.at(sock_srv).clts.at(sock_clt).first_time_cgi == 0) {
         std::vector<std::pair<std::string, std::string> > v;
         int_env_cgi(v, sock_srv, sock_clt, path);
-        std::string str;
-
-        // for (int i = 0; i < v.size(); i++){
-        //     std::cout << v[i].first << v[i].second << std::endl;
-        // }    
+        std::string str;   
         char *env[v.size() + 1];
         std::cout << "ahsdghlsdgjldfj-----------------------------\n";
         for (unsigned long i = 0; i < v.size(); i++)
@@ -128,7 +112,7 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
         servs.at(sock_srv).clts.at(sock_clt).pid = fork();
 	    if (servs.at(sock_srv).clts.at(sock_clt).pid == -1)
 	    	ft_exit("problem in first fork");
-        servs.at(sock_srv).clts.at(sock_clt).file_cgi = random_String() + "_new.txt";
+        servs.at(sock_srv).clts.at(sock_clt).file_cgi = random_String() + "_new";
         std::string s = "./file_cgi/" + servs.at(sock_srv).clts.at(sock_clt).file_cgi;
         servs.at(sock_srv).clts.at(sock_clt).file_cgi = s;
 	    if (servs.at(sock_srv).clts.at(sock_clt).pid == 0) {
@@ -141,9 +125,7 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
 
             par[0] = (char *)ex.c_str();
             par[1] = (char *)path.c_str();
-            // std::cout << path;
             par[2] = NULL;
-            // /goinservs.at(sock_srv).clts.at(sock_clt).pide/iouazzan/back/csnxgn_new.txt
             std::cout <<servs.at(sock_srv).clts.at(sock_clt).fd_name << std::endl;
             int fd_out = open(servs.at(sock_srv).clts.at(sock_clt).file_cgi.c_str(), O_CREAT | O_RDWR, 0644);
             if (!fd_out) {
@@ -154,15 +136,10 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
                 int fd_in = open(path.c_str(), O_CREAT | O_RDWR, 0644);
                 dup2(fd_in, 0);
             }
-            // int fd_in = open("static.txt", O_CREAT | O_RDWR, 0644);
-            // dup2(fd_in, 0);
 	        dup2(fd_out, 1);
 	        dup2(fd_out, 2);
 	        close(fd_out);
-            // std::cout  << "-------------------------------------------->"<< par[0] << par[1] << servs.at(sock_srv).clts.at(sock_clt).file_cgi<< std::endl;
-            // if (execve(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"].c_str(), (char **)ex.c_str(), env) < 0){
             if (execve(par[0], par, env) < 0){
-                // throw std::runtime_error("EXECVE FAILED");
 	    	    ft_exit("first execution not valid");  
             }
         }

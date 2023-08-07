@@ -1,7 +1,7 @@
 DIR_OBJ = ./obj
 NAME	=	webserv
-CXX		=	c++
-CXXFLAGS=	
+CXX		=	clang++
+CXXFLAGS=	-Wall -Wextra -Werror -std=c++98
 RM		=	rm -rf	
 SRCS	=	main.cpp parsing_file_configuration/MainParsing.cpp \
 			parsing_file_configuration/init.cpp \
@@ -36,7 +36,7 @@ clean:
 	@$(RM) $(OBJS)
 
 fclean:		clean
-	@$(RM) $(NAME) obj rm ./file_cgi/*txt ./file_post/file*
+	@$(RM) $(NAME) obj rm ./file_cgi/*new ./file_post/file* ./file_cgi/*null
 
 re:			fclean all
 
