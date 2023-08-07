@@ -3,22 +3,44 @@
 /*                                                        :::      ::::::::   */
 /*   sockets.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/02 22:08:47 by nidor            ###   ########.fr       */
+/*   Updated: 2023/08/06 06:38:44 by emma             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
 
+int check_creat_srv(std::vector<std::pair<std::string, std::string> > &v, std::vector<std::string > &v_name, std::string port, std::string host, std::string s_name)
+{
+    for (unsigned long i = 0; i < v.size(); i++)
+    {
+        if (v[i].first.compare(port) == 0 && v[i].second.compare(host) == 0 && v_name[i].compare(s_name) != 0){
+            std::cout << "the same configuration server twice \n";
+            exit(0);
+        }
+    }
+    return 0;
+}
+
 std::deque<int> int_socket_srvs(void)
 {
     std::deque<int> srvs(data_cnf->servers.size());
-    unsigned long i = 0;
+    unsigned long i =0;
+    std::vector<std::pair<std::string, std::string> > v;
+    
+    std::vector<std::string > v_name;
     while (i < data_cnf->servers.size())
     {
-        srvs[i] = create_socket(i);
+        if (check_creat_srv(v, v_name, data_cnf->servers.at(i).at("port").at("null").at(0), data_cnf->servers.at(i).at("host").at("null").at(0), data_cnf->servers.at(i).at("server_name").at("null").at(0)) == 0){
+            std::cout << "----creat server\n";
+            srvs[i] = create_socket(i);
+            if (srvs[i] < 0)
+                exit (0);
+            v.push_back(std::make_pair(data_cnf->servers.at(i).at("port").at("null").at(0), data_cnf->servers.at(i).at("host").at("null").at(0)));
+            v_name.push_back(data_cnf->servers.at(i).at("server_name").at("null").at(0));
+        }
         i++;
     }
     return srvs;
@@ -47,28 +69,33 @@ int create_socket(int id)
         bind_address->ai_socktype, bind_address->ai_protocol);
     if (socket_sv < 0) {
         std::cout << "open failed socket\n";
-        exit(1);
+        return -1;
     }
     setsockopt(socket_sv, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     std::cout << "Binding socket to local address...\n";
 
     if (bind(socket_sv, bind_address->ai_addr, bind_address->ai_addrlen)) {
         std::cout << "bind failed\n";
-        exit(1);
+        close(socket_sv);
+        return -1;
     }
 
     freeaddrinfo(bind_address);
 
     std::cout << "Listening...\n";
-    if (listen(socket_sv, 10) < 0){
+    if (listen(socket_sv, 128) < 0){
         std::cout << "listen failed\n";
-        exit (1);
+        return -1;
     }
     
     srvs_set sv;
     sv.socket= socket_sv;
     sv.port =atoi(port);
     sv.host =data_cnf->servers.at(id).at("host").at("null").at(0);
+    if (data_cnf->servers.at(id).at("server_name").at("null").size() > 0)
+        sv.s_name = data_cnf->servers.at(id).at("server_name").at("null").at(0);
+    else
+        sv.s_name = "null";
 
     servs.insert (std::pair<int, srvs_set> (socket_sv, sv));
     

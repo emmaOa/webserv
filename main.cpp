@@ -5,20 +5,22 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/25 08:56:15 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/03 19:42:33 by nidor            ###   ########.fr       */
+/*   Created: 2023/08/05 14:21:16 by nidor             #+#    #+#             */
+/*   Updated: 2023/08/05 14:21:21 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "./includes/webserv.hpp"
+
+std::map <std::string, std::string> response;
 std::map<int, srvs_set> servs;
+int exec_err;
 
 int main(int arc, char *arg[])
 {
+    signal(SIGPIPE, SIG_IGN);
+    exec_err = 0;
     std::ifstream CnfFile;
-    char buffer[1024] = {0};
-    int r = 0;
-    int read_ret;
     if (arc != 2){
         std::cout << "invalid number arguments\n";
         exit (1);
@@ -33,32 +35,10 @@ int main(int arc, char *arg[])
         exit (1);
     }
     std::deque<int> socket_srv = int_socket_srvs();
-    std::map<int, srvs_set>::iterator it = servs.begin();
     while (42)
     {
-        it = servs.begin();
-        while (it != servs.end())
-        {
-            r = wait_on_clients(it->first);
-            if (r >= 0) {
-                read_ret = read(r, buffer, 1024);
-                if (read_ret < 0){
-                    std::cout << "read failed\n";
-                    exit (1);
-                }
-                else {
-                    if (request_part(buffer, read_ret, r, it->first) > 0) {    
-                        if (check_response(r) > 0){
-                            if (response_part(r, it->first) > 0) {
-                                close(r);
-                                it->second.clts.erase(r);
-                            }
-                        }
-                    }
-                }
-            }
-            ++it;
-        }
+        if (wait_on_clients() < 0)
+            return 1;
     }
     return 0;
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   clients.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/17 08:49:35 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/07 18:24:28 by iouazzan         ###   ########.fr       */
+/*   Updated: 2023/08/02 20:26:10 by nidor            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,95 +17,140 @@ int create_client(int sock)
     struct client_info *tmp = new client_info;
     if (!tmp) {
         std::cout << "error 01\n";
-        exit (1);
+        exec_err = 500;
+        return -1; 
     }
     tmp->address_length = sizeof(tmp->address);
     tmp->socket = accept(sock, (struct sockaddr*) &(tmp->address), &(tmp->address_length));
     if (tmp->socket < 0){
         std::cout << "accept field\n";
-       return -1; 
+        exec_err = 500;
+        return -1; 
     }
     tmp->socket_srv = sock;
-    tmp->fd_name = "null";
-    tmp->err = -1;
+    tmp->is_done = -1;
+    tmp->err = "null";
+    tmp->is_boundary = 0;
     tmp->err_msg = "null";
+    tmp->new_client = 0;
+    tmp->current_position = 0;
+    tmp->is_ex_cgi = 0;
+    tmp->first_time_cgi = 0;
     servs[sock].clts.insert(std::pair<int, client_info> (tmp->socket, *tmp));
-    return tmp->socket;
+    int socke = tmp->socket;
+    delete tmp;
+    // std::cout << socke << std::endl;
+    return socke;
 }
 
-int check_request(fd_set reads, int server)
+int sock_s(int sock_c)
 {
-    unsigned long i = 0;
-
-    while (i < servs.at(server).clts.size())
+    std::map<int, srvs_set>::iterator it = servs.begin();
+    std::map<int, struct client_info>::iterator it2 ;
+    it = servs.begin();
+    while (it != servs.end())
     {
-        if (FD_ISSET(servs.at(server).clts[i].socket, &reads)){
-            return servs.at(server).clts[i].socket;
+        it2 = servs.at(it->first).clts.begin();
+        while (it2 != servs.at(it->first).clts.end())
+        {
+            if (sock_c == servs.at(it->first).clts[it2->first].socket)
+                return servs.at(it->first).socket;
+            ++it2;
         }
-        i++;
+        ++it;
     }
-    return -1;
+    return 0;
 }
 
-int check_response(int sock)
+
+int wait_on_clients()
 {
-    fd_set wr;
-    FD_ZERO (&wr);
-
-    int max = sock;
-
-    timeval tm;
-    tm.tv_sec = 10;
-    tm.tv_usec = 0;
-    
-    FD_SET (sock, &wr);
-    if (select(max+1, 0, &wr, 0, &tm) < 0){
-        std::cout << "error 04\n";
-        exit (1);
-    }
-    if (FD_ISSET(sock, &wr)){
-        return sock;
-    }
-    return -1;
-}
-
-int wait_on_clients(int server)
-{
+    // std::cout << "hi\n";
     unsigned long i = 0;
     fd_set re;
 
-    timeval tm;
-    tm.tv_sec = 0;
-    tm.tv_usec = 1000;
 
+    int max_socket  = 0;
+    std::map<int, srvs_set>::iterator it = servs.begin();
+    std::map<int, struct client_info>::iterator it2;
     FD_ZERO (&re);
-    FD_SET(server, &re);
-    int max_socket = server;
-    // std::cout << server << " <<------\n";
-    while (i < servs.at(server).clts.size())
+    fd_set wr;
+    FD_ZERO (&wr);
+
+    std::vector<int> vr;
+    std::vector<int> vw;
+
+    while (it != servs.end())
     {
-        FD_SET (servs.at(server).clts[i].socket, &re);
-        if (servs.at(server).clts[i].socket > max_socket)
-            max_socket = servs.at(server).clts[i].socket;
+
+        FD_SET(it->first, &re);
+        if (it->first > max_socket)
+                max_socket = it->first ;
+
+        it2 = servs.at(it->first).clts.begin();
+        while (it2 != servs.at(it->first).clts.end())
+        {
+            if (it2->second.is_done < 1){
+                FD_SET (it2->first, &re);
+                vr.push_back(it2->first);
+            }
+            else {
+                FD_SET (it2->first, &wr);
+                vw.push_back(it2->first);
+            }
+            if (it2->first > max_socket)
+                max_socket = it2->first;
+            ++it2;
+        }
+        ++it;
+    }
+
+    if (select(max_socket+1, &re, &wr, 0, 0) < 0){
+        std::cout << "error 03\n";
+        exec_err = 500;
+    }
+    it = servs.begin();
+    while (it != servs.end())
+    {
+        if (FD_ISSET(it->first, &re)) {
+            if (create_client(servs.at(it->first).socket) < 0){
+                std::cout << "error 04\n";
+                exec_err = 500;
+            }
+            return 0;
+        }
+        ++it;
+    }
+
+    int read_ret;
+    char buffer[1024] = {0};
+    i=0;
+    while (i < vr.size())
+    {
+        if (FD_ISSET(vr[i], &re)){
+            read_ret = read(vr[i], buffer, 1024);
+            if (read_ret < 0){
+                close(vr[i]);
+                std::cout << "error 05\n";
+                // servs.at(sock_srv).clts.erase(vr[i]);
+                exec_err = 500;
+            }
+            else{
+
+                int s = sock_s(vr[i]);
+                if (request_part(buffer, read_ret, vr[i], s) < 0)
+                    exec_err = 500;
+            }
+            return 0;
+        }
         i++;
     }
-
-    if (select(max_socket+1, &re, 0, 0, &tm) < 0){
-        std::cout << "error 03\n";
-        exit (1);
+    i=0;
+    while (i < vw.size())
+    {
+        if (FD_ISSET(vw[i], &wr))
+            response_part(vw[i], sock_s(vw[i]));
+        i++;
     }
-
-    if (FD_ISSET(server, &re)) {
-        try {
-            create_client(servs.at(server).socket);
-        }
-        catch (const std::out_of_range& e) {
-            std::cerr << "Exception srv_socket default: " << e.what() << std::endl;
-        }
-        return -1;
-    }
-    int val = check_request(re, server);
-    return val;  
+    return 0;
 }
-
-

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   MainParsing.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
+/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/25 08:57:24 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/02 22:07:54 by nidor            ###   ########.fr       */
+/*   Updated: 2023/07/25 02:13:32 by iouazzan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ int MainFileCnf(std::ifstream & CnfFile)
 
 int ParseLine(std::string line)
 {
-    // std::cout <<  line << std::endl;
     if (line.compare("server {") == 0 && data_cnf->br.second == 0){
         data_cnf->br.first++;
         return 0;
@@ -63,23 +62,17 @@ int ParseLine(std::string line)
 int close_brackets(void)
 {
     if (data_cnf->br.second > 0){
-        if (data_cnf->is_cgi == false){
-            if (all_key_location() != 0)
-                return 1;
-        }
-        else {
-            if ( all_key_location_cgi() != 0)
-                return 1;
-        }
+        if (all_key_location() != 0)
+            return 1;
         data_cnf->map_1.insert (std::pair<std::string, mp_dq>(data_cnf->key_map1, data_cnf->map_2));
         data_cnf->dq_2.clear();
         data_cnf->map_2.clear();
         data_cnf->br.second--;
-        data_cnf->is_cgi = false;
         data_cnf->key_map1.clear();
     }
     else {
         if (all_key_srv() != 0 || data_cnf->location.first == 0 || data_cnf->location.second == 0){
+            std::cout << data_cnf->location.second << "\n";
             std::cout << "invalid form : 12\n";
             return 1;
         }
