@@ -82,7 +82,7 @@ void getMethod(int sock_clt, int sock_srv)
     std::vector<std::string> out;
     
     initializeVariables(sock_clt, sock_srv, var);
-    if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0)
+    if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0 || servs.at(sock_srv).clts.at(sock_clt).loopDetected == "true")
     {
         servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
         if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1)
@@ -101,6 +101,12 @@ void getMethod(int sock_clt, int sock_srv)
 			else // reverifier
             {
                 f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path);
+                if (servs.at(sock_srv).clts.at(sock_clt).loopDetected == "true")
+                    return ;
+                if (servs.at(sock_srv).clts.at(sock_clt).first_time_cgi != 0)
+                {
+                    servs.at(sock_srv).clts.at(sock_clt).loopDetected.assign("true");
+                }
                 servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
                 if (servs.at(sock_srv).clts.at(sock_clt).type_cgi.compare("php") == 0)
                 {
@@ -144,10 +150,10 @@ void getMethod(int sock_clt, int sock_srv)
                 std::cout << "dir without / ... \n";
                 servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]);
                 servs.at(sock_srv).clts.at(sock_clt).path.append("/");
-                std::cout <<  "path = " << servs.at(sock_srv).clts.at(sock_clt).path << "\n";
+                std::cout << "path = " <<  servs.at(sock_srv).clts.at(sock_clt).path << "\n";
 				servs.at(sock_srv).clts.at(sock_clt).err = "301";
 				servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
-                response["Location: "].assign(servs.at(sock_srv).clts.at(sock_clt).path);
+                response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path;
                 send_header(sock_clt, sock_srv, 0, NULL);
                 close(sock_clt);
                 servs.at(sock_srv).clts.erase(sock_clt);
@@ -170,14 +176,14 @@ void getMethod(int sock_clt, int sock_srv)
                 }
                 else if (var->indexInConfigFile && var->cgiState == "on" && var->indexExtension == "true")
                 {
-					// reste a traiter le cas de php file !!
+					// TODO reste a traiter le cas de php file !!
                     std::cout << "run cgi\n";
 					std::cout << "|indexInConfigFile = " <<  var->indexInConfigFile << "|\n";
 					std::cout << "|cgiState = " <<  var->cgiState << "|\n";
 					std::cout << "indexExtension = " <<  var->indexExtension << "|\n";
                     std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
-					response["Content-Type: "] = "text/html;charset=UTF-8"; // if extension == py
                     f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path.append(var->indexName));
+                    servs.at(sock_srv).clts.at(sock_clt).type_cgi.assign("py");
                     servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
                     var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
                     if (!var->file)
@@ -220,7 +226,10 @@ void getMethod(int sock_clt, int sock_srv)
                     	}
 					}
 					else
-						std::cout << "dir has index file \n"; // do i really need to do this ?? 
+                    {
+						std::cout << "dir has index file \n"; // maghadich ndir cgi wtf why mabghiiiitch !!!!
+                        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+                    }
                 }
             }
         }

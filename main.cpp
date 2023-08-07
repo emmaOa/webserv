@@ -6,6 +6,8 @@ int exec_err;
 
 int main(int arc, char *arg[])
 {
+    // std::cout << "--------------hdkfhsdg\n";
+    // exit (0);
     signal(SIGPIPE, SIG_IGN);
     exec_err = 0;
     std::ifstream CnfFile;

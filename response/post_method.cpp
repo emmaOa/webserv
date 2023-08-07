@@ -35,20 +35,16 @@ void postMethod(int sock_clt, int sock_srv)
         std::string name;
         std::string old;
         std::vector<std::string> out;
-        if (servs.at(sock_srv).clts.at(sock_clt).type_cgi == "php" || servs.at(sock_srv).clts.at(sock_clt).type_cgi == "py") {
-            ft_split(servs.at(sock_srv).clts.at(sock_clt).file_cgi, '/', out);
-            name = out[out.size() - 1];
-            out.clear();
-            old = servs.at(sock_srv).clts.at(sock_clt).file_cgi;
-        }
-        else {
-            ft_split(servs.at(sock_srv).clts.at(sock_clt).fd_name, '/', out);
-            name = out[out.size() - 1];
-            out.clear();
-            old = servs.at(sock_srv).clts.at(sock_clt).fd_name;
 
-        }
-        
+        // check if its a file !!!!!
+        ft_split(servs.at(sock_srv).clts.at(sock_clt).fd_name, '/', out);
+        if (out.size() > 0)
+            name = out[out.size() - 1];
+        else
+            name = out[0];
+        out.clear();
+        old = servs.at(sock_srv).clts.at(sock_clt).fd_name;
+
         if (servs.at(sock_srv).clts.at(sock_clt).request_map.find(" filename") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) 
             root = data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("root").at(0) + "/" + servs.at(sock_srv).clts.at(sock_clt).request_map[" filename"];
         else {
@@ -72,7 +68,7 @@ void postMethod(int sock_clt, int sock_srv)
             std::cout <<  "path = " << servs.at(sock_srv).clts.at(sock_clt).path << "\n";
             servs.at(sock_srv).clts.at(sock_clt).err = "308";
             servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
-            response["Location: "].assign(servs.at(sock_srv).clts.at(sock_clt).path);
+            response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path;
             send_header(sock_clt, sock_srv, 0, NULL);
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);

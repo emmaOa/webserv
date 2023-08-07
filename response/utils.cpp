@@ -105,7 +105,9 @@ int			proceedResponse(int sock_clt, int sock_srv)
                 servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
             if (servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
                 servs.at(sock_srv).clts.at(sock_clt).err_msg = "Found";
-            response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
+            servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]);
+            servs.at(sock_srv).clts.at(sock_clt).path.append("/");
+            response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path;
             send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
             return (0);
         }

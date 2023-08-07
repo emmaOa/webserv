@@ -38,7 +38,7 @@ void check_err_head(int sock_srv, int sock_clt)
             servs.at(sock_srv).clts.at(sock_clt).err_msg = "Not Implemented";
         }
     } else {
-        if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Length") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) {
+        if (servs.at(sock_srv).clts.at(sock_clt).request_map.find("Content-Length") != servs.at(sock_srv).clts.at(sock_clt).request_map.end() && servs.at(sock_srv).clts.at(sock_clt).request_map["method"].compare("POST") == 0) {
             long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
             long long c_len = strtod(servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Length"].c_str(), NULL);
             if (c_len > len){
@@ -245,6 +245,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
     std::cout << "request starte\n";
     // std::cout << "-----------------------------------------------------------------------------------\n";
     if (servs.at(sock_srv).clts.at(sock_clt).is_done < 0) {
+        std::cout << "firstttttt\n";
         
         std::fstream fd2;
         std::string name;
@@ -266,6 +267,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         fd2.write(buffer , lent);
         fd2.seekp(0, std::ios::beg);
         int j = 0;
+        std::cout << buffer << "||||||||||||||\n";
         std::getline(fd2, line);
         first_line(line, sock_clt, sock_srv);
         if (match_location(sock_srv, sock_clt) > 0) {

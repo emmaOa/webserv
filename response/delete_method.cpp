@@ -39,9 +39,10 @@ void recursive_deletion(int sock_clt, int sock_srv, std::string path)
 				else
 				{
 					std::cout << "can't delete = " << path.c_str() << "\n";
-					servs.at(sock_srv).clts.at(sock_clt).err.assign("500");
-					servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("Internal Server Error");
-					return ;
+					// servs.at(sock_srv).clts.at(sock_clt).err.assign("500");
+					// servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("Internal Server Error");
+					// return ;
+					{ interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error"); return ; }
 				}
 			}
 			else // dir
@@ -88,9 +89,9 @@ void deleteMethod(int sock_clt, int sock_srv)
 			servs.at(sock_srv).clts.at(sock_clt).err.assign("204");
 			servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("No content");
 			recursive_deletion(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).path);
-			serve_error_file(sock_clt, sock_srv);
-			close(sock_clt);
-			servs.at(sock_srv).clts.erase(sock_clt);
+			// serve_error_file(sock_clt, sock_srv);
+			// close(sock_clt);
+			// servs.at(sock_srv).clts.erase(sock_clt);
 		}
 	}
 }

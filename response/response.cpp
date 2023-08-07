@@ -21,7 +21,7 @@ void response_part(int sock_clt, int sock_srv)
         interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
         return ;
     }
-    if (!servs.at(sock_srv).clts.at(sock_clt).new_client && (method.compare("GET") == 0 || method.compare("DELETE") == 0 ))
+    if (!servs.at(sock_srv).clts.at(sock_clt).new_client)
 	{
         if (!proceedResponse(sock_clt, sock_srv))
         {

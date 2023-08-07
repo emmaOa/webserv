@@ -23,7 +23,7 @@ int match_location(int sock_srv, int sock_clt)
     std::string uri = servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"];
     if (uri[uri.length() - 1] == '/')
         s =1;
-    // std::cout << "key  :  " << uri << "<===\n";
+    std::cout << "key  :  ----->" << uri << "<===\n";
     bool is_find = 0;
     std::vector<std::string> out; 
     const char delim = '/';
