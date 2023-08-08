@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   cgi.cpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: styes <styes@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/28 16:31:30 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/08/07 01:13:06 by emma             ###   ########.fr       */
+/*   Updated: 2023/08/08 14:45:26 by styes            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "../includes/webserv.hpp"
 #include <sys/wait.h> // TODO ADDED !!!!!!!!!!!!!!!!!!!!!!
-void check_ex_cgi(std::string file, int sock_srv, int sock_clt)
+void check_ex_cgi(std::string file, int sock_srv, int sock_clt)  
 {
     std::vector<std::string> out; 
     
