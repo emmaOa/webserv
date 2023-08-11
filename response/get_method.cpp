@@ -178,7 +178,7 @@ void    getMethod(int sock_clt, int sock_srv)
 					std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
                     servs.at(sock_srv).clts.at(sock_clt).path.append(var->indexName);
                     std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
-                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
                     if (!var->file)
                         { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
                 }
@@ -193,7 +193,7 @@ void    getMethod(int sock_clt, int sock_srv)
                     f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path.append(var->indexName));
                     servs.at(sock_srv).clts.at(sock_clt).type_cgi.assign("py");
                     servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
-                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
                     if (!var->file)
                         { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
                 }
@@ -245,7 +245,7 @@ void    getMethod(int sock_clt, int sock_srv)
                     {
 						std::cout << "dir has index file \n";
                         std::cout <<"name = |" <<  servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
-                        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::binary | std::ios::in | std::ios::ate);
+                        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary | std::ios::in | std::ios::ate);
                     }
                 }
             }

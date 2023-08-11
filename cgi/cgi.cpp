@@ -1,4 +1,5 @@
 # include "../includes/webserv.hpp"
+#include <sys/wait.h> // TODO ADDED
 
 void check_ex_cgi(std::string file, int sock_srv, int sock_clt)
 {

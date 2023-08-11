@@ -46,7 +46,7 @@ int			get_customized_error_file(int sock_clt, int sock_srv, const char *statusCo
 	std::ifstream	file;
     long long int	size;
 	
-	file.open (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(statusCode).at("null").at(0), std::ios::in | std::ios::binary | std::ios::ate);
+	file.open (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(statusCode).at("null").at(0).c_str(), std::ios::in | std::ios::binary | std::ios::ate);
 	if (!file)
 	{
 		servs.at(sock_srv).clts.at(sock_clt).err.assign("404");
@@ -190,7 +190,12 @@ int         send_header(int sock_clt, int sock_srv, long long int size, const ch
     header.append(response["Content-Type: "]).append("\r\n");
     
     header.append("Content-Length: ");
-    response["Content-Length: "] = std::to_string(size);
+    
+    std::string str;
+    std::stringstream ss;  
+    ss << size;  
+    ss >> str;
+    response["Content-Length: "].assign(str);
     header.append(response["Content-Length: "]).append("\r\n\r\n");
     
     if (send(sock_clt, header.c_str(), header.length(), 0) < (ssize_t)header.length())
