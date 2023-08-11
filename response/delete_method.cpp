@@ -1,22 +1,10 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   delete_method.cpp                                  :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/05 14:18:36 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/05 15:07:55 by nidor            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../includes/webserv.hpp"
 
 void recursive_deletion(int sock_clt, int sock_srv, std::string path)
 {
-	struct dirent *read_dir;
-	struct stat buf;
-	DIR *dir;
+	struct dirent	*read_dir;
+	DIR				*dir;
+	struct stat		buf;
 	
 	std::cout << " path" << path << "\n";
 	dir = opendir(path.c_str());
@@ -51,20 +39,43 @@ void recursive_deletion(int sock_clt, int sock_srv, std::string path)
 				else
 				{
 					std::cout << "can't delete = " << path.c_str() << "\n";
-					servs.at(sock_srv).clts.at(sock_clt).err.assign("500");
-					servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("Internal Server Error");
-					return ;
+					{ interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error"); return ; }
 				}
 			}
 			else // dir
 			{
+				std::vector<std::string> out;
 				std::string RootFolderName = read_dir->d_name;
 				std::cout << "RootFolderName " << RootFolderName << "\n";
 				std::cout << "path " << path << "\n";
 				recursive_deletion(sock_clt, sock_srv, path);
-				int pos = path.find(read_dir->d_name);
-				std::string str(read_dir->d_name);
-				path.erase(pos, str.length());
+				std::cout << "path = " << path << "\n";
+				ft_split(path, '/', out);
+				int len =  out.size();
+				std::cout << "len = " << len << "\n";
+				int i = 0;
+				path.assign(out[i]).append("/");
+				i++;
+				while (i < len)
+				{
+					std::cout << "out = " << out[i] << "\n";
+					std::cout << "oread_dir->d_name = " << read_dir->d_name<< "\n";
+					if (out[i].compare(read_dir->d_name) != 0)
+					{
+						path.append(out[i]).append("/");
+						std::cout << "new path = " << path << "\n";
+					}
+					else if (out[i].compare(read_dir->d_name) == 0 && (i != len - 1))
+					{
+						path.append(out[i]).append("/");
+						std::cout << "new path = " << path << "\n";
+					}
+					else
+					{
+						break ;
+					}
+					i++;
+				}
 				std::cout << "path after" << path << "\n";
 			}
 		}
@@ -100,9 +111,6 @@ void deleteMethod(int sock_clt, int sock_srv)
 			servs.at(sock_srv).clts.at(sock_clt).err.assign("204");
 			servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("No content");
 			recursive_deletion(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).path);
-			serve_error_file(sock_clt, sock_srv);
-			close(sock_clt);
-			servs.at(sock_srv).clts.erase(sock_clt);
 		}
 	}
 }

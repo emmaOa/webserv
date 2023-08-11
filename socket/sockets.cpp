@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   sockets.cpp                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/13 14:54:32 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/08/06 06:38:44 by emma             ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../includes/webserv.hpp"
 
 int check_creat_srv(std::vector<std::pair<std::string, std::string> > &v, std::vector<std::string > &v_name, std::string port, std::string host, std::string s_name)
@@ -34,7 +22,7 @@ std::deque<int> int_socket_srvs(void)
     while (i < data_cnf->servers.size())
     {
         if (check_creat_srv(v, v_name, data_cnf->servers.at(i).at("port").at("null").at(0), data_cnf->servers.at(i).at("host").at("null").at(0), data_cnf->servers.at(i).at("server_name").at("null").at(0)) == 0){
-            std::cout << "----creat server\n";
+            std::cout << "*** create server ***\n";
             srvs[i] = create_socket(i);
             if (srvs[i] < 0)
                 exit (0);

@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   init.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: emma <emma@student.42.fr>                  +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/09 17:05:06 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/08/06 11:21:55 by emma             ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../includes/webserv.hpp"
 
 void initial_key_srv(void)
@@ -21,7 +9,6 @@ void initial_key_srv(void)
     data_cnf->m_s_key["400"] = 0;
     data_cnf->m_s_key["client_max_body_size"] = 0;
 }
-
 
 void initial_key_loc(void)
 {

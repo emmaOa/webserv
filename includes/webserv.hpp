@@ -19,7 +19,6 @@
 #include <fstream>
 #include <sstream>
 #include <stdio.h>
-#include <errno.h>
 #include <netdb.h>
 #include <string>
 #include <vector>

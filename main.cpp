@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/05 14:21:16 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/05 14:21:21 by nidor            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "./includes/webserv.hpp"
 
 std::map <std::string, std::string> response;
@@ -18,6 +6,8 @@ int exec_err;
 
 int main(int arc, char *arg[])
 {
+    // std::cout << "--------------hdkfhsdg\n";
+    // exit (0);
     signal(SIGPIPE, SIG_IGN);
     exec_err = 0;
     std::ifstream CnfFile;

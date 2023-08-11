@@ -29,6 +29,9 @@ struct client_info {
     std::string type_cgi;
     long first_time_cgi;
     std::string boundry;
+    std::string loopDetected;
+    int  sizeOfReresource;
+    int rest;
     int pid;
 };
 

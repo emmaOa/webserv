@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   header_request.cpp                                 :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: iouazzan <iouazzan@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/07 18:20:17 by iouazzan          #+#    #+#             */
-/*   Updated: 2023/07/29 19:00:20 by iouazzan         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../includes/webserv.hpp"
 
 int new_path(std::string path, int sock_clt, int sock_srv)
@@ -47,11 +35,19 @@ int first_line(std::string line, int sock_clt, int sock_srv)
     //     i++;
     // }
     std::pair<std::string, std::string>pr;
+    if (out.size() < 2){
+        std::cout << "lineee -------------\n";
+        std::cout << line ;
+        // std::cout << out[0];
+        // std::cout << out[1];
+        exit(0);
+    }
  
     servs.at(sock_srv).clts.at(sock_clt).request_map["method"] = out[0];
     if (new_path(out[1], sock_clt, sock_srv) < 1)
         servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"] = out[1];
     servs.at(sock_srv).clts.at(sock_clt).request_map["http_vr"] = out[2];
+    // std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"] << "<<<<<<<<<<\n";
 
     return 0;
 }

@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   response.cpp                                       :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: nidor <nidor@student.42.fr>                +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/05 14:20:48 by nidor             #+#    #+#             */
-/*   Updated: 2023/08/05 14:56:31 by nidor            ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 # include "../includes/webserv.hpp"
 
 void whichMethod(int sock_clt, int sock_srv, std::string method)
@@ -33,7 +21,7 @@ void response_part(int sock_clt, int sock_srv)
         interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
         return ;
     }
-    if (!servs.at(sock_srv).clts.at(sock_clt).new_client && (method.compare("GET") == 0 || method.compare("DELETE") == 0 ))
+    if (!servs.at(sock_srv).clts.at(sock_clt).new_client)
 	{
         if (!proceedResponse(sock_clt, sock_srv))
         {
