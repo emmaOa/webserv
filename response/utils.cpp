@@ -93,7 +93,7 @@ void		serve_error_file(int sock_clt, int sock_srv)
     send_header(sock_clt, sock_srv, str.size(), ".html");
     if (send(sock_clt, str.c_str(), str.length(), 0) < (ssize_t)str.length())
     {
-        std::cout << "SEND POSED IN HEADER !!!!\n";
+        std::cout << "SEND POSED IN HEADER 1\n";
         close(sock_clt);
         servs.at(sock_srv).clts.erase(sock_clt);
         return ;
@@ -173,7 +173,7 @@ int         send_header(int sock_clt, int sock_srv, long long int size, const ch
         std::cout << "-------------------------------------------------------------------------------------\n";
         if (send(sock_clt, header.c_str(), header.length(), 0) < (ssize_t)header.length()) // est ce que je close la connexion apres ??
         {
-            std::cout << "SEND POSED IN HEADER !!!!\n";
+            std::cout << "SEND POSED IN HEADER 2\n";
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);
             return (0);
@@ -195,7 +195,7 @@ int         send_header(int sock_clt, int sock_srv, long long int size, const ch
     
     if (send(sock_clt, header.c_str(), header.length(), 0) < (ssize_t)header.length())
     {
-        std::cout << "SEND POSED IN HEADER !!!!\n";
+        std::cout << "SEND POSED IN HEADER 2\n";
         close(sock_clt);
         servs.at(sock_srv).clts.erase(sock_clt);
         return (0);

@@ -52,7 +52,7 @@ void    sendResponse(int sock_clt, int sock_srv, t_getVariables *var)
     // std::cout << "cur = +" << servs.at(sock_srv).clts.at(sock_clt).current_position << "+\n";
     var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
     if (!var->file.is_open())
-        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
+        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
     if(servs.at(sock_srv).clts.at(sock_clt).current_position + var->chunk > servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource)
     {
         var->chunk = servs.at(sock_srv).clts.at(sock_clt).rest;
@@ -125,7 +125,7 @@ void    runCGI(int sock_clt, int sock_srv, t_getVariables *var)
     var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
 }
 
-void uriWithoutSlash(int sock_clt, int sock_srv)
+void    uriWithoutSlash(int sock_clt, int sock_srv)
 {
 	std::cout << "dir without / ... \n";
 	servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]);
@@ -149,7 +149,7 @@ void    getMethod(int sock_clt, int sock_srv)
         initializeVariables(sock_clt, sock_srv, var);
         servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
         if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1)
-        	{interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
+            {interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
         if(S_ISREG(buf.st_mode)) // file
         {
             if (access(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), R_OK) != 0)
@@ -180,7 +180,7 @@ void    getMethod(int sock_clt, int sock_srv)
                     std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
                     var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
                     if (!var->file)
-                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
+                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
                 }
                 else if (var->indexInConfigFile && var->cgiState == "on" && var->indexExtension == "true")
                 {
@@ -195,7 +195,7 @@ void    getMethod(int sock_clt, int sock_srv)
                     servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
                     var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
                     if (!var->file)
-                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
+                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
                 }
                 else
                 {
@@ -205,7 +205,7 @@ void    getMethod(int sock_clt, int sock_srv)
 					if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1 || access(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), W_OK) != 0)
 					{
 						if (var->autoindex == "off")
-							{ interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return ; }
+							{ interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); delete var; return ; }
 						else
                     	{
                             std::string str;
@@ -231,10 +231,12 @@ void    getMethod(int sock_clt, int sock_srv)
                                 {
                                     close(sock_clt);
                                     servs.at(sock_srv).clts.erase(sock_clt);
+                                    delete var;
                                     return ;
                                 }
 								close(sock_clt);
 								servs.at(sock_srv).clts.erase(sock_clt);
+                                delete var;
 								return ;
 							}
                     	}
