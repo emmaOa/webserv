@@ -171,13 +171,10 @@ int         send_header(int sock_clt, int sock_srv, long long int size, const ch
         std::cout << "\n-------------------------------- RESPONSE WITH LOCATION HEADER : --------------------------------\n";
         std::cout << header << "\n";
         std::cout << "-------------------------------------------------------------------------------------\n";
-        if (send(sock_clt, header.c_str(), header.length(), 0) < (ssize_t)header.length()) // est ce que je close la connexion apres ??
-        {
-            std::cout << "SEND POSED IN HEADER 2\n";
-            close(sock_clt);
-            servs.at(sock_srv).clts.erase(sock_clt);
-            return (0);
-        }
+        send(sock_clt, header.c_str(), header.length(), 0);
+        response.erase("Location: ");
+        servs.at(sock_srv).clts.erase(sock_clt);
+	    close(sock_clt);
         return (0);
     }
 

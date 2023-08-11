@@ -135,8 +135,6 @@ void    uriWithoutSlash(int sock_clt, int sock_srv)
 	servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
 	response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path;
 	send_header(sock_clt, sock_srv, 0, NULL);
-	close(sock_clt);
-	servs.at(sock_srv).clts.erase(sock_clt);
 }
 
 void    getMethod(int sock_clt, int sock_srv)
@@ -202,17 +200,18 @@ void    getMethod(int sock_clt, int sock_srv)
 					std::cout << "check if i have index file in dir \n";
 					servs.at(sock_srv).clts.at(sock_clt).path.append("index.html");
 					std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
-					if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1 || access(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), W_OK) != 0)
+					if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1 || access(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), R_OK) != 0)
 					{
+                        std::cout << "index not found \n";
 						if (var->autoindex == "off")
 							{ interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); delete var; return ; }
 						else
                     	{
+                            std::cout << "gonna list \n";
                             std::string str;
-                            // std::string oldpath = servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"].append("/"));
 							std::cout << "| = " << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
 							int pos = servs.at(sock_srv).clts.at(sock_clt).path.find("index.html");
-							servs.at(sock_srv).clts.at(sock_clt).path.replace(pos,10, "");
+							servs.at(sock_srv).clts.at(sock_clt).path.replace(pos, 10, "");
 							std::cout << "|path after remove index = " << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
 							if ((var->dir = opendir (servs.at(sock_srv).clts.at(sock_clt).path.c_str())) != NULL)
 							{
@@ -220,20 +219,13 @@ void    getMethod(int sock_clt, int sock_srv)
 								"</title></head><body bgcolor=\"white\"><h1>Index of " + servs.at(sock_srv).clts.at(sock_clt).path + "</h1><hr><ul><li><a href=\"../\">..</a></li>";
 								while ((var->read_dir = readdir (var->dir)) != NULL)
 								{
-									// should i do . too ??
 									if (var->read_dir->d_name[0] != '.')
 									str += "<li><a href=\"" + std::string(var->read_dir->d_name) + "\">" + std::string(var->read_dir->d_name) + "</a></li>";
 								}
 								str += "</ul><hr></body></html>";
 								closedir (var->dir);
 								send_header(sock_clt, sock_srv, str.length(), ".html");
-                                if(send(sock_clt, str.c_str(), str.length(), 0) < (ssize_t)str.length())
-                                {
-                                    close(sock_clt);
-                                    servs.at(sock_srv).clts.erase(sock_clt);
-                                    delete var;
-                                    return ;
-                                }
+                                send(sock_clt, str.c_str(), str.length(), 0);
 								close(sock_clt);
 								servs.at(sock_srv).clts.erase(sock_clt);
                                 delete var;
@@ -251,13 +243,9 @@ void    getMethod(int sock_clt, int sock_srv)
             }
         }
         var->file.seekg (0, std::ios::end);
-        servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource = var->file.tellg(); // if size == -1
+        servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource = var->file.tellg(); // TODO if size == -1
         servs.at(sock_srv).clts.at(sock_clt).rest = servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource % var->chunk;
-        if (!send_header(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource, servs.at(sock_srv).clts.at(sock_clt).path.c_str()))
-        {
-            close(sock_clt);
-            servs.at(sock_srv).clts.erase(sock_clt);
-        }
+        send_header(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
         var->file.close();
         servs.at(sock_srv).clts.at(sock_clt).new_client++;
         delete var;
