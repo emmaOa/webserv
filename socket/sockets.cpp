@@ -22,7 +22,7 @@ std::deque<int> int_socket_srvs(void)
     while (i < data_cnf->servers.size())
     {
         if (check_creat_srv(v, v_name, data_cnf->servers.at(i).at("port").at("null").at(0), data_cnf->servers.at(i).at("host").at("null").at(0), data_cnf->servers.at(i).at("server_name").at("null").at(0)) == 0){
-            std::cout << "----creat server\n";
+            std::cout << "*** create server ***\n";
             srvs[i] = create_socket(i);
             if (srvs[i] < 0)
                 exit (0);

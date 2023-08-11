@@ -18,6 +18,7 @@ std::string	getContentType(const char* path)
         if (strcmp(last_dot, ".pdf") == 0) return "application/pdf";
         if (strcmp(last_dot, ".svg") == 0) return "image/svg+xml";
         if (strcmp(last_dot, ".txt") == 0) return "text/plain";
+        if (strcmp(last_dot, ".mp4") == 0) return "video/mp4";
     }
     return "application/octet-stream";
 }
@@ -43,7 +44,7 @@ int			get_customized_error_file(int sock_clt, int sock_srv, const char *statusCo
 {
 	char			*buffer;
 	std::ifstream	file;
-    int				size;
+    long long int	size;
 	
 	file.open (data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(statusCode).at("null").at(0), std::ios::in | std::ios::binary | std::ios::ate);
 	if (!file)
@@ -105,8 +106,7 @@ int			proceedResponse(int sock_clt, int sock_srv)
                 servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
             if (servs.at(sock_srv).clts.at(sock_clt).err.compare("302") == 0)
                 servs.at(sock_srv).clts.at(sock_clt).err_msg = "Found";
-            servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]);
-            servs.at(sock_srv).clts.at(sock_clt).path.append("/");
+            servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
             response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path;
             send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
             return (0);
@@ -125,7 +125,7 @@ int			proceedResponse(int sock_clt, int sock_srv)
     return (1);
 }
 
-int         send_header(int sock_clt, int sock_srv, int size, const char *path)
+int         send_header(int sock_clt, int sock_srv, long long int size, const char *path)
 {
     std::map<std::string,std::string>::iterator it;
     std::string header;
@@ -137,6 +137,19 @@ int         send_header(int sock_clt, int sock_srv, int size, const char *path)
     header.append(response["StatusCode"]).append(" ");
     header.append(response["ErrorMsg"]).append("\r\n");
     
+    if (servs.at(sock_srv).clts.at(sock_clt).err.compare("405") == 0)
+    {
+        header.append("Allow: ");
+        int len = data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("allow_methods").size();
+        for(int i = 0; i < len; i++)
+        {
+            response["Allow"].append(data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("allow_methods").at(i));
+            if (i != len - 1)
+                response["Allow"].append(", ");
+        }
+        header.append(response["Allow"]).append("\r\n");
+    }
+
     it = response.find("Location: ");
     if (it != response.end())
     {
@@ -149,13 +162,13 @@ int         send_header(int sock_clt, int sock_srv, int size, const char *path)
         return (0);
     }
 
-    // cgi avec php
-    if (servs.at(sock_srv).clts.at(sock_clt).type_cgi != "php")
+    it = response.find("Content-Type: ");
+    if (it == response.end())
     {
-        header.append("Content-Type: ");
-        response["Content-Type: "] = getContentType(path).append(";charset=UTF-8");
-        header.append(response["Content-Type: "]).append("\r\n");
+        response["Content-Type: "] = getContentType(path);
     }
+    header.append("Content-Type: ");
+    header.append(response["Content-Type: "]).append("\r\n");
     
     header.append("Content-Length: ");
     response["Content-Length: "] = std::to_string(size);
@@ -168,6 +181,7 @@ int         send_header(int sock_clt, int sock_srv, int size, const char *path)
         servs.at(sock_srv).clts.erase(sock_clt);
         return (0);
     }
+    response.clear();
     std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
     std::cout << header << "\n";
     std::cout << "-------------------------------------------------------------------------------------\n";

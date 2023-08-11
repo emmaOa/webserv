@@ -2,37 +2,35 @@
 
 typedef struct s_getVariables
 {
-    std::string		cgiState;
-    std::string		cgiExtension;
     int				indexInConfigFile;
+    std::string		indexExtension;
+    std::string		cgiExtension;
     std::string		indexName;
     std::string		autoindex;
-    std::string		indexExtension;
     struct dirent	*read_dir;
+    std::string		cgiState;
+    char			*buffer;
+    int				chunk;
     std::ifstream	file;
     long long int	size;
-    int				chunk;
-    char			*buffer;
-    int 			i;
-    int 			rest;
-    DIR 			*dir;
-
+    int				rest;
+    DIR				*dir;
+    std::string     finish;
 }t_getVariables;
 
-void initializeVariables(int sock_clt, int sock_srv, t_getVariables *var)
+void    initializeVariables(int sock_clt, int sock_srv, t_getVariables *var)
 {
     var->chunk = 1024;
-    var->i = 0;
     if(data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("cgi_is").at(0).compare("off") == 0)
         var->cgiState.assign("off");
     else
         var->cgiState.assign("on");
-    
+  
     if (servs.at(sock_srv).clts.at(sock_clt).is_ex_cgi == 0)
         var->cgiExtension.assign("false");
     else
         var->cgiExtension.assign("true");
-    
+ 
     var->indexInConfigFile = data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("index").size();
     if (var->indexInConfigFile)
         var->indexName.assign(data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(servs.at(sock_srv).clts.at(sock_clt).location).at("index").at(0));
@@ -46,102 +44,103 @@ void initializeVariables(int sock_clt, int sock_srv, t_getVariables *var)
         var->indexExtension = "false";
     else
         var->indexExtension = "true";
-
 }
 
-std::string get_extension_type2(std::string type) {
-    std::cout << "type : " << type << std::endl;
-    std::vector<std::pair<std::string, std::string> > v;
-    v.push_back(std::make_pair("text/css\r", ".css"));
-    v.push_back(std::make_pair("text/csv\r", ".csv"));
-    v.push_back(std::make_pair("image/gif\r", ".gif"));
-    v.push_back(std::make_pair("text/html\r", ".html"));
-    v.push_back(std::make_pair("image/x-icon\r", ".ico"));
-    v.push_back(std::make_pair("image/jpeg\r", ".jpeg"));
-    v.push_back(std::make_pair("application/javascript\r", ".js"));
-    v.push_back(std::make_pair("application/json\r", ".json"));
-    v.push_back(std::make_pair("image/png\r", ".png"));
-    v.push_back(std::make_pair("application/pdf\r", ".pdf"));
-    v.push_back(std::make_pair("text/plain\r", ".txt"));
-    v.push_back(std::make_pair("image/svg+xml\r", ".svg"));
-    v.push_back(std::make_pair("application/x-httpd-php\r", ".php"));
-
-    for (unsigned long i = 0; i < v.size(); i++)
-    {
-        std::cout << "v : "<< v[i].first << std::endl;
-        if (v[i].first.compare(type) == 0)
-            return v[i].second;
-    }
-    return "null";
-}
-
-void getMethod(int sock_clt, int sock_srv)
+void    sendResponse(int sock_clt, int sock_srv, t_getVariables *var)
 {
-    t_getVariables *var = new t_getVariables;
-    struct stat buf;
-    std::vector<std::string> out;
-    
     initializeVariables(sock_clt, sock_srv, var);
-    if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0 || servs.at(sock_srv).clts.at(sock_clt).loopDetected == "true")
+    // std::cout << "cur = +" << servs.at(sock_srv).clts.at(sock_clt).current_position << "+\n";
+    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
+    if (!var->file.is_open())
+        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
+    if(servs.at(sock_srv).clts.at(sock_clt).current_position + var->chunk > servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource)
     {
+        var->chunk = servs.at(sock_srv).clts.at(sock_clt).rest;
+        std::cout << "chunk = " <<  var->chunk << "\n";
+        var->finish.assign("true");
+    }
+    var->buffer = new char[var->chunk];
+    var->file.seekg (servs.at(sock_srv).clts.at(sock_clt).current_position, std::ios::beg);
+    var->file.read (var->buffer, var->chunk);
+    if (send(sock_clt, var->buffer, var->chunk, 0) != var->chunk || var->finish == "true")
+    {
+        var->file.close();
+        close(sock_clt);
+        servs.at(sock_srv).clts.erase(sock_clt);
+        delete[] var->buffer;
+        delete var;
+        return ;
+    }
+    servs.at(sock_srv).clts.at(sock_clt).current_position += var->chunk;
+    var->file.close();
+    delete[] var->buffer;
+    delete var;
+}
+
+void    runCGI(int sock_clt, int sock_srv, t_getVariables *var)
+{
+    std::vector<std::string> out;
+
+    std::cout << "gonna run cgi \n";
+    f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path);
+    servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
+    if (servs.at(sock_srv).clts.at(sock_clt).type_cgi.compare("py") == 0)
+        response["Content-Type: "] = "text/html";
+    else if (servs.at(sock_srv).clts.at(sock_clt).type_cgi.compare("php") == 0)
+    {
+        std::fstream	myfile;
+        std::string		str;
+
+        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
+        myfile.open("file", std::ios::in | std::ios::out | std::ios::app);
+        while(getline(var->file, str))
+        {   
+            ft_split(str.c_str(), ':', out);
+            if (out[0].compare("Content-type") == 0)
+			{
+				out[1].erase(0, 1);
+				out[1].erase(24);
+                response["Content-Type: "] = out[1];
+			}
+            out.clear();
+            if (str == "\r")
+            {
+                while (getline(var->file, str))
+                {
+                    myfile << str;
+                    myfile << "\n";
+                }
+            }
+        }
+        var->file.close();
+		std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path.c_str() << "|\n";
+        rename("file", servs.at(sock_srv).clts.at(sock_clt).path.c_str());
+    }
+    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
+}
+
+void    getMethod(int sock_clt, int sock_srv)
+{
+    t_getVariables  *var = new t_getVariables;
+    struct stat     buf;
+    
+    if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0)
+    {
+        initializeVariables(sock_clt, sock_srv, var);
         servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
         if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1)
             { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ; }
         if(S_ISREG(buf.st_mode)) // file
         {
-            if (access(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), W_OK) != 0)
+            if (access(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), R_OK) != 0)
             {
                 std::cout << "access failed \n";
                 { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return ; }
             }
-        	if (var->cgiState == "off" || (var->cgiState == "on" && var->cgiExtension == "false"))
-            {
-                var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-            }
-			else // reverifier
-            {
-                f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path);
-                if (servs.at(sock_srv).clts.at(sock_clt).loopDetected == "true")
-                    return ;
-                if (servs.at(sock_srv).clts.at(sock_clt).first_time_cgi != 0)
-                {
-                    servs.at(sock_srv).clts.at(sock_clt).loopDetected.assign("true");
-                }
-                servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
-                if (servs.at(sock_srv).clts.at(sock_clt).type_cgi.compare("php") == 0)
-                {
-                    std::string str;
-                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::out);
-                    std::fstream myfile;
-                    myfile.open("example", std::ios::in | std::ios::out | std::ios::app);
-                    while(getline(var->file, str))
-                    {   
-                        std::cout << str << "\n";
-                        ft_split(str.c_str(), ':', out);
-                        std::cout << "key = " << out[0] << "value = " << out[1] << "\n";
-                        response[out[0]] = out[1];
-                        out.clear();
-                        if (str == "\r")
-                        {
-                            while (getline(var->file, str))
-                            {
-                                myfile << str;
-                                myfile << "\n";
-                            }
-                        }
-                    }
-                    ft_split(response["Content-type"].c_str(), ';', out);
-                    std::string ext;
-                    if (out.size() == 2)
-                        ext = get_extension_type2(out[0]);
-                    else
-                        ext = out[0];
-                    out.clear();
-                    servs.at(sock_srv).clts.at(sock_clt).path = servs.at(sock_srv).clts.at(sock_clt).path + ext;
-                    rename("example", servs.at(sock_srv).clts.at(sock_clt).path.c_str());
-                }
-                var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-            }
+        	else if (var->cgiState == "off" || (var->cgiState == "on" && var->cgiExtension == "false"))
+                var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
+			else
+                runCGI(sock_clt, sock_srv, var);
         }
         else // dir
         {
@@ -200,8 +199,9 @@ void getMethod(int sock_clt, int sock_srv)
 							{ interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return ; }
 						else
                     	{
-							std::string str;
-							std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
+                            std::string str;
+                            // std::string oldpath = servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"].append("/"));
+							std::cout << "| = " << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
 							int pos = servs.at(sock_srv).clts.at(sock_clt).path.find("index.html");
 							servs.at(sock_srv).clts.at(sock_clt).path.replace(pos,10, "");
 							std::cout << "|path after remove index = " << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
@@ -227,65 +227,26 @@ void getMethod(int sock_clt, int sock_srv)
 					}
 					else
                     {
-						std::cout << "dir has index file \n"; // maghadich ndir cgi wtf why mabghiiiitch !!!!
-                        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
+						std::cout << "dir has index file \n";
+                        std::cout <<"name = |" <<  servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
+                        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::binary | std::ios::in | std::ios::ate);
                     }
                 }
             }
         }
-        var->size = var->file.tellg();
-        std::cout << "size = " << var->size << "\n";
-        var->file.seekg (0, var->file.beg);
-        var->rest = var->size % var->chunk;
-        std::cout << servs.at(sock_srv).clts.at(sock_clt).type_cgi << "\n";
-        if (servs.at(sock_srv).clts.at(sock_clt).type_cgi == "py")
-            send_header(sock_clt, sock_srv, var->size, ".html");
-        else
-            send_header(sock_clt, sock_srv, var->size, servs.at(sock_srv).clts.at(sock_clt).path.c_str()); // check if send header fail !
+        var->file.seekg (0, std::ios::end);
+        servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource = var->file.tellg(); // if size == -1
+        servs.at(sock_srv).clts.at(sock_clt).rest = servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource % var->chunk;
+        if (!send_header(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource, servs.at(sock_srv).clts.at(sock_clt).path.c_str()))
+        {
+            close(sock_clt);
+            servs.at(sock_srv).clts.erase(sock_clt);
+        }
         var->file.close();
         servs.at(sock_srv).clts.at(sock_clt).new_client++;
         delete var;
         return ;
     }
     else
-    {
-        initializeVariables(sock_clt, sock_srv, var);
-        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path, std::ios::in | std::ios::binary | std::ios::ate);
-        if (!var->file.is_open())
-            { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ;}
-        var->buffer = new char[1024];
-        var->size = var->file.tellg();
-        var->rest = var->size % var->chunk;
-        if (servs.at(sock_srv).clts.at(sock_clt).current_position > var->size)
-        {
-            var->i = 1;
-            servs.at(sock_srv).clts.at(sock_clt).current_position -= var->chunk;
-            var->chunk = var->rest;
-        }
-        var->file.seekg (servs.at(sock_srv).clts.at(sock_clt).current_position, var->file.beg);
-        var->file.read (var->buffer, var->chunk); // protect read
-        if (send(sock_clt, var->buffer, var->chunk, 0) != var->chunk)
-        {
-            std::cout << "SEND POSED\n";
-            var->file.close();
-            close(sock_clt);
-            servs.at(sock_srv).clts.erase(sock_clt);
-            delete[] var->buffer;
-            delete var;
-            return ;
-        }
-        var->file.close();
-        servs.at(sock_srv).clts.at(sock_clt).current_position += var->chunk;
-        if (var->i)
-        {
-            var->file.close();
-            close(sock_clt);
-            servs.at(sock_srv).clts.erase(sock_clt);
-            delete[] var->buffer;
-            delete var;
-            return ;
-        }
-    }
-    delete[] var->buffer;
-    delete var;
+        sendResponse(sock_clt, sock_srv, var);
 }

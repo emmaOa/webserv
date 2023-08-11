@@ -14,7 +14,7 @@ void response_part(int sock_clt, int sock_srv)
 {
 	std::string method;
 	
-    print_request_header(sock_clt, sock_srv);
+    // print_request_header(sock_clt, sock_srv);
 	method.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["method"]);
     if (exec_err == 500)
     {

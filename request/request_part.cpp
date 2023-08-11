@@ -144,7 +144,7 @@ std::string get_extension_type(std::string type) {
 
     for (unsigned long i = 0; i < v.size(); i++)
     {
-        std::cout << "v : "<< v[i].first << std::endl;
+        // std::cout << "v : "<< v[i].first << std::endl;
         if (v[i].first.compare(type) == 0)
             return v[i].second;
     }
@@ -170,7 +170,7 @@ int pars_bound( int sock_clt, int sock_srv, std::string line)
             if (out2[i].find('=') != std::string::npos){   
                 split_one(out2[i], delim3, out3);
                 servs.at(sock_srv).clts.at(sock_clt).request_map[out3[0]] = out3[1];
-                std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map[out3[0]] << "\n";
+                // std::cout << servs.at(sock_srv).clts.at(sock_clt).request_map[out3[0]] << "\n";
                 out3.clear();
             }
         }
@@ -186,7 +186,7 @@ int pars_bound( int sock_clt, int sock_srv, std::string line)
 
 int pars_chunked_body(int sock_clt, int sock_srv, std::fstream &fd)
 {
-    std::cout << "pars chunked body \n";
+    // std::cout << "pars chunked body \n";
     int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host); 
     std::fstream fd2;
     int dec;
@@ -239,13 +239,13 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
 {
         int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host); 
 
-    std::cout << "\n-------------------------------- REQUEST PART : --------------------------------\n";
-    std::cout << "sock_clt" << sock_clt << "\n";
-    std::cout << "sock_srv" << sock_srv << "\n";
-    std::cout << "request starte\n";
+    // std::cout << "\n-------------------------------- REQUEST PART : --------------------------------\n";
+    // std::cout << "sock_clt" << sock_clt << "\n";
+    // std::cout << "sock_srv" << sock_srv << "\n";
+    // std::cout << "request start\n";
     // std::cout << "-----------------------------------------------------------------------------------\n";
     if (servs.at(sock_srv).clts.at(sock_clt).is_done < 0) {
-        std::cout << "firstttttt\n";
+        // std::cout << "firstttttt\n";
         
         std::fstream fd2;
         std::string name;
@@ -267,7 +267,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         fd2.write(buffer , lent);
         fd2.seekp(0, std::ios::beg);
         int j = 0;
-        std::cout << buffer << "||||||||||||||\n";
+        // std::cout << buffer << "||||||||||||||\n";
         std::getline(fd2, line);
         first_line(line, sock_clt, sock_srv);
         if (match_location(sock_srv, sock_clt) > 0) {
@@ -284,7 +284,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             if (j == 2 )
             {
                 if (line.find(':') != std::string::npos) {
-                    std::cout << "im heaaaaaar1\n";
+                    // std::cout << "im heaaaaaar1\n";
                     pars_bound(sock_clt, sock_srv, line);
                 }
             }
@@ -416,8 +416,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 }
             }
             // std::cout << "/////////////////////////////////\n";
-            std::cout << "request end with 0\n";
-            std::cout << "-----------------------------------------------------------------------------------\n";
+            // std::cout << "request end with 0\n";
+            // std::cout << "-----------------------------------------------------------------------------------\n";
         }
         else {
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
@@ -472,12 +472,12 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             }
             long long len = strtod(data_cnf->servers.at(id_srv).at("client_max_body_size").at("null").at(0).c_str(), NULL);
             if (fd.tellg() > len) {
-                std::cout << "===============================\n";
+                // std::cout << "===============================\n";
                 fd.close();
                 return 1;
             }
-            std::cout << "request end\n";
-            std::cout << "-----------------------------------------------------------------------------------\n";
+            // std::cout << "request end\n";
+            // std::cout << "-----------------------------------------------------------------------------------\n";
             // servs.at(sock_srv).clts.at(sock_clt).err = "201";
             fd.close();
         }

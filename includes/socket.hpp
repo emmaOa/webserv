@@ -30,6 +30,8 @@ struct client_info {
     long first_time_cgi;
     std::string boundry;
     std::string loopDetected;
+    int  sizeOfReresource;
+    int rest;
     int pid;
 };
 
