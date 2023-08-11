@@ -2,6 +2,7 @@
 
 void recursive_deletion(int sock_clt, int sock_srv, std::string path)
 {
+	std::cout << "delete hereeee...\n";
 	struct dirent *read_dir;
 	struct stat buf;
 	DIR *dir;

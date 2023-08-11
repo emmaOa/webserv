@@ -62,7 +62,7 @@ void    sendResponse(int sock_clt, int sock_srv, t_getVariables *var)
     var->buffer = new char[var->chunk];
     var->file.seekg (servs.at(sock_srv).clts.at(sock_clt).current_position, std::ios::beg);
     var->file.read (var->buffer, var->chunk);
-    if (send(sock_clt, var->buffer, var->chunk, 0) != var->chunk || var->finish == "true")
+    if (send(sock_clt, var->buffer, var->chunk, 0)!= var->chunk || var->finish == "true")
     {
         var->file.close();
         close(sock_clt);
@@ -83,6 +83,12 @@ void    runCGI(int sock_clt, int sock_srv, t_getVariables *var)
 
     std::cout << "gonna run cgi \n";
     f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path);
+    if (servs.at(sock_srv).clts.at(sock_clt).loopDetected == "true")
+		return ;
+	if (servs.at(sock_srv).clts.at(sock_clt).first_time_cgi != 0)
+	{
+		servs.at(sock_srv).clts.at(sock_clt).loopDetected.assign("true");
+	}
     servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
     if (servs.at(sock_srv).clts.at(sock_clt).type_cgi.compare("py") == 0)
         response["Content-Type: "] = "text/html";
@@ -119,24 +125,35 @@ void    runCGI(int sock_clt, int sock_srv, t_getVariables *var)
     var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
 }
 
+void uriWithoutSlash(int sock_clt, int sock_srv)
+{
+	std::cout << "dir without / ... \n";
+	servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]);
+	servs.at(sock_srv).clts.at(sock_clt).path.append("/");
+	std::cout << "path = " <<  servs.at(sock_srv).clts.at(sock_clt).path << "\n";
+	servs.at(sock_srv).clts.at(sock_clt).err = "301";
+	servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
+	response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path;
+	send_header(sock_clt, sock_srv, 0, NULL);
+	close(sock_clt);
+	servs.at(sock_srv).clts.erase(sock_clt);
+}
+
 void    getMethod(int sock_clt, int sock_srv)
 {
     t_getVariables  *var = new t_getVariables;
     struct stat     buf;
     
-    if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0)
+    if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0 || servs.at(sock_srv).clts.at(sock_clt).loopDetected == "true")
     {
         initializeVariables(sock_clt, sock_srv, var);
         servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
         if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1)
-            { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); return ; }
+        	{interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
         if(S_ISREG(buf.st_mode)) // file
         {
             if (access(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), R_OK) != 0)
-            {
-                std::cout << "access failed \n";
-                { interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); return ; }
-            }
+            	{interruptResponse(sock_clt, sock_srv, "403", "Forbidden"); delete var; return ;}
         	else if (var->cgiState == "off" || (var->cgiState == "on" && var->cgiExtension == "false"))
                 var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
 			else
@@ -146,16 +163,8 @@ void    getMethod(int sock_clt, int sock_srv)
         {
 			if (servs.at(sock_srv).clts.at(sock_clt).path.at(servs.at(sock_srv).clts.at(sock_clt).path.size() - 1) != '/')
 			{
-                std::cout << "dir without / ... \n";
-                servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_old"]);
-                servs.at(sock_srv).clts.at(sock_clt).path.append("/");
-                std::cout << "path = " <<  servs.at(sock_srv).clts.at(sock_clt).path << "\n";
-				servs.at(sock_srv).clts.at(sock_clt).err = "301";
-				servs.at(sock_srv).clts.at(sock_clt).err_msg = "Moved Permanently";
-                response["Location: "] = servs.at(sock_srv).clts.at(sock_clt).path;
-                send_header(sock_clt, sock_srv, 0, NULL);
-                close(sock_clt);
-                servs.at(sock_srv).clts.erase(sock_clt);
+				uriWithoutSlash(sock_clt, sock_srv);
+                delete var;
                 return ;
 			}
             else
@@ -218,7 +227,12 @@ void    getMethod(int sock_clt, int sock_srv)
 								str += "</ul><hr></body></html>";
 								closedir (var->dir);
 								send_header(sock_clt, sock_srv, str.length(), ".html");
-								send(sock_clt, str.c_str(), str.length(), 0);
+                                if(send(sock_clt, str.c_str(), str.length(), 0) < (ssize_t)str.length())
+                                {
+                                    close(sock_clt);
+                                    servs.at(sock_srv).clts.erase(sock_clt);
+                                    return ;
+                                }
 								close(sock_clt);
 								servs.at(sock_srv).clts.erase(sock_clt);
 								return ;

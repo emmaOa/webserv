@@ -60,8 +60,15 @@ int			get_customized_error_file(int sock_clt, int sock_srv, const char *statusCo
 		file.seekg (0, file.beg);
 		file.read (buffer, size);
 		send_header(sock_clt, sock_srv, size, ".html");
-		send(sock_clt, buffer, size, 0);
+        if(send(sock_clt, buffer, size, 0) <= 0)
+        {
+            close(sock_clt);
+            servs.at(sock_srv).clts.erase(sock_clt);
+            return 0;
+        }
+        delete buffer;
 	}
+    file.close();
 	return (1);
 }
 
@@ -84,7 +91,13 @@ void		serve_error_file(int sock_clt, int sock_srv)
     str.replace(str.find("statusCode"), 11, servs.at(sock_srv).clts.at(sock_clt).err);
     str.replace(str.find("statusMessage"), 14, servs.at(sock_srv).clts.at(sock_clt).err_msg);
     send_header(sock_clt, sock_srv, str.size(), ".html");
-    send(sock_clt, str.c_str(), str.length(), 0);
+    if (send(sock_clt, str.c_str(), str.length(), 0) < (ssize_t)str.length())
+    {
+        std::cout << "SEND POSED IN HEADER !!!!\n";
+        close(sock_clt);
+        servs.at(sock_srv).clts.erase(sock_clt);
+        return ;
+    }
 }
 
 void		interruptResponse(int sock_clt, int sock_srv, const char *statusCode, const char *statusMessage)
@@ -158,7 +171,13 @@ int         send_header(int sock_clt, int sock_srv, long long int size, const ch
         std::cout << "\n-------------------------------- RESPONSE WITH LOCATION HEADER : --------------------------------\n";
         std::cout << header << "\n";
         std::cout << "-------------------------------------------------------------------------------------\n";
-        send(sock_clt, header.c_str(), header.length(), 0); // est ce que je close la connexion apres ??
+        if (send(sock_clt, header.c_str(), header.length(), 0) < (ssize_t)header.length()) // est ce que je close la connexion apres ??
+        {
+            std::cout << "SEND POSED IN HEADER !!!!\n";
+            close(sock_clt);
+            servs.at(sock_srv).clts.erase(sock_clt);
+            return (0);
+        }
         return (0);
     }
 

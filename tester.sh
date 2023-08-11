@@ -17,3 +17,8 @@ rm test1.pdf
 curl -s --output test2.gif localhost:7001/toto/gunsNRoses.gif
 diff test2.gif ./public/gunsNRoses.gif
 rm test2.gif 
+
+# serve jpeg file
+curl -s --output test2.jpeg localhost:7001/toto/image.jpeg
+diff test2.jpeg ./public/image.jpeg
+rm test2.jpeg

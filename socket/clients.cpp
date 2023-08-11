@@ -129,7 +129,7 @@ int wait_on_clients()
             else if (read_ret == 0){
                 close(vr[i]);
                 vr.erase(vr.begin() + i);
-                std::cout << "error 06\n";
+                // std::cout << "error 06\n";
                 servs.at(sock_s(vr[i])).clts.erase(vr[i]);
             }
             else{

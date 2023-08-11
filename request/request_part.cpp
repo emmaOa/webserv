@@ -141,6 +141,7 @@ std::string get_extension_type(std::string type) {
     v.push_back(std::make_pair("text/plain\r", ".txt"));
     v.push_back(std::make_pair("image/svg+xml\r", ".svg"));
     v.push_back(std::make_pair("application/x-httpd-php\r", ".php"));
+    v.push_back(std::make_pair("video/mp4\r", ".mp4"));
 
     for (unsigned long i = 0; i < v.size(); i++)
     {
@@ -461,10 +462,12 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 std::cout << "im heaaaaaar1\n";
                 std::cout << "ext\n";
                 std::string ex = get_extension_type(servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"]);
+                std::cout << ex << "**********************\n";
                 std::string new_s = servs.at(sock_srv).clts.at(sock_clt).fd_name +  ex;
                 std::cout << "Content-Type : "<< servs.at(sock_srv).clts.at(sock_clt).request_map["Content-Type"] << std::endl;
                 std::cout << "ex : "<< servs.at(sock_srv).clts.at(sock_clt).fd_name << std::endl;
                 int result = std::rename(servs.at(sock_srv).clts.at(sock_clt).fd_name.c_str(), new_s.c_str());
+                servs.at(sock_srv).clts.at(sock_clt).fd_name = new_s;
                 if (result != 0) {
                     std::cout << "Error renaming file." << std::endl;
                     return -1;
