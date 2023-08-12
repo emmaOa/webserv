@@ -33,7 +33,7 @@ struct client_info {
     int  sizeOfReresource;
     int rest;
     int pid;
-    std::string header;
+    std::string header_php;
 };
 
 typedef struct s_srvs_set {

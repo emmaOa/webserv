@@ -47,7 +47,9 @@ void    initializeVariables(int sock_clt, int sock_srv, t_getVariables *var)
 }
 
 void    sendResponse(int sock_clt, int sock_srv, t_getVariables *var)
-{
+{   
+    int res;
+    
     std::cout << "gonna serve body \n";
     initializeVariables(sock_clt, sock_srv, var);
     var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
@@ -61,7 +63,13 @@ void    sendResponse(int sock_clt, int sock_srv, t_getVariables *var)
     var->buffer = new char[var->chunk];
     var->file.seekg (servs.at(sock_srv).clts.at(sock_clt).current_position, std::ios::beg);
     var->file.read (var->buffer, var->chunk);
-    if (write(sock_clt, var->buffer, var->chunk) != var->chunk || var->finish == "true")
+    res = write(sock_clt, var->buffer, var->chunk);
+    if (res == -1)
+    {
+        interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
+		return ;
+    }
+    if ((res != var->chunk) || var->finish == "true")
     {
         var->file.close();
         close(sock_clt);
@@ -100,12 +108,19 @@ void    runCGI(int sock_clt, int sock_srv, t_getVariables *var)
         myfile.open("file", std::ios::in | std::ios::out | std::ios::app);
         while(getline(var->file, str))
         {   
+            std::cout << "str line = " <<  str << "\n";
             ft_split(str.c_str(), ':', out);
             if (out[0].compare("Content-type") == 0)
 			{
 				out[1].erase(0, 1);
 				out[1].erase(24);
                 response["Content-Type: "] = out[1];
+			}
+            else if (out[0].compare("Set-Cookie") == 0)
+			{
+                response["Set-Cookie: "] = out[1];
+                std::cout << "out [1] = "  << out[1] << "\n";
+                // exit(0);
 			}
             out.clear();
             if (str == "\r")
@@ -208,6 +223,7 @@ void    getMethod(int sock_clt, int sock_srv)
                     }
                     else
                     {
+                        check_ex_cgi(var->indexName, sock_srv, sock_clt);
 						runCGI(sock_clt, sock_srv, var);
 						if (var->finish == "true")
 						{
@@ -246,7 +262,19 @@ void    getMethod(int sock_clt, int sock_srv)
 								str += "</ul><hr></body></html>";
 								closedir (var->dir);
 								send_header(sock_clt, sock_srv, str.length(), ".html");
-                                write(sock_clt, str.c_str(), str.length());
+                                int res = write(sock_clt, str.c_str(), str.length());
+                                if (res == -1)
+                                {
+                                    interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
+                                    return ;
+                                }
+                                if ((size_t)res != str.length())
+                                {
+                                    close(sock_clt);
+                                    servs.at(sock_srv).clts.erase(sock_clt);
+                                    delete var;
+                                    return ;
+                                }
 								close(sock_clt);
 								servs.at(sock_srv).clts.erase(sock_clt);
                                 delete var;

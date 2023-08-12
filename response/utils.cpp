@@ -42,6 +42,9 @@ void		print_request_header(int sock_clt, int sock_srv)
 
 int			get_customized_error_file(int sock_clt, int sock_srv, const char *statusCode)
 {
+    std::cout << "statusCode = "  << statusCode << "\n";
+    std::cout << data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(statusCode).at("null").at(0).c_str() << "\n";
+
 	char			*buffer;
 	std::ifstream	file;
     long long int	size;
@@ -56,15 +59,22 @@ int			get_customized_error_file(int sock_clt, int sock_srv, const char *statusCo
 	else
 	{
 		size = file.tellg();
+        std::cout << "size = " << size << "\n";
 		buffer = new char[size];
 		file.seekg (0, file.beg);
 		file.read (buffer, size);
 		send_header(sock_clt, sock_srv, size, ".html");
-        if(write(sock_clt, buffer, size) <= 0)
+        int res = write(sock_clt, buffer, size);
+        if (res == -1)
+        {
+            interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
+            return (0);
+        }
+        if (res != size)
         {
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);
-            return 0;
+            return (0);
         }
         delete buffer;
 	}
@@ -91,7 +101,13 @@ void		serve_error_file(int sock_clt, int sock_srv)
     str.replace(str.find("statusCode"), 11, servs.at(sock_srv).clts.at(sock_clt).err);
     str.replace(str.find("statusMessage"), 14, servs.at(sock_srv).clts.at(sock_clt).err_msg);
     send_header(sock_clt, sock_srv, str.size(), ".html");
-    if (write(sock_clt, str.c_str(), str.length()) < (ssize_t)str.length())
+    int res = write(sock_clt, str.c_str(), str.length());
+    if (res == -1)
+    {
+        interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
+		return ;
+    }
+    else if ((size_t)res != str.length())
     {
         std::cout << "SEND POSED IN HEADER 1\n";
         close(sock_clt);
@@ -177,7 +193,18 @@ void         send_header(int sock_clt, int sock_srv, long long int size, const c
         std::cout << "\n-------------------------------- RESPONSE WITH LOCATION HEADER : --------------------------------\n";
         std::cout << header << "\n";
         std::cout << "-------------------------------------------------------------------------------------\n";
-        write(sock_clt, header.c_str(), header.length());
+        int res = write(sock_clt, header.c_str(), header.length());
+        if (res == -1)
+        {
+            interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
+            return ;
+        }
+        if ((size_t)res != header.length())
+        {
+            close(sock_clt);
+            servs.at(sock_srv).clts.erase(sock_clt);
+            return ;
+        }
         response.erase("Location: ");
         servs.at(sock_srv).clts.erase(sock_clt);
 	    close(sock_clt);
@@ -192,23 +219,37 @@ void         send_header(int sock_clt, int sock_srv, long long int size, const c
     header.append("Content-Type: ");
     header.append(response["Content-Type: "]).append("\r\n");
     
-    header.append("Content-Length: ");
+    it = response.find("Set-Cookie: ");
+    if (it != response.end())
+    {
+        header.append("Set-Cookie: ");
+        header.append(response["Set-Cookie: "]).append("\r\n");
+    }
     
     std::string str;
     std::stringstream ss;  
     ss << size;  
     ss >> str;
+    header.append("Content-Length: ");
     response["Content-Length: "].assign(str);
-    header.append(response["Content-Length: "]).append("\r\n");
-    header += servs.at(sock_srv).clts.at(sock_clt).header + "\r\n";
-    if (write(sock_clt, header.c_str(), header.length()) < (ssize_t)header.length())
+    header.append(response["Content-Length: "]).append("\r\n\r\n");
+    
+    // header += servs.at(sock_srv).clts.at(sock_clt).header_php + "\r\n";
+
+    int res = write(sock_clt, header.c_str(), header.length());
+    if (res == -1)
+    {
+        interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
+		return ;
+    }
+    if ((size_t)res != header.length())
     {
         std::cout << "SEND POSED IN HEADER 2\n";
         close(sock_clt);
         servs.at(sock_srv).clts.erase(sock_clt);
         return ;
     }
-    response.clear();
+    // response.clear();
     std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
     std::cout << header << "\n";
     std::cout << "-------------------------------------------------------------------------------------\n";

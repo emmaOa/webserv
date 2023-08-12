@@ -1,6 +1,6 @@
 # serve mp4 file
-curl -s --output test0.mp4 localhost:8002/toto/video.mp4
-diff test0.mp4 ./public/video.mp4
+curl -s --output test0.mp4 localhost:8002/toto/video1m.mp4
+diff test0.mp4 ./public/video1m.mp4
 rm test0.mp4
 
 # serve txt file 

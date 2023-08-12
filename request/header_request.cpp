@@ -35,13 +35,6 @@ int first_line(std::string line, int sock_clt, int sock_srv)
     //     i++;
     // }
     std::pair<std::string, std::string>pr;
-    if (out.size() < 2){
-        std::cout << "lineee -------------\n";
-        std::cout << line ;
-        // std::cout << out[0];
-        // std::cout << out[1];
-        exit(0);
-    }
  
     servs.at(sock_srv).clts.at(sock_clt).request_map["method"] = out[0];
     if (new_path(out[1], sock_clt, sock_srv) < 1)

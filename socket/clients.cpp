@@ -96,7 +96,6 @@ int wait_on_clients()
     if (select(max_socket+1, &re, &wr, 0, 0) < 0){
         std::cout << "error 03\n";
         exec_err = 500;
-        exit(0);
     }
     it = servs.begin();
     while (it != servs.end())
@@ -105,7 +104,6 @@ int wait_on_clients()
             if (create_client(servs.at(it->first).socket) < 0){
                 std::cout << "error 04\n";
                 exec_err = 500;
-                exit(0);
             }
             return 0;
         }
@@ -120,10 +118,7 @@ int wait_on_clients()
         if (FD_ISSET(vr[i], &re)){
             read_ret = read(vr[i], buffer, 1024);
             if (read_ret < 0){
-                close(vr[i]);
-                vr.erase(vr.begin() + i);
                 std::cout << "error 05\n";
-                servs.at(sock_s(vr[i])).clts.erase(vr[i]);
                 exec_err = 500;
             }
             else if (read_ret == 0){
