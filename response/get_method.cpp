@@ -66,11 +66,17 @@ void    sendResponse(int sock_clt, int sock_srv, t_getVariables *var)
     res = write(sock_clt, var->buffer, var->chunk);
     if (res == -1)
     {
-        interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
-		return ;
+        std::cout << "1\n";
+        var->file.close();
+        close(sock_clt);
+        servs.at(sock_srv).clts.erase(sock_clt);
+        delete[] var->buffer;
+        delete var;
+        return ;
     }
     if ((res != var->chunk) || var->finish == "true")
     {
+        std::cout << "2\n";
         var->file.close();
         close(sock_clt);
         servs.at(sock_srv).clts.erase(sock_clt);
@@ -180,6 +186,9 @@ void    getMethod(int sock_clt, int sock_srv)
         }
         else // dir
         {
+            // std::string tmp_path;
+
+            // tmp_path.assign(servs.at(sock_srv).clts.at(sock_clt).path);
 			if (servs.at(sock_srv).clts.at(sock_clt).path.at(servs.at(sock_srv).clts.at(sock_clt).path.size() - 1) != '/')
 			{
 				uriWithoutSlash(sock_clt, sock_srv);
@@ -216,13 +225,13 @@ void    getMethod(int sock_clt, int sock_srv)
 					std::cout << "|indexInConfigFile = " <<  var->indexInConfigFile << "|\n";
 					std::cout << "|cgiState = " <<  var->cgiState << "|\n";
 					std::cout << "indexExtension = " <<  var->indexExtension << "|\n";
-                    std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path.append(var->indexName) << "|\n";
-                    if (lstat((servs.at(sock_srv).clts.at(sock_clt).path).c_str(), &buf) == -1)
+                    if (lstat((servs.at(sock_srv).clts.at(sock_clt).path + var->indexName).c_str(), &buf) == -1)
                     {
                         file_exist = 1;
                     }
                     else
                     {
+                        std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path.append(var->indexName) << "|\n";
                         check_ex_cgi(var->indexName, sock_srv, sock_clt);
 						runCGI(sock_clt, sock_srv, var);
 						if (var->finish == "true")
@@ -235,8 +244,11 @@ void    getMethod(int sock_clt, int sock_srv)
 				
                 if (file_exist || !var->indexInConfigFile)
                 {
+                    std::cout << "hna \n";
 					servs.at(sock_srv).clts.at(sock_clt).path.append("index.html");
 					std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
+
+                    // exit(0);
 					if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1 || access(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), R_OK) != 0)
 					{
                         std::cout << "index not found \n";
@@ -265,11 +277,15 @@ void    getMethod(int sock_clt, int sock_srv)
                                 int res = write(sock_clt, str.c_str(), str.length());
                                 if (res == -1)
                                 {
-                                    interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
+                                    std::cout << "3\n";
+                                    close(sock_clt);
+                                    servs.at(sock_srv).clts.erase(sock_clt);
+                                    delete var;
                                     return ;
                                 }
                                 if ((size_t)res != str.length())
                                 {
+                                    std::cout << "4\n";
                                     close(sock_clt);
                                     servs.at(sock_srv).clts.erase(sock_clt);
                                     delete var;
@@ -298,7 +314,8 @@ void    getMethod(int sock_clt, int sock_srv)
             var->file.seekg (0, std::ios::end);
             servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource = var->file.tellg(); // TODO if size == -1
             servs.at(sock_srv).clts.at(sock_clt).rest = servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource % var->chunk;
-            send_header(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
+            if (!send_header(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource, servs.at(sock_srv).clts.at(sock_clt).path.c_str()))
+                return ;
             servs.at(sock_srv).clts.at(sock_clt).new_client++;
             var->file.close();
             delete var;

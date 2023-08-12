@@ -61,12 +61,14 @@ int check_host(std::string host)
 {
     std::vector<std::string> out; 
     const char delim = '.';
+    char *check;
     split_one(host, delim, out);
     if (out.size() != 4)
         return 1;
     for(unsigned long i = 0; i < out.size(); i++)
     {
-        if (strtod(out[i].c_str(), NULL) < 0 || strtod(out[i].c_str(), NULL) > 255)
+        int h = strtol(out[i].c_str(), &check, 10);
+        if ((*check != '\0' && *check != '\n') || h < 0 || h > 255)
             return 1;
     }
     return 0;
@@ -77,16 +79,14 @@ int check_srv_value(std::string key)
     unsigned long i = 0;
     int port;
     int size;
+    char *check;
     if (key.compare("port") == 0){
-        while (i < data_cnf->dq_2.size())
-        {
-            port = strtod(data_cnf->dq_2[i].c_str(), NULL);
-            if (port < 1 || port > 65535){
-                std::cout << "invalid port\n";
-                return 1;
-            }
-            i++;
-        } 
+        port = strtol(data_cnf->dq_2[0].c_str(), &check, 10);
+        if (data_cnf->dq_2.size() > 1 || (*check != '\0' && *check != '\n') || port > 65535){
+            std::cout << "invalid port\n";
+            return 1;
+        }
+        i++;
     }
     else if (key.compare("host") == 0){
         if (data_cnf->dq_2.size() > 1){
@@ -119,8 +119,8 @@ int check_srv_value(std::string key)
             data_cnf->dq_2[0] = "./error/400.html";
     }
     else if (key.compare("client_max_body_size") == 0){
-       size = strtod(data_cnf->dq_2[0].c_str(), NULL);
-       if (data_cnf->dq_2.size() > 1 || size < 0){
+       size = strtol(data_cnf->dq_2[0].c_str(), &check, 10);
+       if (data_cnf->dq_2.size() > 1 || (*check != '\0' && *check != '\n')){
             std::cout << "invalid forme 15\n";
             return 1;
        }

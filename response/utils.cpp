@@ -42,9 +42,6 @@ void		print_request_header(int sock_clt, int sock_srv)
 
 int			get_customized_error_file(int sock_clt, int sock_srv, const char *statusCode)
 {
-    std::cout << "statusCode = "  << statusCode << "\n";
-    std::cout << data_cnf->servers.at(port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host)).at(statusCode).at("null").at(0).c_str() << "\n";
-
 	char			*buffer;
 	std::ifstream	file;
     long long int	size;
@@ -67,11 +64,14 @@ int			get_customized_error_file(int sock_clt, int sock_srv, const char *statusCo
         int res = write(sock_clt, buffer, size);
         if (res == -1)
         {
-            interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
+            std::cout << "5\n";
+            close(sock_clt);
+            servs.at(sock_srv).clts.erase(sock_clt);
             return (0);
         }
         if (res != size)
         {
+            std::cout << "6\n";
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);
             return (0);
@@ -104,11 +104,15 @@ void		serve_error_file(int sock_clt, int sock_srv)
     int res = write(sock_clt, str.c_str(), str.length());
     if (res == -1)
     {
-        interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
-		return ;
+        std::cout << "7\n";
+		std::cout << "SEND POSED IN HEADER 1\n";
+        close(sock_clt);
+        servs.at(sock_srv).clts.erase(sock_clt);
+        return ;
     }
-    else if ((size_t)res != str.length())
+    if ((size_t)res != str.length())
     {
+        std::cout << "8\n";
         std::cout << "SEND POSED IN HEADER 1\n";
         close(sock_clt);
         servs.at(sock_srv).clts.erase(sock_clt);
@@ -155,7 +159,7 @@ int			proceedResponse(int sock_clt, int sock_srv)
     return (1);
 }
 
-void         send_header(int sock_clt, int sock_srv, long long int size, const char *path)
+int         send_header(int sock_clt, int sock_srv, long long int size, const char *path)
 {
     std::map<std::string,std::string>::iterator it;
     std::string header;
@@ -196,19 +200,22 @@ void         send_header(int sock_clt, int sock_srv, long long int size, const c
         int res = write(sock_clt, header.c_str(), header.length());
         if (res == -1)
         {
-            interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
-            return ;
+            std::cout << "9\n";
+            close(sock_clt);
+            servs.at(sock_srv).clts.erase(sock_clt);
+            return 0;
         }
         if ((size_t)res != header.length())
         {
+            std::cout << "10\n";
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);
-            return ;
+            return 0;
         }
         response.erase("Location: ");
         servs.at(sock_srv).clts.erase(sock_clt);
 	    close(sock_clt);
-        return ;
+        return 0;
     }
 
     it = response.find("Content-Type: ");
@@ -234,26 +241,29 @@ void         send_header(int sock_clt, int sock_srv, long long int size, const c
     response["Content-Length: "].assign(str);
     header.append(response["Content-Length: "]).append("\r\n\r\n");
     
-    // header += servs.at(sock_srv).clts.at(sock_clt).header_php + "\r\n";
 
     int res = write(sock_clt, header.c_str(), header.length());
     if (res == -1)
     {
-        interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
-		return ;
+        std::cout << "11\n";
+		std::cout << "SEND POSED IN HEADER 2\n";
+        close(sock_clt);
+        servs.at(sock_srv).clts.erase(sock_clt);
+        return 0;
     }
     if ((size_t)res != header.length())
     {
+        std::cout << "12\n";
         std::cout << "SEND POSED IN HEADER 2\n";
         close(sock_clt);
         servs.at(sock_srv).clts.erase(sock_clt);
-        return ;
+        return 0;
     }
     // response.clear();
     std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
     std::cout << header << "\n";
     std::cout << "-------------------------------------------------------------------------------------\n";
-    return ;
+    return 1;
 }
 
 void        ft_split(std::string const &str, const char delim, std::vector<std::string> &out) 
