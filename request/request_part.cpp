@@ -256,7 +256,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
         std::stringstream ss;
         // int id_srv = port_srv(servs.at(sock_srv).port, servs.at(sock_srv).host);
         int i = 0;
-        int size = 0;
+        // unsigned int size = 0;
     
         ss << sock_clt;
         // servs.at(sock_srv).clts.at(sock_clt).len_bound  = 53;
@@ -278,10 +278,11 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
             servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
             return 1;
         }
+
                     // exit(0);
         while (std::getline(fd2, line))
         {
-            size += line.length() + 1;
+            // size += line.length() + 1;
             if (j == 2 )
             {
                 if (line.find(':') != std::string::npos) {
@@ -403,6 +404,8 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                 servs.at(sock_srv).clts.at(sock_clt).is_done = 0;
 
             }
+            else if((servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) && fd.tellg() != 0)
+                return pars_chunked_body(sock_clt, sock_srv, fd);
             else {
                 fd.write(s.c_str() , lent - l);
                 if ( servs.at(sock_srv).clts.at(sock_clt).is_done == 1) {
@@ -412,8 +415,7 @@ int request_part(char *buffer,int lent, int sock_clt, int sock_srv)
                         servs.at(sock_srv).clts.at(sock_clt).err_msg = "Bad Request";
                         servs.at(sock_srv).clts.at(sock_clt).is_done = 1;
                         return servs.at(sock_srv).clts.at(sock_clt).is_done;
-                    } else if((servs.at(sock_srv).clts.at(sock_clt).request_map.find("Transfer-Encoding") != servs.at(sock_srv).clts.at(sock_clt).request_map.end()) && fd.tellg() != 0)
-                        return pars_chunked_body(sock_clt, sock_srv, fd);
+                    } 
                 }
             }
             // std::cout << "/////////////////////////////////\n";

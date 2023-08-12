@@ -33,6 +33,7 @@ struct client_info {
     int  sizeOfReresource;
     int rest;
     int pid;
+    std::string header;
 };
 
 typedef struct s_srvs_set {

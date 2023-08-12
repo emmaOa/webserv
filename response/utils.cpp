@@ -60,7 +60,7 @@ int			get_customized_error_file(int sock_clt, int sock_srv, const char *statusCo
 		file.seekg (0, file.beg);
 		file.read (buffer, size);
 		send_header(sock_clt, sock_srv, size, ".html");
-        if(send(sock_clt, buffer, size, 0) <= 0)
+        if(write(sock_clt, buffer, size) <= 0)
         {
             close(sock_clt);
             servs.at(sock_srv).clts.erase(sock_clt);
@@ -91,7 +91,7 @@ void		serve_error_file(int sock_clt, int sock_srv)
     str.replace(str.find("statusCode"), 11, servs.at(sock_srv).clts.at(sock_clt).err);
     str.replace(str.find("statusMessage"), 14, servs.at(sock_srv).clts.at(sock_clt).err_msg);
     send_header(sock_clt, sock_srv, str.size(), ".html");
-    if (send(sock_clt, str.c_str(), str.length(), 0) < (ssize_t)str.length())
+    if (write(sock_clt, str.c_str(), str.length()) < (ssize_t)str.length())
     {
         std::cout << "SEND POSED IN HEADER 1\n";
         close(sock_clt);
@@ -124,25 +124,31 @@ int			proceedResponse(int sock_clt, int sock_srv)
             send_header(sock_clt, sock_srv, 0, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
             return (0);
         }
+        else if (servs.at(sock_srv).clts.at(sock_clt).err.compare("508") == 0)
+        {
+            servs.at(sock_srv).clts.at(sock_clt).err_msg = "Loop Detected";
+            serve_error_file(sock_clt, sock_srv);
+            return (0);
+        }
         else
         {
             serve_error_file(sock_clt, sock_srv);
             return (0);
         }
     }
-    else if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") == 0)
-    {
-        servs.at(sock_srv).clts.at(sock_clt).err.assign("200");
-        servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("OK");
-    }
     return (1);
 }
 
-int         send_header(int sock_clt, int sock_srv, long long int size, const char *path)
+void         send_header(int sock_clt, int sock_srv, long long int size, const char *path)
 {
     std::map<std::string,std::string>::iterator it;
     std::string header;
 
+    if (servs.at(sock_srv).clts.at(sock_clt).err.compare("null") == 0)
+    {
+        servs.at(sock_srv).clts.at(sock_clt).err.assign("200");
+        servs.at(sock_srv).clts.at(sock_clt).err_msg.assign("OK");
+    }
     response["ProtocolVersion"] = servs.at(sock_srv).clts.at(sock_clt).request_map["http_vr"].erase(8);
     response["StatusCode"] = servs.at(sock_srv).clts.at(sock_clt).err;
     response["ErrorMsg"] = servs.at(sock_srv).clts.at(sock_clt).err_msg;
@@ -171,11 +177,11 @@ int         send_header(int sock_clt, int sock_srv, long long int size, const ch
         std::cout << "\n-------------------------------- RESPONSE WITH LOCATION HEADER : --------------------------------\n";
         std::cout << header << "\n";
         std::cout << "-------------------------------------------------------------------------------------\n";
-        send(sock_clt, header.c_str(), header.length(), 0);
+        write(sock_clt, header.c_str(), header.length());
         response.erase("Location: ");
         servs.at(sock_srv).clts.erase(sock_clt);
 	    close(sock_clt);
-        return (0);
+        return ;
     }
 
     it = response.find("Content-Type: ");
@@ -193,20 +199,20 @@ int         send_header(int sock_clt, int sock_srv, long long int size, const ch
     ss << size;  
     ss >> str;
     response["Content-Length: "].assign(str);
-    header.append(response["Content-Length: "]).append("\r\n\r\n");
-    
-    if (send(sock_clt, header.c_str(), header.length(), 0) < (ssize_t)header.length())
+    header.append(response["Content-Length: "]).append("\r\n");
+    header += servs.at(sock_srv).clts.at(sock_clt).header + "\r\n";
+    if (write(sock_clt, header.c_str(), header.length()) < (ssize_t)header.length())
     {
         std::cout << "SEND POSED IN HEADER 2\n";
         close(sock_clt);
         servs.at(sock_srv).clts.erase(sock_clt);
-        return (0);
+        return ;
     }
     response.clear();
     std::cout << "\n-------------------------------- RESPONSE HEADER : --------------------------------\n";
     std::cout << header << "\n";
     std::cout << "-------------------------------------------------------------------------------------\n";
-    return (1);
+    return ;
 }
 
 void        ft_split(std::string const &str, const char delim, std::vector<std::string> &out) 

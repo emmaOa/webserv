@@ -48,21 +48,20 @@ void    initializeVariables(int sock_clt, int sock_srv, t_getVariables *var)
 
 void    sendResponse(int sock_clt, int sock_srv, t_getVariables *var)
 {
+    std::cout << "gonna serve body \n";
     initializeVariables(sock_clt, sock_srv, var);
-    // std::cout << "cur = +" << servs.at(sock_srv).clts.at(sock_clt).current_position << "+\n";
     var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
     if (!var->file.is_open())
         { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
     if(servs.at(sock_srv).clts.at(sock_clt).current_position + var->chunk > servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource)
     {
         var->chunk = servs.at(sock_srv).clts.at(sock_clt).rest;
-        std::cout << "chunk = " <<  var->chunk << "\n";
         var->finish.assign("true");
     }
     var->buffer = new char[var->chunk];
     var->file.seekg (servs.at(sock_srv).clts.at(sock_clt).current_position, std::ios::beg);
     var->file.read (var->buffer, var->chunk);
-    if (send(sock_clt, var->buffer, var->chunk, 0)!= var->chunk || var->finish == "true")
+    if (write(sock_clt, var->buffer, var->chunk) != var->chunk || var->finish == "true")
     {
         var->file.close();
         close(sock_clt);
@@ -83,13 +82,13 @@ void    runCGI(int sock_clt, int sock_srv, t_getVariables *var)
 
     std::cout << "gonna run cgi \n";
     f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path);
-    if (servs.at(sock_srv).clts.at(sock_clt).loopDetected == "true")
-		return ;
+    std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
 	if (servs.at(sock_srv).clts.at(sock_clt).first_time_cgi != 0)
-	{
-		servs.at(sock_srv).clts.at(sock_clt).loopDetected.assign("true");
-	}
+    {
+        return ;
+    }
     servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
+    std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path.c_str() << "|\n";
     if (servs.at(sock_srv).clts.at(sock_clt).type_cgi.compare("py") == 0)
         response["Content-Type: "] = "text/html";
     else if (servs.at(sock_srv).clts.at(sock_clt).type_cgi.compare("php") == 0)
@@ -142,7 +141,7 @@ void    getMethod(int sock_clt, int sock_srv)
     t_getVariables  *var = new t_getVariables;
     struct stat     buf;
     
-    if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0 || servs.at(sock_srv).clts.at(sock_clt).loopDetected == "true")
+    if (servs.at(sock_srv).clts.at(sock_clt).new_client == 0)
     {
         initializeVariables(sock_clt, sock_srv, var);
         servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).request_map["uri_new"]);
@@ -155,7 +154,14 @@ void    getMethod(int sock_clt, int sock_srv)
         	else if (var->cgiState == "off" || (var->cgiState == "on" && var->cgiExtension == "false"))
                 var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
 			else
+            {
                 runCGI(sock_clt, sock_srv, var);
+                if (var->finish == "true")
+				{
+					delete var;
+                    return ;
+				}
+            }
         }
         else // dir
         {
@@ -168,36 +174,51 @@ void    getMethod(int sock_clt, int sock_srv)
             else
             {   
                 std::cout << "dir with / ... \n";
+                int file_exist = 0;
                 if (var->indexInConfigFile && (var->cgiState == "off" || (var->cgiState == "on" &&  var->indexExtension == "false")))
                 {
 					std::cout << "|indexInConfigFile = " <<  var->indexInConfigFile << "|\n";
 					std::cout << "|cgiState = " <<  var->cgiState << "|\n";
 					std::cout << "indexExtension = " <<  var->indexExtension << "|\n";
 					std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
-                    servs.at(sock_srv).clts.at(sock_clt).path.append(var->indexName);
-                    std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
-                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
-                    if (!var->file)
-                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
+
+                    if (lstat((servs.at(sock_srv).clts.at(sock_clt).path + var->indexName).c_str(), &buf) == -1)
+                    {
+                        file_exist = 1;
+                    }
+                    else
+                    {
+                        servs.at(sock_srv).clts.at(sock_clt).path.append(var->indexName);
+                        std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
+                        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
+                        if (!var->file)
+                            { interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error"); delete var; return ;}
+                    }
                 }
                 else if (var->indexInConfigFile && var->cgiState == "on" && var->indexExtension == "true")
                 {
-					// TODO reste a traiter le cas de php file !!
                     std::cout << "run cgi\n";
 					std::cout << "|indexInConfigFile = " <<  var->indexInConfigFile << "|\n";
 					std::cout << "|cgiState = " <<  var->cgiState << "|\n";
 					std::cout << "indexExtension = " <<  var->indexExtension << "|\n";
-                    std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
-                    f_cgi(sock_srv, sock_clt, servs.at(sock_srv).clts.at(sock_clt).path.append(var->indexName));
-                    servs.at(sock_srv).clts.at(sock_clt).type_cgi.assign("py");
-                    servs.at(sock_srv).clts.at(sock_clt).path.assign(servs.at(sock_srv).clts.at(sock_clt).file_cgi);
-                    var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
-                    if (!var->file)
-                        { interruptResponse(sock_clt, sock_srv, "404", "Not Found"); delete var; return ;}
+                    std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path.append(var->indexName) << "|\n";
+                    if (lstat((servs.at(sock_srv).clts.at(sock_clt).path).c_str(), &buf) == -1)
+                    {
+                        file_exist = 1;
+                    }
+                    else
+                    {
+						runCGI(sock_clt, sock_srv, var);
+						if (var->finish == "true")
+						{
+							delete var;
+							return ;
+						}
+                    }
                 }
-                else
+				
+                if (file_exist || !var->indexInConfigFile)
                 {
-					std::cout << "check if i have index file in dir \n";
 					servs.at(sock_srv).clts.at(sock_clt).path.append("index.html");
 					std::cout << "|" << servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
 					if (lstat(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), &buf) == -1 || access(servs.at(sock_srv).clts.at(sock_clt).path.c_str(), R_OK) != 0)
@@ -225,7 +246,7 @@ void    getMethod(int sock_clt, int sock_srv)
 								str += "</ul><hr></body></html>";
 								closedir (var->dir);
 								send_header(sock_clt, sock_srv, str.length(), ".html");
-                                send(sock_clt, str.c_str(), str.length(), 0);
+                                write(sock_clt, str.c_str(), str.length());
 								close(sock_clt);
 								servs.at(sock_srv).clts.erase(sock_clt);
                                 delete var;
@@ -237,20 +258,26 @@ void    getMethod(int sock_clt, int sock_srv)
                     {
 						std::cout << "dir has index file \n";
                         std::cout <<"name = |" <<  servs.at(sock_srv).clts.at(sock_clt).path << "|\n";
-                        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary | std::ios::in | std::ios::ate);
+                        var->file.open (servs.at(sock_srv).clts.at(sock_clt).path.c_str(), std::ios::binary);
                     }
                 }
             }
         }
-        var->file.seekg (0, std::ios::end);
-        servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource = var->file.tellg(); // TODO if size == -1
-        servs.at(sock_srv).clts.at(sock_clt).rest = servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource % var->chunk;
-        send_header(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
-        var->file.close();
-        servs.at(sock_srv).clts.at(sock_clt).new_client++;
-        delete var;
-        return ;
+     
+        if (servs.at(sock_srv).clts.at(sock_clt).first_time_cgi == 0)
+        {
+            std::cout << "path in headre = |" <<  servs.at(sock_srv).clts.at(sock_clt).path.c_str() << "|\n";
+            var->file.seekg (0, std::ios::end);
+            servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource = var->file.tellg(); // TODO if size == -1
+            servs.at(sock_srv).clts.at(sock_clt).rest = servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource % var->chunk;
+            send_header(sock_clt, sock_srv, servs.at(sock_srv).clts.at(sock_clt).sizeOfReresource, servs.at(sock_srv).clts.at(sock_clt).path.c_str());
+            servs.at(sock_srv).clts.at(sock_clt).new_client++;
+            var->file.close();
+            delete var;
+            return ;
+        }
+		delete var;
     }
-    else
+    else if (servs.at(sock_srv).clts.at(sock_clt).first_time_cgi == 0)
         sendResponse(sock_clt, sock_srv, var);
 }

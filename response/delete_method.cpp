@@ -10,7 +10,7 @@ void recursive_deletion(int sock_clt, int sock_srv, std::string path)
 	dir = opendir(path.c_str());
 	if (dir == NULL)
 	{
-		std::cout << "open faild\n";
+		std::cout << "open failed\n";
 		interruptResponse(sock_clt, sock_srv, "500", "Internal Server Error");
 		return ;
 	}
@@ -59,7 +59,7 @@ void recursive_deletion(int sock_clt, int sock_srv, std::string path)
 				while (i < len)
 				{
 					std::cout << "out = " << out[i] << "\n";
-					std::cout << "oread_dir->d_name = " << read_dir->d_name<< "\n";
+					std::cout << "read_dir->d_name = " << read_dir->d_name << "\n";
 					if (out[i].compare(read_dir->d_name) != 0)
 					{
 						path.append(out[i]).append("/");

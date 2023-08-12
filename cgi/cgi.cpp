@@ -1,5 +1,4 @@
 # include "../includes/webserv.hpp"
-#include <sys/wait.h> // TODO ADDED
 
 void check_ex_cgi(std::string file, int sock_srv, int sock_clt)
 {
@@ -65,13 +64,14 @@ std::string  check_ex_cgi_index(std::string file_name, int sock_srv, int sock_cl
 
 void int_env_cgi(std::vector<std::pair<std::string, std::string> > &v, int sock_srv, int sock_clt, std::string path)
 {
-//     v.push_back(std::make_pair("CONTENT_TYPE=", servs.at(sock_srv).clts.at(sock_clt).request_map["CONTENT_TYPE"]));
-//     v.push_back(std::make_pair("CONTENT_LENGTH=", servs.at(sock_srv).clts.at(sock_clt).request_map["CONTENT_LENGTH"]));
+    v.push_back(std::make_pair("CONTENT_TYPE=", servs.at(sock_srv).clts.at(sock_clt).request_map["CONTENT_TYPE"]));
+    v.push_back(std::make_pair("CONTENT_LENGTH=", servs.at(sock_srv).clts.at(sock_clt).request_map["CONTENT_LENGTH"]));
     v.push_back(std::make_pair("REQUEST_METHOD=", servs.at(sock_srv).clts.at(sock_clt).request_map["method"]));
     // v.push_back(std::make_pair("PATH_INFO=/Users/iouazzan/goinfre/back", "/public/upload_session.php"));
     v.push_back(std::make_pair("PATH_INFO=", path));
     v.push_back(std::make_pair("QUERY_STRING=", servs.at(sock_srv).clts.at(sock_clt).request_map["query"]));
-    v.push_back(std::make_pair("HTTP_COOKIE=", servs.at(sock_srv).clts.at(sock_clt).request_map["COOKIE"]));
+    v.push_back(std::make_pair("HTTP_COOKIE=", servs.at(sock_srv).clts.at(sock_clt).request_map["Cookie"]));
+    // std::cout <<  "|" << servs.at(sock_srv).clts.at(sock_clt).request_map["Cookie"] << "|YyyyyyyyyyyyyyyyyyyyyyyyyyyyY\n";
     v.push_back(std::make_pair("SCRIPT_FILENAME=",  path));
     v.push_back(std::make_pair("GATEWAY_INTERFACE=", "CGI/1.1"));
     v.push_back(std::make_pair("REDIRECT_STATUS=", "200"));
@@ -96,10 +96,11 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
 {
     if (servs.at(sock_srv).clts.at(sock_clt).first_time_cgi == 0) {
         std::vector<std::pair<std::string, std::string> > v;
+        std::cout << "path with cgi = |" << path << "|\n";
         int_env_cgi(v, sock_srv, sock_clt, path);
         std::string str;   
         char *env[v.size() + 1];
-        std::cout << "ahsdghlsdgjldfj-----------------------------\n";
+        std::cout << "-----------------------------\n";
         for (unsigned long i = 0; i < v.size(); i++)
         {
             std::string str = v[i].first + v[i].second;
@@ -107,7 +108,7 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
             std::strcpy(env[i], str.c_str());
            std::cout << env[i] << std::endl; 
         }
-        std::cout << "ahsdghlsdgjldfj-----------------------------\n";
+        std::cout << "-----------------------------\n";
 
         env[v.size()] = NULL; 
         servs.at(sock_srv).clts.at(sock_clt).pid = fork();
@@ -127,7 +128,7 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
             par[0] = (char *)ex.c_str();
             par[1] = (char *)path.c_str();
             par[2] = NULL;
-            std::cout <<servs.at(sock_srv).clts.at(sock_clt).fd_name << std::endl;
+            // std::cout << "dir ?? | => " << servs.at(sock_srv).clts.at(sock_clt).fd_name << std::endl;
             int fd_out = open(servs.at(sock_srv).clts.at(sock_clt).file_cgi.c_str(), O_CREAT | O_RDWR, 0644);
             if (!fd_out) {
                 exec_err = 500;
@@ -151,6 +152,7 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
             exec_err = 500;
             return -1; 
         } else if(check == 0) {
+            std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
             servs.at(sock_srv).clts.at(sock_clt).first_time_cgi = gettime();
         }
         for (unsigned long i = 0; i < v.size(); i++)
@@ -159,8 +161,21 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
         }
     }
     else {
+        
+        // char buffer[1];
         long time_now = gettime();
-        if (time_now < servs.at(sock_srv).clts.at(sock_clt).first_time_cgi + 30) {
+        // std::cout << "================================\n";
+        // if (recv(sock_clt, buffer, 1, MSG_PEEK) < 0)
+        // {
+        //      std::cout << buffer << "\033[91m%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\033[00m\n";
+        //     close(sock_clt);
+        //     servs.at(sock_srv).clts.erase(sock_clt);
+        //     // kill(servs.at(sock_srv).clts.at(sock_clt).pid, SIGKILL);
+        //     return 2;
+        // }
+        if (time_now >= (servs.at(sock_srv).clts.at(sock_clt).first_time_cgi + 30)) {
+            std::cout << "TIME NOW = " << time_now << " | " << servs.at(sock_srv).clts.at(sock_clt).first_time_cgi << std::endl;
+            std::cout << "\n\n&**************************************************************&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n\n";
             servs.at(sock_srv).clts.at(sock_clt).err = "508";
             if (servs.at(sock_srv).clts.at(sock_clt).type_cgi == "py") 
                 kill(servs.at(sock_srv).clts.at(sock_clt).pid, SIGKILL); 
@@ -168,4 +183,3 @@ int f_cgi(int sock_srv, int sock_clt, std::string path)
     }
     return 0;
 }
-
